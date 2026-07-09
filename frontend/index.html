@@ -514,6 +514,27 @@ footer a { color: var(--red); text-decoration: none; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.error { background: var(--red); }
 
+/* ── SUPPORTS HINT ── */
+.supports-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.supports-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-weight: 500;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 500px) {
   .card { padding: 20px; }
@@ -578,6 +599,11 @@ footer a { color: var(--red); text-decoration: none; }
           Get Video
         </button>
       </div>
+      <div class="supports-hint">
+        <span>🎬 Videos</span>
+        <span>⚡ Shorts</span>
+        <span>🔗 youtu.be</span>
+      </div>
 
       <!-- Video Info -->
       <div class="video-info" id="clip-video-info">
@@ -639,6 +665,11 @@ footer a { color: var(--red); text-decoration: none; }
         <button class="fetch-btn" id="dl-fetch-btn" onclick="fetchInfo('dl')" disabled>
           Continue
         </button>
+      </div>
+      <div class="supports-hint">
+        <span>🎬 Videos</span>
+        <span>⚡ Shorts</span>
+        <span>🔗 youtu.be</span>
       </div>
 
       <!-- Video Info -->
@@ -898,14 +929,39 @@ async function startDownload() {
 // ── POLLING ───────────────────────────────────────────────
 function pollJob(mode, jobId) {
   let pct = 15;
+  let elapsed = 0;
+  const MAX_SEC = 300; // 5 min timeout
+
+  const messages = [
+    'Connecting to YouTube...',
+    'Fetching video stream...',
+    'Downloading...',
+    'Almost there...',
+  ];
+  let msgIdx = 0;
+
   const interval = setInterval(async () => {
+    elapsed += 2;
+
+    // Timeout guard
+    if (elapsed >= MAX_SEC) {
+      clearInterval(interval);
+      showToast('Download timed out. YouTube may be blocking the request. Try again later.', true);
+      resetBtn(mode);
+      hideProgress(mode);
+      return;
+    }
+
     try {
       const resp = await fetch(`${API}/status/${jobId}`);
       const job  = await resp.json();
 
-      if (job.status === 'downloading') {
-        pct = Math.min(pct + 12, 85);
-        showProgress(mode, pct, 'Downloading...');
+      if (job.status === 'queued') {
+        showProgress(mode, pct, 'Queued — waiting to start...');
+      } else if (job.status === 'downloading') {
+        pct = Math.min(pct + 8, 88);
+        if (elapsed % 6 === 0) msgIdx = Math.min(msgIdx + 1, messages.length - 1);
+        showProgress(mode, pct, messages[msgIdx]);
       } else if (job.status === 'done') {
         clearInterval(interval);
         showProgress(mode, 100, 'Done! Starting download...');
@@ -917,13 +973,15 @@ function pollJob(mode, jobId) {
         }, 800);
       } else if (job.status === 'error') {
         clearInterval(interval);
-        showToast(job.error || 'Something went wrong', true);
+        showToast(job.error || 'Something went wrong. Try again.', true);
         resetBtn(mode);
         hideProgress(mode);
       }
     } catch(e) {
       clearInterval(interval);
+      showToast('Network error. Please try again.', true);
       resetBtn(mode);
+      hideProgress(mode);
     }
   }, 2000);
 }
