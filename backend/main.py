@@ -1,6 +1,6 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 import subprocess, uuid, os, re, shutil, json
 from pathlib import Path
@@ -64,6 +64,10 @@ QUALITY_MAP = {
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+@app.head("/health")
+async def health_head():
+    return Response(status_code=200)
 
 @app.post("/info")
 async def get_video_info(req: InfoRequest):
