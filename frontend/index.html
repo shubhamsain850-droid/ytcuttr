@@ -3,9 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YTCuttr — Cut & Download YouTube Videos Online Free</title>
-<meta name="description" content="Cut and download YouTube video clips online for free. Extract any part from long YouTube videos in seconds. No software needed.">
-<meta name="keywords" content="youtube cutter, yt cutter, youtube clip cutter, cut youtube video online, download youtube clip, youtube video downloader">
+<title>YTCuttr — Free YouTube Clip Cutter & Video Downloader | Shorts Supported</title>
+<meta name="description" content="YTCuttr is a free online YouTube video cutter and downloader. Cut any clip with precise timestamps, or download full YouTube videos & Shorts in 4K, 1080p, 720p. No sign-up required.">
+<meta name="keywords" content="youtube cutter, youtube video downloader, cut youtube video online, youtube clip download, youtube shorts downloader, yt cutter free, download youtube video 1080p">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="YTCuttr — Free YouTube Clip Cutter & Downloader">
+<meta property="og:description" content="Cut YouTube video clips or download full videos and Shorts for free. No software, no sign-up needed.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ytcuttr.com">
+<link rel="canonical" href="https://ytcuttr.com">
 
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,6 +19,21 @@
 
 <!-- AdSense placeholder — replace with your real code -->
 <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+<!-- JSON-LD FAQ Schema for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"What is YTCuttr?","acceptedAnswer":{"@type":"Answer","text":"YTCuttr is a free online tool that lets you cut specific clips from YouTube videos using start and end time controls, or download full YouTube videos and Shorts in multiple quality options — no sign-up required."}},
+    {"@type":"Question","name":"Does YTCuttr support YouTube Shorts?","acceptedAnswer":{"@type":"Answer","text":"Yes! YTCuttr fully supports YouTube Shorts. Simply paste any youtube.com/shorts/ URL and download or clip it just like a regular video."}},
+    {"@type":"Question","name":"Is YTCuttr free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes, YTCuttr is completely free. There is no registration, no subscription, and no hidden fees."}},
+    {"@type":"Question","name":"What video qualities are available?","acceptedAnswer":{"@type":"Answer","text":"YTCuttr supports 4K, 1080p, 720p, 480p, 360p, and Audio Only downloads, depending on the original video's available formats."}},
+    {"@type":"Question","name":"Do I need to install any software?","acceptedAnswer":{"@type":"Answer","text":"No software installation is required. YTCuttr runs entirely in your browser and works on all devices including desktop, mobile, and tablets."}}
+  ]
+}
+</script>
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -561,7 +582,158 @@ footer a { color: var(--red); text-decoration: none; }
   .time-row { grid-template-columns: 1fr; }
   .url-row { flex-direction: column; }
   .tab-btn { padding: 9px 16px; font-size: 13px; }
+  .features-grid { grid-template-columns: 1fr; }
 }
+
+/* ── SECTION SHARED ── */
+.section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.section-header h2,
+.about-inner h2,
+.faq-section h2 {
+  font-family: var(--display);
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.section-header p {
+  color: var(--muted);
+  font-size: 15px;
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── FEATURES SECTION ── */
+.features-section {
+  padding: 64px 24px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 20px;
+}
+.feat-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.feat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 28px rgba(0,0,0,.10);
+}
+.feat-icon-wrap {
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feat-icon-wrap svg { width: 76px; height: 76px; }
+.feat-body { padding: 0 22px 26px; }
+.feat-body h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.feat-body p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── ABOUT SECTION ── */
+.about-section {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 60px 24px;
+}
+.about-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.about-inner h2 { text-align: center; margin-bottom: 24px; }
+.about-inner p {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+.about-inner p strong { color: var(--text); }
+.about-inner p em {
+  display: block;
+  margin-top: 20px;
+  font-size: 13px;
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  font-style: normal;
+  color: #92400e;
+}
+
+/* ── FAQ SECTION ── */
+.faq-section {
+  padding: 60px 24px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.faq-section h2 { text-align: center; margin-bottom: 32px; }
+.faq-item {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  background: var(--white);
+  overflow: hidden;
+}
+.faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  gap: 12px;
+}
+.faq-q .chev {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  transition: transform .2s;
+}
+.faq-item.open .chev { transform: rotate(180deg); background: var(--red); color: #fff; }
+.faq-a {
+  display: none;
+  padding: 4px 20px 18px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+.faq-item.open .faq-a { display: block; }
+
 </style>
 </head>
 <body>
@@ -754,11 +926,213 @@ footer a { color: var(--red); text-decoration: none; }
       <p>Hit the download button and get your file in seconds. No sign-up required.</p>
     </div>
   </div>
-</div>
+<!-- FEATURES SECTION -->
+<section class="features-section" aria-label="YTCuttr Features">
+  <div class="section-header">
+    <h2>Why Choose YTCuttr?</h2>
+    <p>Everything you need to save YouTube content — precise, fast, and completely free.</p>
+  </div>
+  <div class="features-grid">
+
+    <!-- 1: Clip Cutter -->
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#fff0f0">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="22" r="10" stroke="#e63030" stroke-width="3.5"/>
+          <circle cx="20" cy="58" r="10" stroke="#e63030" stroke-width="3.5"/>
+          <circle cx="20" cy="22" r="4" fill="#e63030"/>
+          <circle cx="20" cy="58" r="4" fill="#e63030"/>
+          <line x1="29" y1="19" x2="70" y2="8" stroke="#e63030" stroke-width="3" stroke-linecap="round"/>
+          <line x1="29" y1="61" x2="70" y2="72" stroke="#e63030" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="24" x2="50" y2="40" stroke="#e63030" stroke-width="3" stroke-linecap="round"/>
+          <line x1="30" y1="56" x2="50" y2="40" stroke="#e63030" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-body">
+        <h3>Precise Clip Cutter</h3>
+        <p>Set a start and end time to extract exactly the segment you want from any YouTube video. Perfect for saving highlights, key moments, or lecture excerpts.</p>
+      </div>
+    </div>
+
+    <!-- 2: Shorts -->
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#fffbeb">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="22" y="8" width="36" height="64" rx="7" stroke="#f59e0b" stroke-width="3.5"/>
+          <rect x="28" y="18" width="24" height="38" rx="3" fill="#fef3c7"/>
+          <polygon points="43,22 34,40 40,40 37,58 47,36 41,36" fill="#f59e0b"/>
+          <circle cx="40" cy="64" r="3" fill="#f59e0b"/>
+        </svg>
+      </div>
+      <div class="feat-body">
+        <h3>YouTube Shorts Download</h3>
+        <p>Download any YouTube Short instantly. Paste a youtube.com/shorts/ link and save the vertical video to your device in full quality — no app needed.</p>
+      </div>
+    </div>
+
+    <!-- 3: Quality -->
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#eff6ff">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="50" width="12" height="24" rx="3" fill="#93c5fd"/>
+          <rect x="24" y="38" width="12" height="36" rx="3" fill="#60a5fa"/>
+          <rect x="40" y="26" width="12" height="48" rx="3" fill="#3b82f6"/>
+          <rect x="56" y="12" width="12" height="62" rx="3" fill="#1d4ed8"/>
+          <text x="52" y="10" font-size="9" fill="#1d4ed8" font-weight="bold" font-family="sans-serif">4K</text>
+        </svg>
+      </div>
+      <div class="feat-body">
+        <h3>Up to 4K Quality</h3>
+        <p>Choose your preferred resolution — 4K Ultra HD, 1080p Full HD, 720p, 480p, 360p, or Audio Only. Always get the best quality the video offers.</p>
+      </div>
+    </div>
+
+    <!-- 4: Audio -->
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#f5f3ff">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M26 50 C26 36 54 36 54 50" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="26" y1="50" x2="26" y2="58" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round"/>
+          <line x1="54" y1="50" x2="54" y2="58" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="23" cy="60" r="5" stroke="#7c3aed" stroke-width="3" fill="#ede9fe"/>
+          <circle cx="57" cy="60" r="5" stroke="#7c3aed" stroke-width="3" fill="#ede9fe"/>
+          <line x1="20" y1="28" x2="20" y2="44" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+          <line x1="29" y1="22" x2="29" y2="48" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+          <line x1="38" y1="18" x2="38" y2="48" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+          <line x1="47" y1="22" x2="47" y2="48" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+          <line x1="56" y1="28" x2="56" y2="44" stroke="#7c3aed" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-body">
+        <h3>Audio-Only Extraction</h3>
+        <p>Extract just the audio from any YouTube video or Short. Download in M4A format — ideal for music, podcasts, lectures, and meditation content.</p>
+      </div>
+    </div>
+
+    <!-- 5: Free / No signup -->
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#f0fdf4">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M40 8 L58 20 L58 44 C58 58 40 70 40 70 C40 70 22 58 22 44 L22 20 Z" fill="#dcfce7" stroke="#16a34a" stroke-width="3.5" stroke-linejoin="round"/>
+          <polyline points="30,40 37,48 52,30" stroke="#16a34a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feat-body">
+        <h3>100% Free &mdash; No Sign-up</h3>
+        <p>No account, no email, no hidden fees. YTCuttr is completely free to use. Just paste a YouTube URL and your file is ready in seconds.</p>
+      </div>
+    </div>
+
+    <!-- 6: All Devices -->
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#f0fdfa">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="6" y="16" width="46" height="32" rx="4" stroke="#0d9488" stroke-width="3.5"/>
+          <rect x="10" y="20" width="38" height="24" rx="2" fill="#ccfbf1"/>
+          <line x1="20" y1="50" x2="38" y2="50" stroke="#0d9488" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="29" cy="54" r="2" fill="#0d9488"/>
+          <rect x="58" y="28" width="18" height="30" rx="4" stroke="#0d9488" stroke-width="3"/>
+          <rect x="61" y="32" width="12" height="20" rx="2" fill="#ccfbf1"/>
+          <circle cx="67" cy="55" r="2" fill="#0d9488"/>
+        </svg>
+      </div>
+      <div class="feat-body">
+        <h3>Works on All Devices</h3>
+        <p>Use YTCuttr on any device — desktop, laptop, tablet, or smartphone. No installation required. Works on Chrome, Firefox, Safari, and all modern browsers.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section class="about-section" aria-label="About YTCuttr">
+  <div class="about-inner">
+    <h2>The Best Free YouTube Video Cutter &amp; Downloader</h2>
+    <p>YTCuttr is a free, browser-based tool built for anyone who wants more control over YouTube content. Whether you need a short clip from a long tutorial or want to download an entire video in high definition, YTCuttr makes it quick and effortless — with no software installation and no account required.</p>
+    <p>What sets YTCuttr apart is its <strong>Clip Cutter</strong> feature. Unlike standard YouTube downloaders, YTCuttr lets you define a precise start and end timestamp to extract exactly the segment you need. This is ideal for saving a key moment from a lecture, a highlight from a sports match, a recipe demo from a cooking video, or any memorable scene you want to keep.</p>
+    <p>YTCuttr also offers full support for <strong>YouTube Shorts</strong>. Paste any Shorts URL and download it just as easily as a regular video. From trending clips to educational Shorts, save them to your device for offline viewing anytime.</p>
+    <p>With quality options ranging from compact 360p to crisp 4K Ultra HD, and an audio-only mode for podcasts and music, YTCuttr gives you the flexibility to choose exactly the format that suits your needs.</p>
+    <p><em>⚠️ Personal Use Disclaimer: YTCuttr is designed for personal, non-commercial use only. Please ensure you have the rights to download any content. Only download videos you own, have permission to download, or that are licensed under Creative Commons. Always respect content creators and YouTube’s Terms of Service.</em></p>
+  </div>
+</section>
+
+<!-- FAQ SECTION -->
+<section class="faq-section" aria-label="Frequently Asked Questions">
+  <h2>Frequently Asked Questions</h2>
+  <div id="faq-list">
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What is YTCuttr and what can I do with it?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">YTCuttr is a free online tool that lets you do two things: (1) cut a specific clip from any YouTube video by setting start and end timestamps, and (2) download full YouTube videos or Shorts in your chosen quality. No registration or software is needed.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        How do I cut a specific part of a YouTube video?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">Open the <strong>Clip Cutter</strong> tab, paste the YouTube URL, click "Get Video", then set your Start Time and End Time in HH:MM:SS format. Select your preferred quality and click "Download Clip". YTCuttr will extract and download only that segment.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Does YTCuttr support YouTube Shorts?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">Yes! YTCuttr fully supports YouTube Shorts. Simply paste any youtube.com/shorts/ link in either the Clip Cutter or the Videos &amp; Shorts tab, and it will work just like a regular video.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What video quality options are available?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">YTCuttr offers 4K, 1080p, 720p, 480p, and 360p video downloads, plus an "Audio Only" option in M4A format. The available options depend on what the original YouTube video offers.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Is YTCuttr completely free?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">Yes, YTCuttr is 100% free to use. There is no subscription, no account, no email required, and no hidden fees of any kind. Just paste a URL and download.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Do I need to install any software or app?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">No. YTCuttr works entirely in your browser. It is compatible with all modern browsers including Chrome, Firefox, Safari, and Edge on desktop, mobile, and tablet devices.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Can I download audio only from a YouTube video?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">Yes! Select the "Audio only" option in the quality selector. YTCuttr will extract and download just the audio track in M4A format, perfect for music, lectures, podcasts, and guided meditations.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Is it legal to download YouTube videos?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">Downloading YouTube videos may be restricted by copyright law and YouTube's Terms of Service. YTCuttr is intended for personal use only — for example, downloading content you have created, content licensed under Creative Commons, or videos for which you have explicit permission. Always respect content creators' rights.</div>
+    </div>
+
+  </div>
+</section>
 
 <!-- FOOTER -->
 <footer>
-  <p>© 2026 <a href="/">YTCuttr.com</a> — For personal use only. Respect content creators' rights.</p>
+  <p>© 2026 <a href="/">YTCuttr.com</a> &mdash; For personal use only. Respect content creators&rsquo; rights.</p>
+  <p style="font-size:12px;margin-top:6px;"><a href="#" style="color:var(--muted);text-decoration:none;">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="#" style="color:var(--muted);text-decoration:none;">Terms of Use</a> &nbsp;&middot;&nbsp; <a href="mailto:contact@ytcuttr.com" style="color:var(--muted);text-decoration:none;">Contact</a></p>
 </footer>
 
 <!-- TOAST -->
@@ -1049,6 +1423,17 @@ function showToast(msg, isError = false) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
+
+// ── FAQ TOGGLE ────────────────────────────────────────────
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  // Open clicked if it was closed
+  if (!isOpen) item.classList.add('open');
+}
+
 </script>
 </body>
 </html>
