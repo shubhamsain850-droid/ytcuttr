@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YTCuttr — Cut & Download YouTube Videos Online Free</title>
+<meta name="description" content="Cut and download YouTube video clips online for free. Extract any part from long YouTube videos in seconds. No software needed.">
+<meta name="keywords" content="youtube cutter, yt cutter, youtube clip cutter, cut youtube video online, download youtube clip, youtube video downloader">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
+<!-- AdSense placeholder — replace with your real code -->
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:      #e63030;
+  --red-glow: rgba(230, 48, 48, 0.35);
+  --bg:       #f7f8fa;
+  --white:    #ffffff;
+  --border:   #e4e7ec;
+  --text:     #111827;
+  --muted:    #6b7280;
+  --subtle:   #f3f4f6;
+  --success:  #16a34a;
+  --sans:     'Inter', sans-serif;
+  --display:  'Plus Jakarta Sans', sans-serif;
+  --radius:   14px;
+  --shadow:   0 1px 4px rgba(0,0,0,.07), 0 4px 20px rgba(0,0,0,.06);
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.logo span { color: var(--red); }
+.nav-tag {
+  background: #fef2f2;
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #fecaca;
+}
+
+/* ── AD BANNER ── */
+.ad-banner {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 52px 24px 36px;
+}
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--text);
+}
+.hero h1 span { color: var(--red); }
+.hero p {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* ── TABS ── */
+.tabs-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 0 24px 32px;
+}
+.tabs {
+  display: flex;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 5px;
+  gap: 4px;
+  box-shadow: var(--shadow);
+}
+.tab-btn {
+  padding: 10px 28px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab-btn.active {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 2px 12px var(--red-glow);
+}
+.tab-btn:hover:not(.active) { color: var(--text); background: var(--subtle); }
+
+/* ── MAIN CARD ── */
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+}
+
+/* ── PANEL ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── URL INPUT ── */
+.url-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+.url-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  display: block;
+}
+.url-row {
+  display: flex;
+  gap: 10px;
+}
+.url-input {
+  flex: 1;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--white);
+}
+.url-input:focus { border-color: #d1d5db; }
+.url-input.has-value { border-color: var(--red); }
+
+.fetch-btn {
+  padding: 13px 22px;
+  border-radius: 10px;
+  border: none;
+  background: var(--subtle);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.fetch-btn.glowing {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 0 0 3px var(--red-glow);
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 3px var(--red-glow); }
+  50%       { box-shadow: 0 0 0 7px rgba(230,48,48,0.12); }
+}
+
+/* ── VIDEO INFO ── */
+.video-info {
+  display: none;
+  gap: 14px;
+  margin-bottom: 24px;
+  align-items: center;
+  background: var(--subtle);
+  border-radius: 10px;
+  padding: 14px;
+}
+.video-info.visible { display: flex; }
+.video-thumb {
+  width: 100px;
+  height: 58px;
+  object-fit: cover;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+.video-meta { flex: 1; min-width: 0; }
+.video-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.video-dur {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+/* ── TIME ROW ── */
+.time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.field label span {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 12px;
+}
+.time-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace, var(--sans);
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.time-input:focus { border-color: var(--red); }
+
+/* ── RESOLUTION ── */
+.res-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  display: block;
+}
+.res-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.res-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.res-btn:hover { border-color: var(--red); color: var(--text); }
+.res-btn.active {
+  border-color: var(--red);
+  background: #fef2f2;
+  color: var(--red);
+}
+
+/* ── DOWNLOAD BTN ── */
+.dl-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 11px;
+  border: none;
+  background: #e5e7eb;
+  color: #9ca3af;
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: not-allowed;
+  transition: all 0.3s;
+  letter-spacing: 0.01em;
+}
+.dl-btn.ready {
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--red-glow);
+  animation: pulse 1.8s infinite;
+}
+.dl-btn.ready:hover { opacity: 0.92; transform: translateY(-1px); }
+.dl-btn.loading {
+  background: var(--red);
+  color: #fff;
+  cursor: wait;
+  animation: none;
+  opacity: 0.75;
+}
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  display: none;
+  margin-top: 18px;
+}
+.progress-wrap.visible { display: block; }
+.progress-bar-bg {
+  background: var(--subtle);
+  border-radius: 99px;
+  height: 8px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--red);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-text {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 8px;
+  text-align: center;
+}
+
+/* ── AD MID ── */
+.ad-mid {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+
+/* ── HOW IT WORKS ── */
+.how {
+  max-width: 720px;
+  margin: 0 auto 48px;
+  padding: 0 20px;
+}
+.how h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.step-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.step-num {
+  width: 32px;
+  height: 32px;
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 12px;
+}
+.step-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+.step-card p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  padding: 20px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+footer a { color: var(--red); text-decoration: none; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: transform 0.3s;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--red); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 500px) {
+  .card { padding: 20px; }
+  .time-row { grid-template-columns: 1fr; }
+  .url-row { flex-direction: column; }
+  .tab-btn { padding: 9px 16px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="/">YT<span>Cuttr</span></a>
+  <span class="nav-tag">Free & Online</span>
+</nav>
+
+<!-- TOP AD -->
+<div class="ad-banner">
+  <!-- AdSense: Replace this comment with your ad code -->
+  <span>Advertisement</span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Cut & Download<br><span>YouTube Videos</span> Online</h1>
+  <p>Extract any clip from a long video or download YouTube videos in your preferred quality — free, no software needed.</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('clip')">✂️ Clip Cutter</button>
+    <button class="tab-btn" onclick="switchTab('download')">⬇️ Video Download</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- MID AD -->
+  <div class="ad-mid">
+    <!-- AdSense: Replace with your ad code -->
+    <span>Advertisement</span>
+  </div>
+
+  <div class="card">
+
+    <!-- ═══════════════ PANEL 1: CLIP CUTTER ═══════════════ -->
+    <div class="panel active" id="panel-clip">
+
+      <span class="url-label">YouTube Video URL</span>
+      <div class="url-row">
+        <input
+          class="url-input"
+          id="clip-url"
+          type="text"
+          placeholder="Paste YouTube URL here..."
+          oninput="onUrlInput('clip')"
+        />
+        <button class="fetch-btn" id="clip-fetch-btn" onclick="fetchInfo('clip')" disabled>
+          Get Video
+        </button>
+      </div>
+
+      <!-- Video Info -->
+      <div class="video-info" id="clip-video-info">
+        <img class="video-thumb" id="clip-thumb" src="" alt="thumbnail">
+        <div class="video-meta">
+          <div class="video-title" id="clip-title">—</div>
+          <div class="video-dur" id="clip-dur">—</div>
+        </div>
+      </div>
+
+      <hr class="divider" id="clip-divider" style="display:none">
+
+      <!-- Time inputs -->
+      <div id="clip-settings" style="display:none">
+        <div class="time-row">
+          <div class="field">
+            <label>Start Time <span>(HH:MM:SS)</span></label>
+            <input class="time-input" id="clip-start" type="text" placeholder="00:00:00" oninput="onClipSettingsChange()">
+          </div>
+          <div class="field">
+            <label>End Time <span>(HH:MM:SS)</span></label>
+            <input class="time-input" id="clip-end" type="text" placeholder="00:02:00" oninput="onClipSettingsChange()">
+          </div>
+        </div>
+
+        <span class="res-label">Select Quality</span>
+        <div class="res-grid" id="clip-res-grid"></div>
+
+        <button class="dl-btn" id="clip-dl-btn" onclick="startClip()" disabled>
+          ⬇ Download Clip
+        </button>
+
+        <div class="progress-wrap" id="clip-progress">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="clip-bar"></div></div>
+          <div class="progress-text" id="clip-progress-text">Processing your clip...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ PANEL 2: VIDEO DOWNLOAD ═══════════════ -->
+    <div class="panel" id="panel-download">
+
+      <span class="url-label">YouTube Video URL</span>
+      <div class="url-row">
+        <input
+          class="url-input"
+          id="dl-url"
+          type="text"
+          placeholder="Paste YouTube URL here..."
+          oninput="onUrlInput('dl')"
+        />
+        <button class="fetch-btn" id="dl-fetch-btn" onclick="fetchInfo('dl')" disabled>
+          Continue
+        </button>
+      </div>
+
+      <!-- Video Info -->
+      <div class="video-info" id="dl-video-info">
+        <img class="video-thumb" id="dl-thumb" src="" alt="thumbnail">
+        <div class="video-meta">
+          <div class="video-title" id="dl-title">—</div>
+          <div class="video-dur" id="dl-dur">—</div>
+        </div>
+      </div>
+
+      <hr class="divider" id="dl-divider" style="display:none">
+
+      <div id="dl-settings" style="display:none">
+        <span class="res-label">Select Quality</span>
+        <div class="res-grid" id="dl-res-grid"></div>
+
+        <button class="dl-btn" id="dl-dl-btn" onclick="startDownload()" disabled>
+          ⬇ Download Video
+        </button>
+
+        <div class="progress-wrap" id="dl-progress">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="dl-bar"></div></div>
+          <div class="progress-text" id="dl-progress-text">Preparing download...</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /main -->
+
+<!-- HOW IT WORKS -->
+<div class="how">
+  <h2>How it works</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h3>Paste URL</h3>
+      <p>Copy any YouTube video link and paste it into the box above.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h3>Set your options</h3>
+      <p>For clips, set start and end time. Choose your preferred video quality.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h3>Download</h3>
+      <p>Hit the download button and get your file in seconds. No sign-up required.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 <a href="/">YTCuttr.com</a> — For personal use only. Respect content creators' rights.</p>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────
+// Replace with your Railway backend URL after deploy
+const API = "https://your-backend.railway.app";
+
+// ── STATE ─────────────────────────────────────────────────
+let clipRes = "720p", dlRes = "720p";
+let clipJobId = null, dlJobId = null;
+let clipPollInterval = null, dlPollInterval = null;
+
+// ── TAB SWITCH ────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='clip') || (i===1 && tab==='download'));
+  });
+  document.getElementById('panel-clip').classList.toggle('active', tab==='clip');
+  document.getElementById('panel-download').classList.toggle('active', tab==='download');
+}
+
+// ── URL INPUT WATCHER ─────────────────────────────────────
+function onUrlInput(mode) {
+  const id = mode === 'clip' ? 'clip-url' : 'dl-url';
+  const btnId = mode === 'clip' ? 'clip-fetch-btn' : 'dl-fetch-btn';
+  const val = document.getElementById(id).value.trim();
+  const isYT = /youtube\.com|youtu\.be/.test(val);
+  const input = document.getElementById(id);
+  const btn   = document.getElementById(btnId);
+
+  input.classList.toggle('has-value', isYT);
+  btn.disabled = !isYT;
+  btn.classList.toggle('glowing', isYT);
+}
+
+// ── FETCH VIDEO INFO ──────────────────────────────────────
+async function fetchInfo(mode) {
+  const urlId   = mode === 'clip' ? 'clip-url'   : 'dl-url';
+  const btnId   = mode === 'clip' ? 'clip-fetch-btn' : 'dl-fetch-btn';
+  const infoId  = mode === 'clip' ? 'clip-video-info' : 'dl-video-info';
+  const thumbId = mode === 'clip' ? 'clip-thumb'  : 'dl-thumb';
+  const titleId = mode === 'clip' ? 'clip-title'  : 'dl-title';
+  const durId   = mode === 'clip' ? 'clip-dur'    : 'dl-dur';
+  const divId   = mode === 'clip' ? 'clip-divider': 'dl-divider';
+  const setId   = mode === 'clip' ? 'clip-settings':'dl-settings';
+  const resId   = mode === 'clip' ? 'clip-res-grid':'dl-res-grid';
+
+  const url = document.getElementById(urlId).value.trim();
+  const btn = document.getElementById(btnId);
+  btn.textContent = "Loading...";
+  btn.disabled = true;
+  btn.classList.remove('glowing');
+
+  try {
+    const resp = await fetch(`${API}/info`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ url })
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.detail || "Failed to fetch video info");
+    }
+    const data = await resp.json();
+
+    // Show info
+    document.getElementById(thumbId).src = data.thumbnail;
+    document.getElementById(titleId).textContent = data.title;
+    document.getElementById(durId).textContent = `Duration: ${formatDur(data.duration)}`;
+    document.getElementById(infoId).classList.add('visible');
+    document.getElementById(divId).style.display = 'block';
+    document.getElementById(setId).style.display = 'block';
+
+    // Build resolution buttons
+    const grid = document.getElementById(resId);
+    grid.innerHTML = '';
+    data.resolutions.forEach((r, i) => {
+      const b = document.createElement('button');
+      b.className = 'res-btn' + (i === 0 ? ' active' : '');
+      b.textContent = r;
+      b.onclick = () => selectRes(mode, r, b);
+      grid.appendChild(b);
+    });
+
+    if (mode === 'clip') {
+      clipRes = data.resolutions[0];
+    } else {
+      dlRes = data.resolutions[0];
+      checkDlReady();
+    }
+
+    btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
+    btn.disabled = false;
+    btn.classList.add('glowing');
+
+  } catch(e) {
+    showToast(e.message, true);
+    btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
+    btn.disabled = false;
+    btn.classList.add('glowing');
+  }
+}
+
+function selectRes(mode, val, el) {
+  const gridId = mode === 'clip' ? 'clip-res-grid' : 'dl-res-grid';
+  document.querySelectorAll(`#${gridId} .res-btn`).forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (mode === 'clip') { clipRes = val; onClipSettingsChange(); }
+  else { dlRes = val; checkDlReady(); }
+}
+
+// ── CLIP LOGIC ────────────────────────────────────────────
+function onClipSettingsChange() {
+  const s = document.getElementById('clip-start').value.trim();
+  const e = document.getElementById('clip-end').value.trim();
+  const ready = s.length >= 4 && e.length >= 4;
+  const btn = document.getElementById('clip-dl-btn');
+  btn.disabled = !ready;
+  btn.classList.toggle('ready', ready);
+}
+
+async function startClip() {
+  const url   = document.getElementById('clip-url').value.trim();
+  const start = document.getElementById('clip-start').value.trim();
+  const end   = document.getElementById('clip-end').value.trim();
+  const btn   = document.getElementById('clip-dl-btn');
+
+  btn.classList.remove('ready');
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Processing...';
+  btn.disabled = true;
+
+  showProgress('clip', 10, 'Sending request...');
+
+  try {
+    const resp = await fetch(`${API}/clip`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ url, start, end, quality: clipRes === 'Audio only' ? 'audio' : clipRes })
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.detail || "Failed to start clip");
+    }
+    const data = await resp.json();
+    clipJobId = data.job_id;
+    pollJob('clip', clipJobId);
+  } catch(e) {
+    showToast(e.message, true);
+    resetBtn('clip');
+  }
+}
+
+// ── DOWNLOAD LOGIC ────────────────────────────────────────
+function checkDlReady() {
+  const btn = document.getElementById('dl-dl-btn');
+  btn.disabled = false;
+  btn.classList.add('ready');
+}
+
+async function startDownload() {
+  const url = document.getElementById('dl-url').value.trim();
+  const btn = document.getElementById('dl-dl-btn');
+
+  btn.classList.remove('ready');
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Processing...';
+  btn.disabled = true;
+
+  showProgress('dl', 10, 'Preparing download...');
+
+  try {
+    const resp = await fetch(`${API}/download`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ url, quality: dlRes === 'Audio only' ? 'audio' : dlRes })
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.detail || "Failed to start download");
+    }
+    const data = await resp.json();
+    dlJobId = data.job_id;
+    pollJob('dl', dlJobId);
+  } catch(e) {
+    showToast(e.message, true);
+    resetBtn('dl');
+  }
+}
+
+// ── POLLING ───────────────────────────────────────────────
+function pollJob(mode, jobId) {
+  let pct = 15;
+  const interval = setInterval(async () => {
+    try {
+      const resp = await fetch(`${API}/status/${jobId}`);
+      const job  = await resp.json();
+
+      if (job.status === 'downloading') {
+        pct = Math.min(pct + 12, 85);
+        showProgress(mode, pct, 'Downloading...');
+      } else if (job.status === 'done') {
+        clearInterval(interval);
+        showProgress(mode, 100, 'Done! Starting download...');
+        setTimeout(() => {
+          window.location.href = `${API}/file/${jobId}`;
+          showToast('✅ Download started!');
+          resetBtn(mode);
+          hideProgress(mode);
+        }, 800);
+      } else if (job.status === 'error') {
+        clearInterval(interval);
+        showToast(job.error || 'Something went wrong', true);
+        resetBtn(mode);
+        hideProgress(mode);
+      }
+    } catch(e) {
+      clearInterval(interval);
+      resetBtn(mode);
+    }
+  }, 2000);
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function showProgress(mode, pct, text) {
+  const wrap = document.getElementById(mode === 'clip' ? 'clip-progress' : 'dl-progress');
+  const bar  = document.getElementById(mode === 'clip' ? 'clip-bar' : 'dl-bar');
+  const txt  = document.getElementById(mode === 'clip' ? 'clip-progress-text' : 'dl-progress-text');
+  wrap.classList.add('visible');
+  bar.style.width = pct + '%';
+  txt.textContent = text;
+}
+
+function hideProgress(mode) {
+  document.getElementById(mode === 'clip' ? 'clip-progress' : 'dl-progress').classList.remove('visible');
+}
+
+function resetBtn(mode) {
+  const btn = document.getElementById(mode === 'clip' ? 'clip-dl-btn' : 'dl-dl-btn');
+  btn.classList.remove('loading');
+  btn.classList.add('ready');
+  btn.disabled = false;
+  btn.textContent = mode === 'clip' ? '⬇ Download Clip' : '⬇ Download Video';
+}
+
+function formatDur(sec) {
+  if (!sec) return 'Unknown';
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  return `${m}m ${s}s`;
+}
+
+let toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

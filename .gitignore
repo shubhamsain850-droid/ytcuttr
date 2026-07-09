@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.env
+venv/
+.venv/
+
+# Temp files
+/tmp/
+*.mp4
+*.m4a
+*.webm
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
