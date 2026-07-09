@@ -219,35 +219,86 @@ nav {
 /* ── VIDEO INFO ── */
 .video-info {
   display: none;
-  gap: 14px;
+  flex-direction: column;
+  gap: 0;
   margin-bottom: 24px;
-  align-items: center;
-  background: var(--subtle);
-  border-radius: 10px;
-  padding: 14px;
+  background: var(--white);
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  animation: fadeSlideIn 0.3s ease;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .video-info.visible { display: flex; }
-.video-thumb {
-  width: 100px;
-  height: 58px;
-  object-fit: cover;
-  border-radius: 7px;
-  flex-shrink: 0;
+
+/* Thumbnail container */
+.video-thumb-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #111;
+  overflow: hidden;
 }
-.video-meta { flex: 1; min-width: 0; }
+.video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.video-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+}
+.video-dur-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 5px;
+  letter-spacing: 0.02em;
+}
+
+/* Meta below thumbnail */
+.video-meta {
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.video-meta-text { flex: 1; min-width: 0; }
 .video-title {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
-  white-space: nowrap;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
-.video-dur {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 4px;
+.video-ready-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  background: #f0fdf4;
+  color: var(--success);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #bbf7d0;
 }
+.video-dur { display: none; }
 
 /* ── DIVIDER ── */
 .divider {
@@ -530,10 +581,16 @@ footer a { color: var(--red); text-decoration: none; }
 
       <!-- Video Info -->
       <div class="video-info" id="clip-video-info">
-        <img class="video-thumb" id="clip-thumb" src="" alt="thumbnail">
+        <div class="video-thumb-wrap">
+          <img class="video-thumb" id="clip-thumb" src="" alt="thumbnail">
+          <div class="video-thumb-overlay"></div>
+          <div class="video-dur-badge" id="clip-dur"></div>
+        </div>
         <div class="video-meta">
-          <div class="video-title" id="clip-title">—</div>
-          <div class="video-dur" id="clip-dur">—</div>
+          <div class="video-meta-text">
+            <div class="video-title" id="clip-title"></div>
+            <div class="video-ready-tag">✅ Ready to clip</div>
+          </div>
         </div>
       </div>
 
@@ -586,10 +643,16 @@ footer a { color: var(--red); text-decoration: none; }
 
       <!-- Video Info -->
       <div class="video-info" id="dl-video-info">
-        <img class="video-thumb" id="dl-thumb" src="" alt="thumbnail">
+        <div class="video-thumb-wrap">
+          <img class="video-thumb" id="dl-thumb" src="" alt="thumbnail">
+          <div class="video-thumb-overlay"></div>
+          <div class="video-dur-badge" id="dl-dur"></div>
+        </div>
         <div class="video-meta">
-          <div class="video-title" id="dl-title">—</div>
-          <div class="video-dur" id="dl-dur">—</div>
+          <div class="video-meta-text">
+            <div class="video-title" id="dl-title"></div>
+            <div class="video-ready-tag">✅ Ready to download</div>
+          </div>
         </div>
       </div>
 
@@ -710,7 +773,7 @@ async function fetchInfo(mode) {
     // Show info
     document.getElementById(thumbId).src = data.thumbnail;
     document.getElementById(titleId).textContent = data.title;
-    document.getElementById(durId).textContent = `Duration: ${formatDur(data.duration)}`;
+    document.getElementById(durId).textContent = formatDur(data.duration);
     document.getElementById(infoId).classList.add('visible');
     document.getElementById(divId).style.display = 'block';
     document.getElementById(setId).style.display = 'block';
