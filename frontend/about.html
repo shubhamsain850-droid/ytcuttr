@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About YTCuttr — Free YouTube Clip Cutter & Downloader</title>
+<meta name="description" content="Learn about YTCuttr — a free online tool to cut and download YouTube video clips by timestamp. No watermark, no signup, no software needed.">
+<link rel="canonical" href="https://ytcuttr.com/about">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red: #e63030; --bg: #f7f8fa; --white: #ffffff;
+  --border: #e4e7ec; --text: #111827; --muted: #6b7280;
+  --sans: 'Inter', sans-serif; --display: 'Plus Jakarta Sans', sans-serif;
+}
+body { font-family: var(--sans); background: var(--bg); color: var(--text); }
+nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; height: 58px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo { font-family: var(--display); font-size: 22px; font-weight: 800; color: var(--text); text-decoration: none; }
+.logo span { color: var(--red); }
+.nav-back { font-size: 13px; color: var(--muted); text-decoration: none; }
+.nav-back:hover { color: var(--red); }
+.container { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+.page-tag { display: inline-block; background: #fef2f2; color: var(--red); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 1px solid #fecaca; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.08em; }
+.page-header { margin-bottom: 40px; }
+.page-header h1 { font-family: var(--display); font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
+.page-header p { color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 560px; }
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 36px; margin-bottom: 16px; }
+.card h2 { font-size: 17px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.card h2 .icon { width: 32px; height: 32px; background: #fef2f2; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.card p { font-size: 15px; color: #374151; line-height: 1.75; margin-bottom: 10px; }
+.card p:last-child { margin-bottom: 0; }
+
+.mission-box {
+  background: linear-gradient(135deg, #fef2f2, #fff);
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  padding: 32px 36px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.mission-box .quote {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--red);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+.mission-box p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+.features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.feature-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.feature-item .fi-icon { font-size: 20px; margin-bottom: 8px; }
+.feature-item h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.feature-item p { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; }
+
+.promise-list { list-style: none; padding: 0; }
+.promise-list li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 15px; color: #374151; line-height: 1.5; }
+.promise-list li:last-child { border-bottom: none; }
+.promise-list li .check { color: #16a34a; font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+footer { background: var(--white); border-top: 1px solid var(--border); padding: 20px 24px; text-align: center; color: var(--muted); font-size: 12px; margin-top: 40px; }
+footer a { color: var(--red); text-decoration: none; margin: 0 8px; }
+
+@media (max-width: 500px) {
+  .features-grid { grid-template-columns: 1fr; }
+  .card { padding: 22px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">YT<span>Cuttr</span></a>
+  <a class="nav-back" href="/">← Back to Home</a>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <div class="page-tag">About</div>
+    <h1>About YTCuttr</h1>
+    <p>A free, fast, and simple tool built for anyone who wants to save exactly the right moment from a YouTube video — without downloading the whole thing.</p>
+  </div>
+
+  <div class="mission-box">
+    <div class="quote">"Save the moment that matters."</div>
+    <p>YTCuttr exists because downloading an 8-hour stream just to get a 2-minute highlight is frustrating. We fixed that.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">💡</span> Why We Built YTCuttr</h2>
+    <p>YouTube is full of incredible content — but sometimes you only need a small piece of it. A key moment from a lecture. A highlight from a 6-hour gaming stream. A recipe step from a long cooking video. A soundbite from a 2-hour podcast.</p>
+    <p>Most tools either require you to download the entire video first, add ugly watermarks, or force you to sign up and pay. We found that frustrating — so we built YTCuttr.</p>
+    <p>With YTCuttr, you paste a URL, set your start and end timestamps, choose quality, and download just the clip you need. That's it. Fast, clean, and free.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">⚡</span> What Makes YTCuttr Different</h2>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="fi-icon">⏱️</div>
+        <h3>Timestamp Precision</h3>
+        <p>Set exact start and end times to the second. Get only the clip you need.</p>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon">🚀</div>
+        <h3>No Full Download</h3>
+        <p>We only process the portion you want — not the entire 8-hour video.</p>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon">🎯</div>
+        <h3>Long Video Support</h3>
+        <p>Works perfectly on long videos, live stream recordings, and Shorts.</p>
+      </div>
+      <div class="feature-item">
+        <div class="fi-icon">🆓</div>
+        <h3>Always Free</h3>
+        <p>No hidden fees, no premium tier for basic features, no watermark.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">🤝</span> Our Promises to You</h2>
+    <ul class="promise-list">
+      <li><span class="check">✅</span> We will never add a watermark to your downloads</li>
+      <li><span class="check">✅</span> We will never ask you to create an account</li>
+      <li><span class="check">✅</span> We will never store your videos or clips on our servers</li>
+      <li><span class="check">✅</span> We will never sell your data to third parties</li>
+      <li><span class="check">✅</span> We will keep the core tool free — always</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">👥</span> Who Uses YTCuttr?</h2>
+    <p><strong>Content creators</strong> — Extract highlights from long videos to repurpose for Reels, Shorts, or TikTok.</p>
+    <p><strong>Students & researchers</strong> — Save specific lecture or tutorial segments for offline study.</p>
+    <p><strong>Gaming & sports fans</strong> — Clip winning moments, funny fails, or highlight reels from hours of footage.</p>
+    <p><strong>Podcast listeners</strong> — Extract a key soundbite or quote from a 2-hour episode as audio only.</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">✉️</span> Get in Touch</h2>
+    <p>Have a suggestion, found a bug, or just want to say hello?</p>
+    <p><strong>Email:</strong> <a href="mailto:contact@ytcuttr.com" style="color: var(--red);">contact@ytcuttr.com</a></p>
+    <p>We read every message and aim to reply within 48 hours.</p>
+  </div>
+</div>
+
+<footer>
+  © 2026 <a href="/">YTCuttr.com</a> — For personal use only.
+  <br style="display:none">
+  <a href="/">Home</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Use</a> · <a href="/about.html">About</a> · <a href="/contact.html">Contact</a>
+</footer>
+
+</body>
+</html>

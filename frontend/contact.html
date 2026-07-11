@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — YTCuttr</title>
+<meta name="description" content="Contact YTCuttr for support, feedback, or bug reports. We reply within 48 hours.">
+<link rel="canonical" href="https://ytcuttr.com/contact">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --red: #e63030; --bg: #f7f8fa; --white: #ffffff;
+  --border: #e4e7ec; --text: #111827; --muted: #6b7280;
+  --sans: 'Inter', sans-serif; --display: 'Plus Jakarta Sans', sans-serif;
+}
+body { font-family: var(--sans); background: var(--bg); color: var(--text); }
+nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; height: 58px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.logo { font-family: var(--display); font-size: 22px; font-weight: 800; color: var(--text); text-decoration: none; }
+.logo span { color: var(--red); }
+.nav-back { font-size: 13px; color: var(--muted); text-decoration: none; }
+.nav-back:hover { color: var(--red); }
+
+.container { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+.page-tag { display: inline-block; background: #fef2f2; color: var(--red); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 1px solid #fecaca; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.08em; }
+.page-header { margin-bottom: 36px; }
+.page-header h1 { font-family: var(--display); font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
+.page-header p { color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+/* Contact cards */
+.contact-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.contact-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 24px; text-align: center; }
+.contact-card .cc-icon { font-size: 28px; margin-bottom: 10px; }
+.contact-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.contact-card p { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+.contact-card a.btn {
+  display: inline-block;
+  background: var(--red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.contact-card a.btn:hover { opacity: 0.88; }
+
+/* Form */
+.form-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 36px; }
+.form-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--red); background: var(--white); }
+.field textarea { min-height: 130px; }
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 4px;
+}
+.submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.success-msg {
+  display: none;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #166534;
+  text-align: center;
+}
+
+/* FAQ quick links */
+.faq-nudge {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #92400e;
+}
+.faq-nudge a { color: var(--red); font-weight: 600; text-decoration: none; }
+
+footer { background: var(--white); border-top: 1px solid var(--border); padding: 20px 24px; text-align: center; color: var(--muted); font-size: 12px; margin-top: 40px; }
+footer a { color: var(--red); text-decoration: none; margin: 0 8px; }
+
+@media (max-width: 500px) {
+  .contact-cards { grid-template-columns: 1fr; }
+  .form-card { padding: 22px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">YT<span>Cuttr</span></a>
+  <a class="nav-back" href="/">← Back to Home</a>
+</nav>
+
+<div class="container">
+  <div class="page-header">
+    <div class="page-tag">Contact</div>
+    <h1>Get in Touch</h1>
+    <p>Have a question, found a bug, or want to share feedback? We'd love to hear from you. We aim to reply within 48 hours.</p>
+  </div>
+
+  <div class="faq-nudge">
+    💡 <strong>Quick tip:</strong> Most common questions are answered in our <a href="/#faq">FAQ section</a> on the homepage. Check there first — you might get an instant answer!
+  </div>
+
+  <div class="contact-cards">
+    <div class="contact-card">
+      <div class="cc-icon">✉️</div>
+      <h3>Email Us</h3>
+      <p>For support, bugs, or general inquiries</p>
+      <a class="btn" href="mailto:contact@ytcuttr.com">Send Email</a>
+    </div>
+    <div class="contact-card">
+      <div class="cc-icon">🐛</div>
+      <h3>Report a Bug</h3>
+      <p>Something not working? Tell us what happened</p>
+      <a class="btn" href="mailto:contact@ytcuttr.com?subject=Bug Report — YTCuttr">Report Bug</a>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h2>Send Us a Message</h2>
+
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="name" placeholder="John Doe">
+    </div>
+
+    <div class="field">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="you@example.com">
+    </div>
+
+    <div class="field">
+      <label>Subject</label>
+      <select id="subject">
+        <option value="">Select a topic...</option>
+        <option value="bug">Bug Report</option>
+        <option value="feature">Feature Request</option>
+        <option value="general">General Question</option>
+        <option value="copyright">Copyright / DMCA</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Message</label>
+      <textarea id="message" placeholder="Describe your issue or question in detail..."></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="handleSubmit()">Send Message</button>
+
+    <div class="success-msg" id="successMsg">
+      ✅ Thank you! Your message has been sent. We'll reply to your email within 48 hours.
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2026 <a href="/">YTCuttr.com</a> — For personal use only.
+  <br style="display:none">
+  <a href="/">Home</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Use</a> · <a href="/about.html">About</a> · <a href="/contact.html">Contact</a>
+</footer>
+
+<script>
+function handleSubmit() {
+  const name    = document.getElementById('name').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const subject = document.getElementById('subject').value;
+  const message = document.getElementById('message').value.trim();
+
+  if (!name || !email || !subject || !message) {
+    alert('Please fill in all fields before sending.');
+    return;
+  }
+  if (!email.includes('@')) {
+    alert('Please enter a valid email address.');
+    return;
+  }
+
+  // Open mail client with pre-filled content
+  const mailSubject = encodeURIComponent(`[YTCuttr] ${subject} — from ${name}`);
+  const mailBody    = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nTopic: ${subject}\n\nMessage:\n${message}`);
+  window.location.href = `mailto:contact@ytcuttr.com?subject=${mailSubject}&body=${mailBody}`;
+
+  document.getElementById('successMsg').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
