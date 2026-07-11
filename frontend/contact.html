@@ -141,13 +141,13 @@ footer a { color: var(--red); text-decoration: none; margin: 0 8px; }
       <div class="cc-icon">✉️</div>
       <h3>Email Us</h3>
       <p>For support, bugs, or general inquiries</p>
-      <a class="btn" href="mailto:contact@ytcuttr.com">Send Email</a>
+      <a class="btn" href="mailto:shubhamsain858@gmail.com">Send Email</a>
     </div>
     <div class="contact-card">
       <div class="cc-icon">🐛</div>
       <h3>Report a Bug</h3>
       <p>Something not working? Tell us what happened</p>
-      <a class="btn" href="mailto:contact@ytcuttr.com?subject=Bug Report — YTCuttr">Report Bug</a>
+      <a class="btn" href="mailto:shubhamsain858@gmail.com?subject=Bug Report — YTCuttr">Report Bug</a>
     </div>
   </div>
 
@@ -214,7 +214,7 @@ function handleSubmit() {
   // Open mail client with pre-filled content
   const mailSubject = encodeURIComponent(`[YTCuttr] ${subject} — from ${name}`);
   const mailBody    = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nTopic: ${subject}\n\nMessage:\n${message}`);
-  window.location.href = `mailto:contact@ytcuttr.com?subject=${mailSubject}&body=${mailBody}`;
+  window.location.href = `mailto:shubhamsain858@gmail.com?subject=${mailSubject}&body=${mailBody}`;
 
   document.getElementById('successMsg').style.display = 'block';
 }
