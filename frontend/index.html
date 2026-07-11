@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YTCuttr — Free YouTube Clip Cutter & Video Downloader | Shorts Supported</title>
-<meta name="description" content="YTCuttr is a free online YouTube video cutter and downloader. Cut any clip with precise timestamps, or download full YouTube videos & Shorts in 4K, 1080p, 720p. No sign-up required.">
-<meta name="keywords" content="youtube cutter, youtube video downloader, cut youtube video online, youtube clip download, youtube shorts downloader, yt cutter free, download youtube video 1080p">
+<title>YTCuttr — Cut & Download YouTube Video Clips Online Free | No Watermark</title>
+<meta name="description" content="Cut any clip from YouTube videos by timestamp and download as MP4. Works on long videos, live streams, and clips longer than 60 seconds. Free, no signup, no watermark. Just paste URL, set time, download.">
+<meta name="keywords" content="youtube clip cutter, cut and download youtube video by timestamp, download specific part of youtube video online, youtube clip cutter no watermark no signup, how to save part of youtube video online, download youtube video segment free, youtube live stream clip downloader online, extract clip from youtube video by time, clip youtube video longer than 60 seconds">
 <meta name="robots" content="index, follow">
-<meta property="og:title" content="YTCuttr — Free YouTube Clip Cutter & Downloader">
-<meta property="og:description" content="Cut YouTube video clips or download full videos and Shorts for free. No software, no sign-up needed.">
+<meta property="og:title" content="YTCuttr — Free YouTube Clip Cutter & Downloader | No Watermark">
+<meta property="og:description" content="Cut YouTube video clips or download full videos and Shorts for free. No software, no signup, no watermark.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ytcuttr.com">
 <link rel="canonical" href="https://ytcuttr.com">
@@ -26,11 +26,54 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {"@type":"Question","name":"What is YTCuttr?","acceptedAnswer":{"@type":"Answer","text":"YTCuttr is a free online tool that lets you cut specific clips from YouTube videos using start and end time controls, or download full YouTube videos and Shorts in multiple quality options — no sign-up required."}},
-    {"@type":"Question","name":"Does YTCuttr support YouTube Shorts?","acceptedAnswer":{"@type":"Answer","text":"Yes! YTCuttr fully supports YouTube Shorts. Simply paste any youtube.com/shorts/ URL and download or clip it just like a regular video."}},
-    {"@type":"Question","name":"Is YTCuttr free to use?","acceptedAnswer":{"@type":"Answer","text":"Yes, YTCuttr is completely free. There is no registration, no subscription, and no hidden fees."}},
-    {"@type":"Question","name":"What video qualities are available?","acceptedAnswer":{"@type":"Answer","text":"YTCuttr supports 4K, 1080p, 720p, 480p, 360p, and Audio Only downloads, depending on the original video's available formats."}},
-    {"@type":"Question","name":"Do I need to install any software?","acceptedAnswer":{"@type":"Answer","text":"No software installation is required. YTCuttr runs entirely in your browser and works on all devices including desktop, mobile, and tablets."}}
+    {
+      "@type": "Question",
+      "name": "How do I cut a clip from a YouTube video online?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Paste any YouTube URL into YTCuttr, click Get Video, enter start and end time in HH:MM:SS format, select quality, and hit Download. Your clip is ready in seconds — no software, no signup, no watermark."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I clip a YouTube video longer than 60 seconds?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! YouTube's built-in Clip feature is limited to 60 seconds. YTCuttr lets you cut and download clips up to 10 minutes long from any YouTube video."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How to download a specific part of a YouTube video?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Enter the exact start and end timestamps in YTCuttr. Only that segment is processed — not the full video. Faster, lighter, and no unnecessary storage used."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does YTCuttr add a watermark?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. YTCuttr never adds any watermark, logo, or branding to your clips. It is completely free with no hidden charges."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I download a clip from a YouTube live stream?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. After a live stream ends and is saved as a video on YouTube, paste the URL into YTCuttr and extract any clip using timestamps."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is YTCuttr safe? Does it store my videos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "YTCuttr does not store any videos or personal data. Clips are processed on our servers and permanently deleted immediately after you download them."
+      }
+    }
   ]
 }
 </script>
@@ -734,6 +777,35 @@ footer a { color: var(--red); text-decoration: none; }
 }
 .faq-item.open .faq-a { display: block; }
 
+/* ── TRUST BADGES ── */
+.trust-badges-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+  padding: 0 24px;
+}
+.trust-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 18px;
+  max-width: 680px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 10px 20px;
+  border-radius: 30px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.trust-badge span { color: var(--success); }
+
 </style>
 </head>
 <body>
@@ -752,8 +824,8 @@ footer a { color: var(--red); text-decoration: none; }
 
 <!-- HERO -->
 <div class="hero">
-  <h1>Cut & Download<br><span>YouTube Videos & Shorts</span> Online</h1>
-  <p>Extract any clip or download YouTube videos & Shorts in your preferred quality — free, no software needed.</p>
+  <h1>YouTube Clip Cutter<br><span>Download Any Part of a YouTube Video Free</span></h1>
+  <p>Paste a YouTube URL, set your start and end time, and download just the clip you need. Works on long videos, live streams, and clips up to 10 minutes. No watermark. No sign-up. 100% Free.</p>
   <div class="hero-pills">
     <span>✅ Regular Videos</span>
     <span>⚡ YouTube Shorts</span>
@@ -904,6 +976,19 @@ footer a { color: var(--red); text-decoration: none; }
     </div>
 
   </div><!-- /card -->
+
+  <!-- TRUST BADGES -->
+  <div class="trust-badges-wrap">
+    <div class="trust-badges">
+      <div class="trust-badge"><span>✅</span> No Watermark</div>
+      <div class="trust-badge"><span>✅</span> No Signup</div>
+      <div class="trust-badge"><span>✅</span> Up to 10 Min Clips</div>
+      <div class="trust-badge"><span>✅</span> Long Videos</div>
+      <div class="trust-badge"><span>✅</span> Live Streams</div>
+      <div class="trust-badge"><span>✅</span> Free Forever</div>
+    </div>
+  </div>
+
 </div><!-- /main -->
 
 <!-- HOW IT WORKS -->
@@ -1064,66 +1149,98 @@ footer a { color: var(--red); text-decoration: none; }
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        What is YTCuttr and what can I do with it?
+        How do I cut a clip from a YouTube video online?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">YTCuttr is a free online tool that lets you do two things: (1) cut a specific clip from any YouTube video by setting start and end timestamps, and (2) download full YouTube videos or Shorts in your chosen quality. No registration or software is needed.</div>
+      <div class="faq-a">Paste any YouTube video URL into YTCuttr, click "Get Video", then enter your desired start and end time in HH:MM:SS format. Select your preferred quality and hit Download. Your clip is ready in seconds — no software, no signup, no watermark.</div>
     </div>
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        How do I cut a specific part of a YouTube video?
+        How to download a specific part of a YouTube video?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">Open the <strong>Clip Cutter</strong> tab, paste the YouTube URL, click "Get Video", then set your Start Time and End Time in HH:MM:SS format. Select your preferred quality and click "Download Clip". YTCuttr will extract and download only that segment.</div>
+      <div class="faq-a">YTCuttr lets you download any specific segment of a YouTube video by entering exact timestamps. Unlike other tools that download the full video first, YTCuttr only processes the portion you need — saving time, bandwidth, and storage.</div>
     </div>
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        Does YTCuttr support YouTube Shorts?
+        Can I clip a YouTube video longer than 60 seconds?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">Yes! YTCuttr fully supports YouTube Shorts. Simply paste any youtube.com/shorts/ link in either the Clip Cutter or the Videos &amp; Shorts tab, and it will work just like a regular video.</div>
+      <div class="faq-a">Yes! YouTube's built-in Clip feature is limited to 60 seconds. YTCuttr has no such restriction — you can cut and download clips up to 10 minutes long from any YouTube video. Just set your start and end time and download the full segment in MP4.</div>
     </div>
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        What video quality options are available?
+        Can I download a clip from a YouTube live stream?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">YTCuttr offers 4K, 1080p, 720p, 480p, and 360p video downloads, plus an "Audio Only" option in M4A format. The available options depend on what the original YouTube video offers.</div>
+      <div class="faq-a">Yes. After a live stream ends and is saved as a video on YouTube, you can paste the URL into YTCuttr and extract any timestamp-based clip from it. This is especially useful for gaming streams, podcasts, and long broadcast recordings.</div>
     </div>
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        Is YTCuttr completely free?
+        How do I find the exact timestamp for my clip?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">Yes, YTCuttr is 100% free to use. There is no subscription, no account, no email required, and no hidden fees of any kind. Just paste a URL and download.</div>
+      <div class="faq-a">On YouTube, pause the video at the exact moment you want your clip to start. The current time is shown in the bottom-left of the player (e.g., 1:23:45). Use this as your Start Time in YTCuttr. Do the same for your End Time. Enter both in HH:MM:SS format and you're ready to download.</div>
     </div>
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        Do I need to install any software or app?
+        Does YTCuttr add a watermark to downloaded clips?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">No. YTCuttr works entirely in your browser. It is compatible with all modern browsers including Chrome, Firefox, Safari, and Edge on desktop, mobile, and tablet devices.</div>
+      <div class="faq-a">No. YTCuttr never adds any watermark, logo, or branding to your clips. Many online tools add watermarks unless you pay — YTCuttr is completely watermark-free with no hidden charges.</div>
     </div>
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        Can I download audio only from a YouTube video?
+        Do I need to sign up or create an account?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">Yes! Select the "Audio only" option in the quality selector. YTCuttr will extract and download just the audio track in M4A format, perfect for music, lectures, podcasts, and guided meditations.</div>
+      <div class="faq-a">No signup, no account, no registration required. Just open ytcuttr.com, paste your YouTube URL, and start cutting. We do not ask for your email, phone number, or any personal info.</div>
     </div>
 
     <div class="faq-item">
       <button class="faq-q" onclick="toggleFaq(this)">
-        Is it legal to download YouTube videos?
+        How to save part of a YouTube video to my phone?
         <span class="chev">&#9660;</span>
       </button>
-      <div class="faq-a">Downloading YouTube videos may be restricted by copyright law and YouTube's Terms of Service. YTCuttr is intended for personal use only — for example, downloading content you have created, content licensed under Creative Commons, or videos for which you have explicit permission. Always respect content creators' rights.</div>
+      <div class="faq-a">YTCuttr works on all mobile browsers — iPhone Safari, Android Chrome, or any browser. Open ytcuttr.com on your phone, paste the YouTube URL, set your timestamps, choose quality, and tap Download. The MP4 clip will save directly to your phone's Downloads folder.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What is the maximum clip length I can download?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">You can download clips up to 10 minutes in length. This is more than enough for highlights, lecture segments, podcast soundbites, gameplay moments, and interview clips. YouTube's own Clip tool is capped at 60 seconds — YTCuttr gives you 10x more flexibility.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        What quality can I download YouTube clips in?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">YTCuttr automatically detects all available resolutions for each video — typically 360p, 480p, 720p, and 1080p. Some videos offer 1440p or 4K if the creator uploaded in those formats. You can also choose "Audio Only" to download just the sound as an M4A file — useful for podcast clips and music segments.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Is YTCuttr safe to use? Does it store my videos?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">YTCuttr is completely safe. We do not store, save, or share any videos or personal data. Clips are processed on our servers and permanently deleted immediately after you download them. No account data, no tracking beyond standard analytics.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Why use YTCuttr instead of downloading the full video?
+        <span class="chev">&#9660;</span>
+      </button>
+      <div class="faq-a">Downloading an 8-hour YouTube video just to get a 2-minute clip wastes time and storage. YTCuttr uses smart technology to download only the exact segment you need — so a 2-minute clip from an 8-hour stream takes the same time as downloading any short video. Faster, lighter, and more efficient.</div>
     </div>
 
   </div>
