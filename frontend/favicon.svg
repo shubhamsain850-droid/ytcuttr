@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background rounded square - red gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff2d2d"/>
+      <stop offset="100%" style="stop-color:#c0000a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="32" height="32" rx="7" fill="url(#bg)"/>
+
+  <!-- Play button triangle (white) -->
+  <polygon points="11,9 11,23 24,16" fill="white" opacity="0.95"/>
+
+  <!-- Scissors blade top - cutting through play button -->
+  <line x1="4" y1="6" x2="20" y2="17" stroke="#ffe500" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- Scissors blade bottom -->
+  <line x1="4" y1="13" x2="20" y2="17" stroke="#ffe500" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- Scissors pivot circle -->
+  <circle cx="20" cy="17" r="2" fill="#ffe500"/>
+
+  <!-- Scissors handle circles (top) -->
+  <circle cx="4" cy="6" r="2.8" fill="none" stroke="#ffe500" stroke-width="1.8"/>
+  <!-- Scissors handle circles (bottom) -->
+  <circle cx="4" cy="13" r="2.8" fill="none" stroke="#ffe500" stroke-width="1.8"/>
+</svg>
