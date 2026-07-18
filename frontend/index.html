@@ -490,7 +490,7 @@ nav {
   opacity: 0.75;
 }
 
-/* ── PROGRESS ── */
+/* ── PROGRESS (download) ── */
 .progress-wrap {
   display: none;
   margin-top: 18px;
@@ -514,6 +514,117 @@ nav {
   color: var(--muted);
   margin-top: 8px;
   text-align: center;
+}
+
+/* ── FETCH LOADING BAR (Get Video / Continue) ── */
+.fetch-loader {
+  display: none;
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 10px 14px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  animation: fadeInUp 0.25s ease;
+}
+.fetch-loader.visible { display: block; }
+.fetch-loader-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.fetch-loader-label span:first-child {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fetch-loader-label span:first-child::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: blink-dot 1.2s infinite;
+}
+.fetch-loader-pct {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red);
+}
+.fetch-bar-track {
+  background: #f3f4f6;
+  border-radius: 99px;
+  height: 7px;
+  overflow: hidden;
+  position: relative;
+}
+.fetch-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #e63030 0%, #ff6b6b 50%, #e63030 100%);
+  background-size: 200% 100%;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0%;
+  position: relative;
+  animation: shimmer-bar 1.6s linear infinite;
+}
+.fetch-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer-sweep 1.4s linear infinite;
+  border-radius: 99px;
+}
+.fetch-loader-steps {
+  display: flex;
+  gap: 8px;
+  margin-top: 9px;
+  flex-wrap: wrap;
+}
+.fetch-step {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: #f3f4f6;
+  color: var(--muted);
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+.fetch-step.active {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: var(--red);
+  font-weight: 600;
+}
+.fetch-step.done {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #16a34a;
+}
+@keyframes shimmer-bar {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+@keyframes shimmer-sweep {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes blink-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── AD MID ── */
@@ -872,6 +983,24 @@ footer a { color: var(--red); text-decoration: none; }
           Get Video
         </button>
       </div>
+
+      <!-- Fetch Loading Bar - Clip -->
+      <div class="fetch-loader" id="clip-fetch-loader">
+        <div class="fetch-loader-label">
+          <span id="clip-fetch-status">Fetching video info...</span>
+          <span class="fetch-loader-pct" id="clip-fetch-pct">0%</span>
+        </div>
+        <div class="fetch-bar-track">
+          <div class="fetch-bar-fill" id="clip-fetch-bar"></div>
+        </div>
+        <div class="fetch-loader-steps">
+          <span class="fetch-step" id="clip-step-1">🔗 Connecting</span>
+          <span class="fetch-step" id="clip-step-2">📡 Fetching Info</span>
+          <span class="fetch-step" id="clip-step-3">🎬 Loading Video</span>
+          <span class="fetch-step" id="clip-step-4">✅ Ready</span>
+        </div>
+      </div>
+
       <div class="supports-hint">
         <span>🎬 Videos</span>
         <span>⚡ Shorts</span>
@@ -939,6 +1068,24 @@ footer a { color: var(--red); text-decoration: none; }
           Continue
         </button>
       </div>
+
+      <!-- Fetch Loading Bar - Download -->
+      <div class="fetch-loader" id="dl-fetch-loader">
+        <div class="fetch-loader-label">
+          <span id="dl-fetch-status">Fetching video info...</span>
+          <span class="fetch-loader-pct" id="dl-fetch-pct">0%</span>
+        </div>
+        <div class="fetch-bar-track">
+          <div class="fetch-bar-fill" id="dl-fetch-bar"></div>
+        </div>
+        <div class="fetch-loader-steps">
+          <span class="fetch-step" id="dl-step-1">🔗 Connecting</span>
+          <span class="fetch-step" id="dl-step-2">📡 Fetching Info</span>
+          <span class="fetch-step" id="dl-step-3">🎬 Loading Video</span>
+          <span class="fetch-step" id="dl-step-4">✅ Ready</span>
+        </div>
+      </div>
+
       <div class="supports-hint">
         <span>🎬 Videos</span>
         <span>⚡ Shorts</span>
@@ -1291,6 +1438,78 @@ function onUrlInput(mode) {
   btn.classList.toggle('glowing', isYT);
 }
 
+// ── FETCH LOADER HELPERS ──────────────────────────────────
+let fetchLoaderInterval = null;
+
+function showFetchLoader(mode) {
+  const loader  = document.getElementById(mode === 'clip' ? 'clip-fetch-loader' : 'dl-fetch-loader');
+  const bar     = document.getElementById(mode === 'clip' ? 'clip-fetch-bar'    : 'dl-fetch-bar');
+  const pct     = document.getElementById(mode === 'clip' ? 'clip-fetch-pct'    : 'dl-fetch-pct');
+  const status  = document.getElementById(mode === 'clip' ? 'clip-fetch-status' : 'dl-fetch-status');
+  const steps   = [1,2,3,4].map(i => document.getElementById(`${mode}-step-${i}`));
+
+  // Reset
+  loader.classList.add('visible');
+  bar.style.width = '0%';
+  pct.textContent = '0%';
+  status.textContent = 'Connecting to YouTube...';
+  steps.forEach(s => { s.classList.remove('active','done'); });
+
+  const phases = [
+    { pct: 15,  label: 'Connecting to YouTube...',  stepIdx: 0 },
+    { pct: 40,  label: 'Fetching video info...',     stepIdx: 1 },
+    { pct: 70,  label: 'Loading video details...',   stepIdx: 2 },
+    { pct: 88,  label: 'Almost done...',             stepIdx: 2 },
+  ];
+  let phase = 0;
+
+  // Activate first step
+  steps[0].classList.add('active');
+
+  fetchLoaderInterval = setInterval(() => {
+    if (phase < phases.length) {
+      const p = phases[phase];
+      bar.style.width = p.pct + '%';
+      pct.textContent = p.pct + '%';
+      status.textContent = p.label;
+      // Step transitions
+      steps.forEach((s, i) => {
+        if (i < p.stepIdx)       { s.classList.add('done'); s.classList.remove('active'); }
+        else if (i === p.stepIdx) { s.classList.add('active'); s.classList.remove('done'); }
+        else                     { s.classList.remove('active','done'); }
+      });
+      phase++;
+    }
+  }, 700);
+}
+
+function completeFetchLoader(mode, success) {
+  if (fetchLoaderInterval) { clearInterval(fetchLoaderInterval); fetchLoaderInterval = null; }
+  const loader = document.getElementById(mode === 'clip' ? 'clip-fetch-loader' : 'dl-fetch-loader');
+  const bar    = document.getElementById(mode === 'clip' ? 'clip-fetch-bar'    : 'dl-fetch-bar');
+  const pct    = document.getElementById(mode === 'clip' ? 'clip-fetch-pct'    : 'dl-fetch-pct');
+  const status = document.getElementById(mode === 'clip' ? 'clip-fetch-status' : 'dl-fetch-status');
+  const steps  = [1,2,3,4].map(i => document.getElementById(`${mode}-step-${i}`));
+
+  if (success) {
+    bar.style.width = '100%';
+    pct.textContent = '100%';
+    status.textContent = 'Video loaded! ✅';
+    steps.forEach((s, i) => { s.classList.remove('active'); s.classList.add('done'); });
+    setTimeout(() => { loader.classList.remove('visible'); }, 1200);
+  } else {
+    bar.style.background = '#dc2626';
+    bar.style.width = '100%';
+    status.textContent = 'Failed to load video ❌';
+    steps.forEach(s => { s.classList.remove('active','done'); });
+    setTimeout(() => {
+      loader.classList.remove('visible');
+      bar.style.background = '';
+      bar.style.width = '0%';
+    }, 1800);
+  }
+}
+
 // ── FETCH VIDEO INFO ──────────────────────────────────────
 async function fetchInfo(mode) {
   const urlId   = mode === 'clip' ? 'clip-url'   : 'dl-url';
@@ -1309,6 +1528,9 @@ async function fetchInfo(mode) {
   btn.disabled = true;
   btn.classList.remove('glowing');
 
+  // Show fetch loading bar
+  showFetchLoader(mode);
+
   try {
     const resp = await fetch(`${API}/info`, {
       method: 'POST',
@@ -1320,6 +1542,9 @@ async function fetchInfo(mode) {
       throw new Error(err.detail || "Failed to fetch video info");
     }
     const data = await resp.json();
+
+    // Complete loader with success
+    completeFetchLoader(mode, true);
 
     // Show info
     document.getElementById(thumbId).src = data.thumbnail;
@@ -1352,6 +1577,7 @@ async function fetchInfo(mode) {
     btn.classList.add('glowing');
 
   } catch(e) {
+    completeFetchLoader(mode, false);
     showToast(e.message, true);
     btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
     btn.disabled = false;
