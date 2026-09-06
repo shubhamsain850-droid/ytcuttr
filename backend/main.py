@@ -75,7 +75,13 @@ QUALITY_MAP = {
 
 def build_ytdlp_cmd(extra: list = []) -> list:
     """Build base yt-dlp command with cookies or player client args."""
-    cmd = ["yt-dlp", "--no-playlist", "--no-warnings"]
+    cmd = [
+        "yt-dlp",
+        "--no-playlist",
+        "--no-warnings",
+        "--add-header", "Accept-Language:en-US,en;q=0.9",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+    ]
     if COOKIES_FILE:
         cmd += ["--cookies", COOKIES_FILE]
     else:
