@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ytcuttr-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    branch: main
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 8000
+    healthCheckPath: /health
