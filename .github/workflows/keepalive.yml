@@ -1,0 +1,22 @@
+name: Keep Render Alive — YTCuttr Wakeup Bot
+
+on:
+  schedule:
+    # Runs every 5 minutes — keeps Render free tier awake
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allow manual trigger too
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping YTCuttr API Health
+        run: |
+          echo "🤖 Pinging YTCuttr backend..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://ytcuttr.onrender.com/health)
+          echo "Response status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Server is ALIVE!"
+          else
+            echo "⚠️ Server returned: $STATUS (may be waking up)"
+          fi
