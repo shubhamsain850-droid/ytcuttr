@@ -1531,58 +1531,86 @@ async function fetchInfo(mode) {
   // Show fetch loading bar
   showFetchLoader(mode);
 
-  try {
-    const resp = await fetch(`${API}/info`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ url })
-    });
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.detail || "Failed to fetch video info");
+  // ── Retry helper (handles Render cold-start) ───────────────
+  const MAX_RETRIES = 3;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      // Update status message on retries
+      if (attempt > 1) {
+        const statusEl = document.getElementById(mode === 'clip' ? 'clip-fetch-status' : 'dl-fetch-status');
+        if (statusEl) statusEl.textContent = `⏳ Server waking up... (attempt ${attempt}/${MAX_RETRIES})`;
+        await new Promise(r => setTimeout(r, 5000)); // wait 5s before retry
+      }
+
+      const resp = await fetch(`${API}/info`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ url }),
+        signal: AbortSignal.timeout(55000) // 55 second timeout
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.detail || `Server error (${resp.status})`);
+      }
+      const data = await resp.json();
+
+      // Complete loader with success
+      completeFetchLoader(mode, true);
+
+      // Show info
+      document.getElementById(thumbId).src = data.thumbnail;
+      document.getElementById(titleId).textContent = data.title;
+      document.getElementById(durId).textContent = formatDur(data.duration);
+      document.getElementById(infoId).classList.add('visible');
+      document.getElementById(divId).style.display = 'block';
+      document.getElementById(setId).style.display = 'block';
+
+      // Build resolution buttons
+      const grid = document.getElementById(resId);
+      grid.innerHTML = '';
+      data.resolutions.forEach((r, i) => {
+        const b = document.createElement('button');
+        b.className = 'res-btn' + (i === 0 ? ' active' : '');
+        b.textContent = r;
+        b.onclick = () => selectRes(mode, r, b);
+        grid.appendChild(b);
+      });
+
+      if (mode === 'clip') {
+        clipRes = data.resolutions[0];
+      } else {
+        dlRes = data.resolutions[0];
+        checkDlReady();
+      }
+
+      btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
+      btn.disabled = false;
+      btn.classList.add('glowing');
+      return; // ✅ success — exit loop
+
+    } catch(e) {
+      lastError = e;
+      // Only retry on network errors (cold start), not on 4xx errors
+      const isNetworkErr = (e.name === 'TypeError' || e.name === 'AbortError' || e.message === 'Failed to fetch');
+      if (!isNetworkErr || attempt === MAX_RETRIES) break;
     }
-    const data = await resp.json();
-
-    // Complete loader with success
-    completeFetchLoader(mode, true);
-
-    // Show info
-    document.getElementById(thumbId).src = data.thumbnail;
-    document.getElementById(titleId).textContent = data.title;
-    document.getElementById(durId).textContent = formatDur(data.duration);
-    document.getElementById(infoId).classList.add('visible');
-    document.getElementById(divId).style.display = 'block';
-    document.getElementById(setId).style.display = 'block';
-
-    // Build resolution buttons
-    const grid = document.getElementById(resId);
-    grid.innerHTML = '';
-    data.resolutions.forEach((r, i) => {
-      const b = document.createElement('button');
-      b.className = 'res-btn' + (i === 0 ? ' active' : '');
-      b.textContent = r;
-      b.onclick = () => selectRes(mode, r, b);
-      grid.appendChild(b);
-    });
-
-    if (mode === 'clip') {
-      clipRes = data.resolutions[0];
-    } else {
-      dlRes = data.resolutions[0];
-      checkDlReady();
-    }
-
-    btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
-    btn.disabled = false;
-    btn.classList.add('glowing');
-
-  } catch(e) {
-    completeFetchLoader(mode, false);
-    showToast(e.message, true);
-    btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
-    btn.disabled = false;
-    btn.classList.add('glowing');
   }
+
+  // All retries failed
+  completeFetchLoader(mode, false);
+  // All retries failed — show error
+  const errMsg = lastError
+    ? (lastError.message === 'Failed to fetch' || lastError.name === 'AbortError'
+        ? '⚠️ Server is starting up. Please try again in 30 seconds.'
+        : lastError.message)
+    : 'Something went wrong. Please try again.';
+  showToast(errMsg, true);
+  btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
+  btn.disabled = false;
+  btn.classList.add('glowing');
 }
 
 function selectRes(mode, val, el) {
