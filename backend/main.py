@@ -117,23 +117,61 @@ async def health_head():
 
 @app.post("/info")
 async def get_video_info(req: InfoRequest):
-    """Fetch video title, duration, thumbnail, available formats."""
+    """Fetch video title, duration, thumbnail, available formats.
+    Strategy: oEmbed first (fast, 3-5s), yt-dlp as upgrade fallback.
+    """
+
+    # ── Step 1: Fast path via oEmbed (always works, no bot detection) ──
+    fallback = fetch_oembed(req.url)
+    if fallback:
+        # Try to enrich with yt-dlp in a tight timeout (best-effort)
+        try:
+            cmd = build_ytdlp_cmd(["--dump-json", "--no-warnings", req.url])
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=12)
+            if result.returncode == 0 and result.stdout.strip():
+                data = json.loads(result.stdout)
+                formats = data.get("formats", [])
+                resolutions = set()
+                for f in formats:
+                    h = f.get("height")
+                    if h and f.get("vcodec") != "none" and h >= 360:
+                        resolutions.add(h)
+                sorted_res = sorted(resolutions, reverse=True)
+                res_labels = []
+                for h in sorted_res:
+                    if h >= 2160: res_labels.append("2160p")
+                    elif h >= 1080: res_labels.append("1080p")
+                    elif h >= 720:  res_labels.append("720p")
+                    elif h >= 480:  res_labels.append("480p")
+                    elif h >= 360:  res_labels.append("360p")
+                seen = set(); unique_res = []
+                for r in res_labels:
+                    if r not in seen:
+                        seen.add(r); unique_res.append(r)
+                unique_res.append("Audio only")
+                # Return enriched data
+                return {
+                    "title":       data.get("title", fallback["title"]),
+                    "duration":    data.get("duration", 0),
+                    "thumbnail":   data.get("thumbnail", fallback["thumbnail"]),
+                    "resolutions": unique_res,
+                }
+        except Exception:
+            pass  # yt-dlp failed or timed out — use oEmbed data below
+        return fallback
+
+    # ── Step 2: oEmbed failed — try yt-dlp directly ──
     cmd = build_ytdlp_cmd(["--dump-json", req.url])
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
-
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0 and result.stdout.strip():
             data = json.loads(result.stdout)
-
-            # Extract available resolutions
             formats = data.get("formats", [])
             resolutions = set()
             for f in formats:
                 h = f.get("height")
-                if h and f.get("vcodec") != "none":
-                    if h >= 360:
-                        resolutions.add(h)
-
+                if h and f.get("vcodec") != "none" and h >= 360:
+                    resolutions.add(h)
             sorted_res = sorted(resolutions, reverse=True)
             res_labels = []
             for h in sorted_res:
@@ -142,37 +180,23 @@ async def get_video_info(req: InfoRequest):
                 elif h >= 720:  res_labels.append("720p")
                 elif h >= 480:  res_labels.append("480p")
                 elif h >= 360:  res_labels.append("360p")
-
-            seen = set()
-            unique_res = []
+            seen = set(); unique_res = []
             for r in res_labels:
                 if r not in seen:
-                    seen.add(r)
-                    unique_res.append(r)
+                    seen.add(r); unique_res.append(r)
             unique_res.append("Audio only")
-
             return {
                 "title":       data.get("title", "Unknown"),
                 "duration":    data.get("duration", 0),
                 "thumbnail":   data.get("thumbnail", ""),
                 "resolutions": unique_res,
             }
-
-        # yt-dlp failed → try oEmbed fallback
-        fallback = fetch_oembed(req.url)
-        if fallback:
-            return fallback
-
         raise HTTPException(400, detail="Could not fetch video info. Check the URL or try again.")
-
     except subprocess.TimeoutExpired:
-        # Try oEmbed on timeout too
-        fallback = fetch_oembed(req.url)
-        if fallback:
-            return fallback
         raise HTTPException(408, detail="Request timed out. Try again.")
     except json.JSONDecodeError:
         raise HTTPException(400, detail="Invalid video URL.")
+
 
 
 def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str):
