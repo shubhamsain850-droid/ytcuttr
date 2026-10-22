@@ -86,12 +86,12 @@ def to_hms(s: int) -> str:
     return f"{h:02d}:{m:02d}:{sec:02d}"
 
 QUALITY_MAP = {
-    "2160p": "bestvideo[height<=2160]+bestaudio/best[height<=2160]/best",
-    "1080p": "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
-    "720p":  "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
-    "480p":  "bestvideo[height<=480]+bestaudio/best[height<=480]/best",
-    "360p":  "bestvideo[height<=360]+bestaudio/best[height<=360]/best",
-    "audio": "bestaudio/best",
+    "2160p": "bv*[height<=2160][ext=mp4]+ba[ext=m4a]/bv*[height<=2160]+ba/b[height<=2160]/best",
+    "1080p": "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/best",
+    "720p":  "bv*[height<=720][ext=mp4]+ba[ext=m4a]/bv*[height<=720]+ba/b[height<=720]/best",
+    "480p":  "bv*[height<=480][ext=mp4]+ba[ext=m4a]/bv*[height<=480]+ba/b[height<=480]/best",
+    "360p":  "bv*[height<=360][ext=mp4]+ba[ext=m4a]/bv*[height<=360]+ba/b[height<=360]/best",
+    "audio": "ba[ext=m4a]/ba/best",
 }
 
 def build_ytdlp_cmd(extra: list = [], client_override: str = None) -> list:
@@ -136,7 +136,7 @@ async def version():
     env_cookie_keys = [k for k in os.environ.keys() if "COOKIE" in k.upper() or "YT" in k.upper()]
     secrets = [f.name for f in Path("/etc/secrets").glob("*")] if Path("/etc/secrets").exists() else []
     return {
-        "version": "2.3-universal-cookie-detect",
+        "version": "2.4-robust-mp4-formats",
         "has_cookies": bool(cf),
         "env_keys_detected": env_cookie_keys,
         "secrets_detected": secrets
@@ -275,7 +275,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
 
             if r_dl.returncode != 0 or not raw_path.exists() or raw_path.stat().st_size == 0:
                 cmd_dl_best = build_ytdlp_cmd([
-                    "-f", "best",
+                    "-f", "bv*+ba/b",
                     "--merge-output-format", ext,
                     "-o", str(raw_path),
                     url,
@@ -338,7 +338,7 @@ def _run_download(job_id: str, url: str, quality: str):
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
         if r.returncode != 0 or not out_path.exists() or out_path.stat().st_size == 0:
             fallback_cmd = build_ytdlp_cmd([
-                "-f", "best",
+                "-f", "bv*+ba/b",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
                 url,
