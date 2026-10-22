@@ -20,7 +20,7 @@ CLIPS_DIR.mkdir(exist_ok=True)
 
 jobs: dict = {}
 
-# ── Cookie support via env variable ─────────────────────
+# Cookie support via env variable
 COOKIES_FILE = None
 _cookies_content = os.environ.get("YT_COOKIES", "").strip()
 if _cookies_content:
@@ -29,11 +29,11 @@ if _cookies_content:
     _cf.close()
     COOKIES_FILE = _cf.name
 
-# ── Player clients to try (in order) ────────────────────
-# These clients are less likely to trigger bot detection
-PLAYER_CLIENTS = ["android", "ios"]
+# Player clients to try (in order).
+# Do not force fake user-agent, let yt-dlp send matching native headers.
+PLAYER_CLIENTS = ["android", "ios", "mweb"]
 
-# ── Models ──────────────────────────────────────────────
+# Models
 class InfoRequest(BaseModel):
     url: str
 
@@ -47,7 +47,7 @@ class DownloadRequest(BaseModel):
     url: str
     quality: str = "720p"
 
-# ── Helpers ─────────────────────────────────────────────
+# Helpers
 def parse_time(t: str) -> int:
     t = t.strip()
     if re.match(r'^\d+$', t):
@@ -73,20 +73,21 @@ QUALITY_MAP = {
     "audio": "bestaudio/best",
 }
 
-def build_ytdlp_cmd(extra: list = []) -> list:
-    """Build base yt-dlp command with cookies or player client args."""
+def build_ytdlp_cmd(extra: list = [], client_override: str = None) -> list:
+    """Build base yt-dlp command with IPv4, cache cleanup and native headers."""
     cmd = [
         "yt-dlp",
+        "-4",
         "--no-playlist",
         "--no-warnings",
+        "--rm-cache-dir",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
-        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     ]
     if COOKIES_FILE:
         cmd += ["--cookies", COOKIES_FILE]
     else:
-        clients = ",".join(PLAYER_CLIENTS)
-        cmd += ["--extractor-args", f"youtube:player_client={clients}"]
+        chosen = client_override if client_override else ",".join(PLAYER_CLIENTS)
+        cmd += ["--extractor-args", f"youtube:player_client={chosen}"]
     return cmd + extra
 
 def fetch_oembed(url: str) -> dict | None:
@@ -105,7 +106,27 @@ def fetch_oembed(url: str) -> dict | None:
     except Exception:
         return None
 
-# ── Routes ───────────────────────────────────────────────
+# Routes
+
+@app.get("/version")
+async def version():
+    return {
+        "version": "2.2-local-cut-fix",
+        "clients": PLAYER_CLIENTS,
+        "has_cookies": bool(COOKIES_FILE)
+    }
+
+@app.get("/diag")
+async def diag(url: str = "https://www.youtube.com/watch?v=aqz-KE-bpKQ", client: str = "android"):
+    cmd = build_ytdlp_cmd(["--dump-json", "--skip-download", url], client_override=client)
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    return {
+        "client": client,
+        "returncode": r.returncode,
+        "stdout_len": len(r.stdout),
+        "stderr": r.stderr[-500:],
+        "has_cookies": bool(COOKIES_FILE)
+    }
 
 @app.get("/health")
 async def health():
@@ -120,13 +141,10 @@ async def get_video_info(req: InfoRequest):
     """Fetch video title, duration, thumbnail, available formats.
     Strategy: oEmbed first (fast, 3-5s), yt-dlp as upgrade fallback.
     """
-
-    # ── Step 1: Fast path via oEmbed (always works, no bot detection) ──
     fallback = fetch_oembed(req.url)
     if fallback:
-        # Try to enrich with yt-dlp in a tight timeout (best-effort)
         try:
-            cmd = build_ytdlp_cmd(["--dump-json", "--no-warnings", req.url])
+            cmd = build_ytdlp_cmd(["--dump-json", req.url])
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=12)
             if result.returncode == 0 and result.stdout.strip():
                 data = json.loads(result.stdout)
@@ -149,7 +167,6 @@ async def get_video_info(req: InfoRequest):
                     if r not in seen:
                         seen.add(r); unique_res.append(r)
                 unique_res.append("Audio only")
-                # Return enriched data
                 return {
                     "title":       data.get("title", fallback["title"]),
                     "duration":    data.get("duration", 0),
@@ -157,10 +174,9 @@ async def get_video_info(req: InfoRequest):
                     "resolutions": unique_res,
                 }
         except Exception:
-            pass  # yt-dlp failed or timed out — use oEmbed data below
+            pass
         return fallback
 
-    # ── Step 2: oEmbed failed — try yt-dlp directly ──
     cmd = build_ytdlp_cmd(["--dump-json", req.url])
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
@@ -198,47 +214,81 @@ async def get_video_info(req: InfoRequest):
         raise HTTPException(400, detail="Invalid video URL.")
 
 
-
 def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str):
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
     ext = "m4a" if quality == "audio" else "mp4"
     out_path = out_dir / f"clip.{ext}"
+    raw_path = out_dir / f"raw.{ext}"
     fmt = QUALITY_MAP.get(quality, QUALITY_MAP["720p"])
 
-    cmd = build_ytdlp_cmd([
-        "--download-sections", f"*{start_hms}-{end_hms}",
-        "--force-keyframes-at-cuts",
-        "-f", fmt,
-        "--merge-output-format", ext,
-        "-o", str(out_path),
-        url,
-    ])
     try:
         jobs[job_id]["status"] = "downloading"
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-        if r.returncode != 0 or not out_path.exists():
-            # Robust fallback retry with 'best' format
-            fallback_cmd = build_ytdlp_cmd([
-                "--download-sections", f"*{start_hms}-{end_hms}",
-                "--force-keyframes-at-cuts",
-                "-f", "best",
+
+        # Strategy A: Direct section download
+        cmd_fast = build_ytdlp_cmd([
+            "--download-sections", f"*{start_hms}-{end_hms}",
+            "--force-keyframes-at-cuts",
+            "-f", fmt,
+            "--merge-output-format", ext,
+            "-o", str(out_path),
+            url,
+        ])
+        r = subprocess.run(cmd_fast, capture_output=True, text=True, timeout=90)
+
+        # Strategy B: If fast section download fails (e.g. ffmpeg 403 on remote URL),
+        # download video stream locally with yt-dlp then cut with ffmpeg locally.
+        if r.returncode != 0 or not out_path.exists() or out_path.stat().st_size == 0:
+            cmd_dl = build_ytdlp_cmd([
+                "-f", fmt,
                 "--merge-output-format", ext,
-                "-o", str(out_path),
+                "-o", str(raw_path),
                 url,
             ])
-            r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=300)
+            r_dl = subprocess.run(cmd_dl, capture_output=True, text=True, timeout=180)
 
-        if r.returncode == 0 and out_path.exists():
+            if r_dl.returncode != 0 or not raw_path.exists() or raw_path.stat().st_size == 0:
+                cmd_dl_best = build_ytdlp_cmd([
+                    "-f", "best",
+                    "--merge-output-format", ext,
+                    "-o", str(raw_path),
+                    url,
+                ])
+                r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=180)
+
+            if r_dl.returncode == 0 and raw_path.exists() and raw_path.stat().st_size > 0:
+                cmd_cut = [
+                    "ffmpeg", "-y",
+                    "-ss", start_hms,
+                    "-to", end_hms,
+                    "-i", str(raw_path),
+                    "-c", "copy",
+                    "-avoid_negative_ts", "make_zero",
+                    str(out_path),
+                ]
+                subprocess.run(cmd_cut, capture_output=True, text=True, timeout=60)
+                try:
+                    raw_path.unlink(missing_ok=True)
+                except Exception:
+                    pass
+
+        if out_path.exists() and out_path.stat().st_size > 0:
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_clip_{start_hms.replace(':','-')}_{end_hms.replace(':','-')}.{ext}"
         else:
+            err = ""
+            if 'r_dl' in locals() and r_dl and r_dl.stderr:
+                err = r_dl.stderr[-400:]
+            elif r and r.stderr:
+                err = r.stderr[-400:]
+            else:
+                err = "Could not process clip. Please try another video or resolution."
             jobs[job_id]["status"] = "error"
-            jobs[job_id]["error"] = r.stderr[-400:] if r.stderr else "Download failed"
+            jobs[job_id]["error"] = err
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = "Timed out"
+        jobs[job_id]["error"] = "Processing timed out. Please try a shorter segment."
     except Exception as e:
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)
@@ -259,27 +309,26 @@ def _run_download(job_id: str, url: str, quality: str):
     ])
     try:
         jobs[job_id]["status"] = "downloading"
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
-        if r.returncode != 0 or not out_path.exists():
-            # Robust fallback retry with 'best' format
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        if r.returncode != 0 or not out_path.exists() or out_path.stat().st_size == 0:
             fallback_cmd = build_ytdlp_cmd([
                 "-f", "best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
                 url,
             ])
-            r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=600)
+            r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=300)
 
-        if r.returncode == 0 and out_path.exists():
+        if out_path.exists() and out_path.stat().st_size > 0:
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_video.{ext}"
         else:
             jobs[job_id]["status"] = "error"
-            jobs[job_id]["error"] = r.stderr[-400:] if r.stderr else "Download failed"
+            jobs[job_id]["error"] = r.stderr[-400:] if (r and r.stderr) else "Download failed"
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = "Timed out"
+        jobs[job_id]["error"] = "Download timed out."
     except Exception as e:
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)
