@@ -1,670 +1,1189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YTCuttr — Download YouTube Video From Specific Time | Free YT Cutter</title>
-<meta name="description" content="Download any part of a YouTube video free — just paste URL, select start &amp; end time, choose quality and download. No watermark, no signup, works on long videos &amp; live streams.">
-<meta name="keywords" content="youtube clip cutter, cut and download youtube video by timestamp, download specific part of youtube video online, youtube clip cutter no watermark no signup, how to save part of youtube video online, download youtube video segment free, youtube live stream clip downloader online, extract clip from youtube video by time, clip youtube video longer than 60 seconds">
-<meta name="robots" content="index, follow">
-<meta property="og:title" content="YTCuttr — Free YouTube Clip Cutter & Downloader | No Watermark">
-<meta property="og:description" content="Cut YouTube video clips or download full videos and Shorts for free. No software, no signup, no watermark.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://ytcuttr.com">
-<link rel="canonical" href="https://ytcuttr.com">
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>YTCuttr — Download YouTube Video From Specific Time | Free YT Cutter</title>
+  <meta name="description" content="Download any part of a YouTube video free — just paste URL, select start &amp; end time, choose quality and download. No watermark, no signup, works on long videos &amp; live streams.">
+  <meta name="keywords" content="youtube clip cutter, cut and download youtube video by timestamp, download specific part of youtube video online, youtube clip cutter no watermark no signup, how to save part of youtube video online, download youtube video segment free, youtube live stream clip downloader online, extract clip from youtube video by time, clip youtube video longer than 60 seconds, youtube downloader with time selection">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#e63030">
+  <link rel="canonical" href="https://ytcuttr.com/">
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ytcuttr.com/">
+  <meta property="og:title" content="YTCuttr — Download YouTube Video From Specific Time | Free YT Cutter">
+  <meta property="og:description" content="Extract and download any segment from any YouTube video in seconds. Set custom start and end timestamps. Free, fast, no watermark.">
+  <meta property="og:image" content="https://ytcuttr.com/img/feat_clip.png">
 
-<!-- AdSense placeholder — replace with your real code -->
-<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://ytcuttr.com/">
+  <meta property="twitter:title" content="YTCuttr — Download YouTube Video From Specific Time | Free YT Cutter">
+  <meta property="twitter:description" content="Extract and download any segment from any YouTube video in seconds. Free, fast, no watermark.">
+  <meta property="twitter:image" content="https://ytcuttr.com/img/feat_clip.png">
 
-<!-- JSON-LD FAQ Schema for SEO -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "How do I cut a clip from a YouTube video online?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Paste any YouTube URL into YTCuttr, click Get Video, enter start and end time in HH:MM:SS format, select quality, and hit Download. Your clip is ready in seconds — no software, no signup, no watermark."
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+  <!-- Google Fonts Preconnect & Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- WebApplication Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "YTCuttr",
+    "url": "https://ytcuttr.com/",
+    "description": "Free online YouTube video clip cutter and downloader. Cut and download specific parts of YouTube videos by setting start and end timestamps.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript. Requires HTML5.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- FAQPage Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I cut a clip from a YouTube video online?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Paste your YouTube video URL into YTCuttr, set your desired start and end time using the timestamp fields or timeline slider, select your quality, and click Download Clip. Your trimmed clip will be ready in seconds with no watermark."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to download a specific part of a YouTube video?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "With YTCuttr, you simply enter the exact start timestamp and end timestamp for the part you want. Only that specific segment is downloaded, saving bandwidth and storage."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I clip a YouTube video longer than 60 seconds?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! YouTube's native clip tool limits you to 60 seconds. YTCuttr allows you to cut clips up to 10 minutes long from videos of any length."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I download a clip from a YouTube live stream?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, YTCuttr supports recorded YouTube live streams and broadcasts. Just paste the live stream link, enter your start and end time, and extract your clip."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I find the exact timestamp for my clip?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Play the video in YTCuttr's preview player or on YouTube, note the time where you want the clip to begin and end, and enter it in HH:MM:SS format, or click 'Set to Player Time'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does YTCuttr add a watermark to downloaded clips?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. All clips and videos downloaded from YTCuttr are completely free of watermarks, logos, or branding."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to sign up or create an account?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No account, registration, or credit card is ever required. YTCuttr is completely free and instant."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to save part of a YouTube video to my phone?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Open ytcuttr.com in your mobile browser (Safari on iPhone, Chrome on Android), paste the URL, pick your timestamps, and tap Download Clip. The file saves directly to your phone."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the maximum clip length I can download?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The maximum clip duration is 10 minutes (600 seconds) per download. The source video itself can be any length."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What quality can I download YouTube clips in?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can download in 4K, 1080p Full HD, 720p, 480p, 360p, or Audio Only (M4A) depending on available stream resolutions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is YTCuttr safe to use? Does it store my videos?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "YTCuttr does not store any videos or personal data. Clips are processed on our servers and permanently deleted immediately after you download them."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to download YouTube video from a specific time?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Open YTCuttr, paste your YouTube video URL, and click Get Video. Enter the exact start time and end time. Choose your preferred quality and hit Download Clip. Only that exact segment will be downloaded."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I select start and end time to download YouTube video?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! In the Clip Cutter tab, paste any YouTube link, click Get Video, then enter your desired Start Time and End Time in HH:MM:SS format. YTCuttr will extract and download only that segment."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to download only a part of a YouTube video for free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Go to ytcuttr.com, select the Clip Cutter tab, paste the YouTube URL, click Get Video, set your start and end timestamps, choose video quality, and click Download. Free, no watermark, no signup."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why use YTCuttr instead of downloading the full video?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Downloading an entire 2-hour video just to use a 30-second moment wastes bandwidth, storage, and battery. YTCuttr extracts just the slice you need instantly."
+        }
       }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I clip a YouTube video longer than 60 seconds?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! YouTube's built-in Clip feature is limited to 60 seconds. YTCuttr lets you cut and download clips up to 10 minutes long from any YouTube video."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How to download a specific part of a YouTube video?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Enter the exact start and end timestamps in YTCuttr. Only that segment is processed — not the full video. Faster, lighter, and no unnecessary storage used."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does YTCuttr add a watermark?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. YTCuttr never adds any watermark, logo, or branding to your clips. It is completely free with no hidden charges."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I download a clip from a YouTube live stream?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. After a live stream ends and is saved as a video on YouTube, paste the URL into YTCuttr and extract any clip using timestamps."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is YTCuttr safe? Does it store my videos?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "YTCuttr does not store any videos or personal data. Clips are processed on our servers and permanently deleted immediately after you download them."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How to download YouTube video from a specific time?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Open YTCuttr, paste your YouTube video URL, and click Get Video. Enter the exact start time and end time. Choose your preferred quality and hit Download Clip. Only that exact segment will be downloaded."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I select start and end time to download YouTube video?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! In the Clip Cutter tab, paste any YouTube link, click Get Video, then enter your desired Start Time and End Time in HH:MM:SS format. YTCuttr will extract and download only that segment."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How to download only a part of a YouTube video for free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Go to ytcuttr.com, select the Clip Cutter tab, paste the YouTube URL, click Get Video, set your start and end timestamps, choose video quality, and click Download. Free, no watermark, no signup."
+    ]
+  }
+  </script>
+
+  <style>
+    /* ── BASE & DESIGN TOKENS ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:          #e63030;
+      --red-hover:    #d02525;
+      --red-subtle:   #fef2f2;
+      --red-border:   #fecaca;
+      --red-glow:     rgba(230, 48, 48, 0.28);
+      --bg:           #f8fafc;
+      --white:        #ffffff;
+      --card-bg:      #ffffff;
+      --border:       #e2e8f0;
+      --border-focus: #94a3b8;
+      --text:         #0f172a;
+      --text-soft:    #334155;
+      --muted:        #64748b;
+      --subtle:       #f1f5f9;
+      --success:      #16a34a;
+      --success-bg:   #f0fdf4;
+      --success-bdr:  #bbf7d0;
+      --warn:         #d97706;
+      --warn-bg:      #fffbeb;
+      --warn-bdr:     #fde68a;
+      --error:        #dc2626;
+      --error-bg:     #fef2f2;
+      --error-bdr:    #fecaca;
+      --sans:         'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --display:      'Plus Jakarta Sans', var(--sans);
+      --mono:         'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --radius:       16px;
+      --radius-sm:    10px;
+      --radius-pill:  9999px;
+      --shadow-sm:    0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md:    0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      --shadow-lg:    0 12px 32px -4px rgba(15, 23, 42, 0.10), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+      --transition:   all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--sans);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font-family: inherit; }
+
+    /* ── ACCESSIBILITY FOCUS ── */
+    :focus-visible {
+      outline: 2px solid var(--red);
+      outline-offset: 2px;
+    }
+
+    /* ── STICKY NAVIGATION ── */
+    nav {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .nav-inner {
+      max-width: 1120px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: var(--display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      letter-spacing: -0.03em;
+    }
+    .logo span { color: var(--red); }
+
+    .nav-tag {
+      background: var(--red-subtle);
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--red-border);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── HERO SECTION ── */
+    .hero {
+      text-align: center;
+      padding: 44px 20px 24px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-family: var(--display);
+      font-size: clamp(28px, 4.8vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    .hero h1 span {
+      color: var(--red);
+      display: inline-block;
+    }
+
+    .hero-lead {
+      margin-top: 14px;
+      color: var(--text-soft);
+      font-size: clamp(15px, 2.2vw, 17px);
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    .hero-subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13.5px;
+      max-width: 540px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .hero-pills span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 6px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-soft);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── WORKSPACE TOOL CONTAINER ── */
+    .workspace-wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 12px 20px 60px;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    /* ── UNIFIED URL SEARCH BAR ── */
+    .url-section {
+      padding: 24px 28px 18px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .url-input-container {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      position: relative;
+    }
+
+    .url-input-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .url-input-icon {
+      position: absolute;
+      left: 16px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .url-input {
+      width: 100%;
+      height: 52px;
+      padding: 0 44px 0 46px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      background: var(--bg);
+      transition: var(--transition);
+    }
+
+    .url-input:focus {
+      background: var(--white);
+      border-color: var(--red);
+      box-shadow: 0 0 0 4px var(--red-glow);
+    }
+
+    .url-clear-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-pill);
+      transition: var(--transition);
+    }
+    .url-clear-btn:hover { color: var(--text); background: var(--subtle); }
+    .url-clear-btn.visible { display: flex; }
+
+    .fetch-btn {
+      height: 52px;
+      padding: 0 28px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--red);
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px var(--red-glow);
+      transition: var(--transition);
+      min-width: 130px;
+    }
+
+    .fetch-btn:hover:not(:disabled) {
+      background: var(--red-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px var(--red-glow);
+    }
+
+    .fetch-btn:disabled {
+      background: #cbd5e1;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* ── HONEST STATUS NOTIFICATION (No Fake Pct) ── */
+    .status-badge {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 500;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.25s ease;
+    }
+    .status-badge.visible { display: flex; }
+    .status-badge.info {
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+    }
+    .status-badge.error {
+      background: var(--error-bg);
+      border: 1px solid var(--error-bdr);
+      color: var(--error);
+    }
+    .status-badge.success {
+      background: var(--success-bg);
+      border: 1px solid var(--success-bdr);
+      color: var(--success);
+    }
+
+    .status-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(230, 48, 48, 0.25);
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0;
+    }
+
+    /* ── TABS BAR ── */
+    .tabs-bar {
+      display: flex;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      gap: 8px;
+    }
+
+    .tab-item {
+      padding: 14px 20px;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: var(--transition);
+      min-height: 48px;
+    }
+
+    .tab-item:hover:not(.active) {
+      color: var(--text);
+    }
+
+    .tab-item.active {
+      color: var(--red);
+      border-bottom-color: var(--red);
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .empty-state.hidden { display: none; }
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: var(--red-subtle);
+      color: var(--red);
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .empty-title {
+      font-family: var(--display);
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .empty-desc {
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── ACTIVE STUDIO WORKSPACE ── */
+    .studio-workspace {
+      display: none;
+      padding: 28px;
+    }
+    .studio-workspace.visible { display: block; }
+
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+
+    @media (min-width: 880px) {
+      .studio-grid {
+        grid-template-columns: 1.15fr 1fr;
+        gap: 32px;
+        align-items: start;
       }
     }
-  ]
-}
-</script>
 
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ── LEFT COLUMN: PREVIEW PLAYER ── */
+    .player-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-:root {
-  --red:      #e63030;
-  --red-glow: rgba(230, 48, 48, 0.35);
-  --bg:       #f7f8fa;
-  --white:    #ffffff;
-  --border:   #e4e7ec;
-  --text:     #111827;
-  --muted:    #6b7280;
-  --subtle:   #f3f4f6;
-  --success:  #16a34a;
-  --sans:     'Inter', sans-serif;
-  --display:  'Plus Jakarta Sans', sans-serif;
-  --radius:   14px;
-  --shadow:   0 1px 4px rgba(0,0,0,.07), 0 4px 20px rgba(0,0,0,.06);
-}
+    .video-viewport-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      border: 1px solid #1e293b;
+    }
 
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-}
+    .player-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
 
-/* ── NAV ── */
-nav {
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.logo {
-  font-family: var(--display);
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
-  text-decoration: none;
-  letter-spacing: -0.5px;
-}
-.logo span { color: var(--red); }
-.nav-tag {
-  background: #fef2f2;
-  color: var(--red);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
-  border: 1px solid #fecaca;
-}
+    .video-fallback-thumb {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .video-fallback-thumb.visible { display: block; }
 
-/* ── AD BANNER ── */
-.ad-banner {
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 90px;
-  color: var(--muted);
-  font-size: 12px;
-}
+    .video-title-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-/* ── HERO ── */
-.hero {
-  text-align: center;
-  padding: 52px 24px 36px;
-}
-.hero h1 {
-  font-family: var(--display);
-  font-size: clamp(28px, 5vw, 46px);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  color: var(--text);
-}
-.hero h1 span { color: var(--red); }
-.hero p {
-  margin-top: 14px;
-  color: var(--muted);
-  font-size: 16px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
-}
-.hero-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 18px;
-}
-.hero-pills span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: 20px;
-  padding: 5px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text);
-  box-shadow: 0 1px 3px rgba(0,0,0,.05);
-}
+    .video-live-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
-/* ── TABS ── */
-.tabs-wrap {
-  display: flex;
-  justify-content: center;
-  padding: 0 24px 32px;
-}
-.tabs {
-  display: flex;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 5px;
-  gap: 4px;
-  box-shadow: var(--shadow);
-}
-.tab-btn {
-  padding: 10px 28px;
-  border-radius: 9px;
-  border: none;
-  background: transparent;
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.tab-btn.active {
-  background: var(--red);
-  color: #fff;
-  box-shadow: 0 2px 12px var(--red-glow);
-}
-.tab-btn:hover:not(.active) { color: var(--text); background: var(--subtle); }
+    .video-meta-pills {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-/* ── MAIN CARD ── */
-.main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 20px 60px;
-}
-.card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 32px;
-  box-shadow: var(--shadow);
-}
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+    }
+    .badge-dur {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: var(--mono);
+    }
+    .badge-ready {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid var(--success-bdr);
+    }
 
-/* ── PANEL ── */
-.panel { display: none; }
-.panel.active { display: block; }
+    /* Quick Player Controls (Set Start / Set End) */
+    .player-quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
-/* ── URL INPUT ── */
-.url-wrap {
-  position: relative;
-  margin-bottom: 20px;
-}
-.url-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 8px;
-  display: block;
-}
-.url-row {
-  display: flex;
-  gap: 10px;
-}
-.url-input {
-  flex: 1;
-  padding: 13px 16px;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  font-family: var(--sans);
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s;
-  background: var(--white);
-}
-.url-input:focus { border-color: #d1d5db; }
-.url-input.has-value { border-color: var(--red); }
+    .btn-quick {
+      height: 42px;
+      padding: 0 14px;
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-soft);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .btn-quick:hover {
+      background: var(--white);
+      border-color: var(--border-focus);
+      color: var(--text);
+    }
 
-.fetch-btn {
-  padding: 13px 22px;
-  border-radius: 10px;
-  border: none;
-  background: var(--subtle);
-  color: var(--muted);
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.fetch-btn.glowing {
-  background: var(--red);
-  color: #fff;
-  box-shadow: 0 0 0 3px var(--red-glow);
-  animation: pulse 1.8s infinite;
-}
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 3px var(--red-glow); }
-  50%       { box-shadow: 0 0 0 7px rgba(230,48,48,0.12); }
-}
+    .btn-preview-clip {
+      grid-column: 1 / -1;
+      height: 40px;
+      background: #f1f5f9;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-soft);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .btn-preview-clip:hover {
+      background: var(--red-subtle);
+      border-color: var(--red-border);
+      color: var(--red);
+    }
 
-/* ── VIDEO INFO ── */
-.video-info {
-  display: none;
-  flex-direction: column;
-  gap: 0;
-  margin-bottom: 24px;
-  background: var(--white);
-  border-radius: 12px;
-  border: 1.5px solid var(--border);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  animation: fadeSlideIn 0.3s ease;
-}
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.video-info.visible { display: flex; }
+    /* ── RIGHT COLUMN: CUTTER & TIMESTAMPS ── */
+    .controls-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-/* Thumbnail container */
-.video-thumb-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: #111;
-  overflow: hidden;
-}
-.video-thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.video-thumb-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
-}
-.video-dur-badge {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.78);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 5px;
-  letter-spacing: 0.02em;
-}
+    /* Visual Timeline Scrubber */
+    .timeline-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+    }
 
-/* Meta below thumbnail */
-.video-meta {
-  padding: 14px 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-.video-meta-text { flex: 1; min-width: 0; }
-.video-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.video-ready-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 8px;
-  background: #f0fdf4;
-  color: var(--success);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 20px;
-  border: 1px solid #bbf7d0;
-}
-.video-dur { display: none; }
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
 
-/* ── DIVIDER ── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 24px 0;
-}
+    .timeline-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
 
-/* ── TIME ROW ── */
-.time-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-.field label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-.field label span {
-  font-weight: 400;
-  color: var(--muted);
-  font-size: 12px;
-}
-.time-input {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  font-family: 'JetBrains Mono', monospace, var(--sans);
-  font-size: 15px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s;
-}
-.time-input:focus { border-color: var(--red); }
+    .timeline-clip-len {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--white);
+      border: 1px solid var(--border);
+    }
+    .timeline-clip-len.valid {
+      color: var(--success);
+      border-color: var(--success-bdr);
+      background: var(--success-bg);
+    }
+    .timeline-clip-len.invalid {
+      color: var(--error);
+      border-color: var(--error-bdr);
+      background: var(--error-bg);
+    }
 
-/* ── RESOLUTION ── */
-.res-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 10px;
-  display: block;
-}
-.res-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-.res-btn {
-  padding: 8px 18px;
-  border-radius: 8px;
-  border: 1.5px solid var(--border);
-  background: var(--white);
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.res-btn:hover { border-color: var(--red); color: var(--text); }
-.res-btn.active {
-  border-color: var(--red);
-  background: #fef2f2;
-  color: var(--red);
-}
+    /* Dual Range Track */
+    .slider-container {
+      position: relative;
+      height: 36px;
+      display: flex;
+      align-items: center;
+    }
 
-/* ── DOWNLOAD BTN ── */
-.dl-btn {
-  width: 100%;
-  padding: 15px;
-  border-radius: 11px;
-  border: none;
-  background: #e5e7eb;
-  color: #9ca3af;
-  font-family: var(--sans);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: not-allowed;
-  transition: all 0.3s;
-  letter-spacing: 0.01em;
-}
-.dl-btn.ready {
-  background: var(--red);
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 0 0 3px var(--red-glow);
-  animation: pulse 1.8s infinite;
-}
-.dl-btn.ready:hover { opacity: 0.92; transform: translateY(-1px); }
-.dl-btn.loading {
-  background: var(--red);
-  color: #fff;
-  cursor: wait;
-  animation: none;
-  opacity: 0.75;
-}
+    .slider-track-bg {
+      position: absolute;
+      width: 100%;
+      height: 8px;
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
 
-/* ── PROGRESS (download) ── */
-.progress-wrap {
-  display: none;
-  margin-top: 18px;
-}
-.progress-wrap.visible { display: block; }
-.progress-bar-bg {
-  background: var(--subtle);
-  border-radius: 99px;
-  height: 8px;
-  overflow: hidden;
-}
-.progress-bar-fill {
-  height: 100%;
-  background: var(--red);
-  border-radius: 99px;
-  transition: width 0.4s ease;
-  width: 0%;
-}
-.progress-text {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 8px;
-  text-align: center;
-}
+    .slider-track-highlight {
+      position: absolute;
+      height: 8px;
+      background: var(--red);
+      border-radius: 4px;
+      left: 0%;
+      width: 25%;
+    }
 
-/* ── FETCH LOADING BAR (Get Video / Continue) ── */
-.fetch-loader {
-  display: none;
-  margin-top: 12px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--white);
-  border: 1px solid var(--border);
-  padding: 10px 14px 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  animation: fadeInUp 0.25s ease;
-}
-.fetch-loader.visible { display: block; }
-.fetch-loader-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.fetch-loader-label span:first-child {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.fetch-loader-label span:first-child::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--red);
-  animation: blink-dot 1.2s infinite;
-}
-.fetch-loader-pct {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--red);
-}
-.fetch-bar-track {
-  background: #f3f4f6;
-  border-radius: 99px;
-  height: 7px;
-  overflow: hidden;
-  position: relative;
-}
-.fetch-bar-fill {
-  height: 100%;
-  border-radius: 99px;
-  background: linear-gradient(90deg, #e63030 0%, #ff6b6b 50%, #e63030 100%);
-  background-size: 200% 100%;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 0%;
-  position: relative;
-  animation: shimmer-bar 1.6s linear infinite;
-}
-.fetch-bar-fill::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);
-  background-size: 200% 100%;
-  animation: shimmer-sweep 1.4s linear infinite;
-  border-radius: 99px;
-}
-.fetch-loader-steps {
-  display: flex;
-  gap: 8px;
-  margin-top: 9px;
-  flex-wrap: wrap;
-}
-.fetch-step {
-  font-size: 11px;
-  padding: 2px 9px;
-  border-radius: 20px;
-  background: #f3f4f6;
-  color: var(--muted);
-  font-weight: 500;
-  border: 1px solid transparent;
-  transition: all 0.3s ease;
-}
-.fetch-step.active {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: var(--red);
-  font-weight: 600;
-}
-.fetch-step.done {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #16a34a;
-}
-@keyframes shimmer-bar {
-  0%   { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
-@keyframes shimmer-sweep {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-@keyframes blink-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.4; transform: scale(0.7); }
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+    .range-input {
+      position: absolute;
+      width: 100%;
+      height: 8px;
+      background: transparent;
+      -webkit-appearance: none;
+      pointer-events: none;
+      margin: 0;
+    }
 
-/* ── AD MID ── */
-.ad-mid {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  font-size: 12px;
-  margin-bottom: 20px;
-}
+    .range-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      pointer-events: auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--red);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      cursor: grab;
+      transition: transform 0.1s;
+    }
+    .range-input::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+    }
+    .range-input::-moz-range-thumb {
+      pointer-events: auto;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--red);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      cursor: grab;
+    }
 
+    /* Manual Timestamp Boxes with Nudges */
+    .time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .time-field-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .time-field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .time-field-label span {
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .time-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .time-text-input {
+      width: 100%;
+      height: 42px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      background: var(--white);
+      outline: none;
+      transition: var(--transition);
+    }
+    .time-text-input:focus {
+      border-color: var(--red);
+    }
+
+    .nudge-group {
+      display: flex;
+      gap: 4px;
+    }
+    .nudge-btn {
+      height: 42px;
+      padding: 0 8px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .nudge-btn:hover {
+      color: var(--text);
+      border-color: var(--border-focus);
+    }
+
+    /* Validation Message Banner */
+    .time-validation-msg {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+    .time-validation-msg.visible { display: block; }
+    .time-validation-msg.error {
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid var(--error-bdr);
+    }
+
+    /* Resolution Selector */
+    .res-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .res-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .res-pills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .res-pill {
+      height: 44px;
+      min-width: 78px;
+      padding: 0 16px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-soft);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .res-pill:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .res-pill.active {
+      border-color: var(--red);
+      background: var(--red-subtle);
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    /* Primary Action Buttons */
+    .action-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--red);
+      color: var(--white);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 10px var(--red-glow);
+      transition: var(--transition);
+      letter-spacing: 0.01em;
+    }
+    .action-btn:hover:not(:disabled) {
+      background: var(--red-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px var(--red-glow);
+    }
+    .action-btn:disabled {
+      background: #e2e8f0;
+      color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .action-btn.processing {
+      background: #334155;
+      color: #f8fafc;
+      cursor: wait;
+    }
+
+    /* Live Processing Progress Box */
+    .processing-card {
+      display: none;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      margin-top: 10px;
+      animation: fadeIn 0.25s ease;
+    }
+    .processing-card.visible { display: block; }
+
+    .proc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .proc-track {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .proc-bar-indeterminate {
+      width: 40%;
+      height: 100%;
+      background: var(--red);
+      border-radius: 99px;
+      position: absolute;
+      animation: indeterminate 1.6s infinite ease-in-out;
+    }
+
+    @keyframes indeterminate {
+      0%   { left: -40%; width: 40%; }
+      50%  { left: 30%;  width: 50%; }
+      100% { left: 100%; width: 30%; }
+    }
+
+    .proc-details {
+      margin-top: 8px;
+      font-size: 12.5px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ── TRUST BADGES ── */
+    .trust-badges-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+      padding: 0 20px;
+    }
+    .trust-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 20px;
+      max-width: 720px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 12px 24px;
+      border-radius: var(--radius-pill);
+      box-shadow: var(--shadow-sm);
+    }
+    .trust-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-soft);
+    }
+    .trust-badge span { color: var(--success); }
+
+    /* ── GENERAL TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 14px 22px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+      z-index: 9999;
+      max-width: 90vw;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .toast.error {
+      background: #991b1b;
+      color: #fff;
+    }
+    .toast.success {
+      background: #166534;
+      color: #fff;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── RESPONSIVE BREAKPOINTS (Phase 3 Strict Requirements) ── */
+    @media (max-width: 768px) {
+      nav { height: 58px; padding: 0 16px; }
+      .hero { padding: 36px 16px 20px; }
+      .workspace-wrap { padding: 0 16px 40px; }
+      .url-section { padding: 20px 16px 16px; }
+      .tabs-bar { padding: 0 16px; }
+      .studio-workspace { padding: 20px 16px; }
+    }
+
+    @media (max-width: 540px) {
+      .url-input-container { flex-direction: column; }
+      .fetch-btn { width: 100%; height: 48px; }
+      .url-input { height: 48px; }
+      .time-grid { grid-template-columns: 1fr; }
+      .player-quick-actions { grid-template-columns: 1fr; }
+      .btn-quick { height: 44px; }
+      .tab-item { padding: 12px 14px; font-size: 13px; }
+    }
+
+    @media (max-width: 380px) {
+      .hero-pills span { font-size: 11.5px; padding: 4px 10px; }
+      .trust-badge { font-size: 11.5px; }
+      .res-pill { min-width: 64px; font-size: 12.5px; }
+    }
+
+    /* Reduced Motion Preference (Phase 6) */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  
 /* ── HOW IT WORKS ── */
 .how {
   max-width: 720px;
@@ -944,229 +1463,249 @@ footer a { color: var(--red); text-decoration: none; }
 }
 .trust-badge span { color: var(--success); }
 
+
 </style>
 </head>
+
 <body>
 
-<!-- NAV -->
-<nav>
-  <a class="logo" href="/">YT<span>Cuttr</span></a>
-  <span class="nav-tag">Free & Online</span>
-</nav>
+  <!-- NAVIGATION -->
+  <nav aria-label="Main Navigation">
+    <div class="nav-inner">
+      <a href="/" class="logo" aria-label="YTCuttr Home">
+        YT<span>Cuttr</span>
+      </a>
+      <div class="nav-tag" aria-label="App Status">
+        ✂️ 100% Free Video Cutter
+      </div>
+    </div>
+  </nav>
 
-<!-- TOP AD -->
-<div class="ad-banner">
-  <!-- AdSense: Replace this comment with your ad code -->
-  <span>Advertisement</span>
-</div>
+  <!-- HERO -->
+  <header class="hero">
+    <h1>YouTube Clip Cutter<br><span>Download Any Part of a YouTube Video Free</span></h1>
+    <p class="hero-lead">Paste a YouTube URL, select your exact start and end timestamp, and download just the segment you need in crisp quality. No watermarks. No signup.</p>
+    <p class="hero-subtitle">Select any start &amp; end timestamp &rarr; Download only that segment.<br>Works on long videos, 8-hour live recordings &amp; YouTube Shorts.</p>
+    <div class="hero-pills" aria-label="Key Capabilities">
+      <span>✅ Regular Videos</span>
+      <span>⚡ YouTube Shorts</span>
+      <span>🔗 youtu.be links</span>
+      <span>🎧 Audio Only (M4A)</span>
+      <span>⏱️ Precise Timeline Trimming</span>
+    </div>
+  </header>
 
-<!-- HERO -->
-<div class="hero">
-  <h1>YouTube Clip Cutter<br><span>Download Any Part of a YouTube Video Free</span></h1>
-  <p>Paste a YouTube URL, set your start and end time, and download just the clip you need. Works on long videos, live streams, and clips up to 10 minutes. No watermark. No sign-up. 100% Free.</p>
-  <p style="margin-top:10px;color:var(--muted);font-size:14px;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.6;">Select any start &amp; end timestamp → Download only that segment.<br>Works on 8-hour streams, live recordings &amp; YouTube Shorts.</p>
-  <div class="hero-pills">
-    <span>✅ Regular Videos</span>
-    <span>⚡ YouTube Shorts</span>
-    <span>🔗 youtu.be links</span>
-    <span>🎧 Audio Only</span>
-  </div>
-</div>
+  <!-- WORKSPACE TOOL CONTAINER -->
+  <main class="workspace-wrap" id="cutter-tool">
+    <div class="tool-card">
 
-<!-- TABS -->
-<div class="tabs-wrap">
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('clip')">✂️ Clip Cutter</button>
-    <button class="tab-btn" onclick="switchTab('download')">⬇️ Videos & Shorts</button>
-  </div>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- MID AD -->
-  <div class="ad-mid">
-    <!-- AdSense: Replace with your ad code -->
-    <span>Advertisement</span>
-  </div>
-
-  <div class="card">
-
-    <!-- ═══════════════ PANEL 1: CLIP CUTTER ═══════════════ -->
-    <div class="panel active" id="panel-clip">
-
-      <span class="url-label">YouTube Video URL</span>
-      <div class="url-row">
-        <input
-          class="url-input"
-          id="clip-url"
-          type="text"
-          placeholder="Paste YouTube URL here..."
-          oninput="onUrlInput('clip')"
-        />
-        <button class="fetch-btn" id="clip-fetch-btn" onclick="fetchInfo('clip')" disabled>
-          Get Video
+      <!-- TABS BAR -->
+      <div class="tabs-bar" role="tablist" aria-label="Tool Selection">
+        <button class="tab-item active" id="tab-clip-btn" role="tab" aria-selected="true" aria-controls="clip-mode" onclick="switchMode('clip')">
+          ✂️ Clip Cutter (Time Selection)
+        </button>
+        <button class="tab-item" id="tab-full-btn" role="tab" aria-selected="false" aria-controls="full-mode" onclick="switchMode('full')">
+          ⬇️ Full Video &amp; Shorts
         </button>
       </div>
 
-      <!-- Fetch Loading Bar - Clip -->
-      <div class="fetch-loader" id="clip-fetch-loader">
-        <div class="fetch-loader-label">
-          <span id="clip-fetch-status">Fetching video info...</span>
-          <span class="fetch-loader-pct" id="clip-fetch-pct">0%</span>
+      <!-- UNIFIED URL INPUT BAR -->
+      <section class="url-section" aria-label="Video Input">
+        <div class="url-input-container">
+          <div class="url-input-wrapper">
+            <div class="url-input-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+            </div>
+            <input
+              type="url"
+              id="main-url-input"
+              class="url-input"
+              placeholder="Paste YouTube URL here (e.g. https://www.youtube.com/watch?v=...)"
+              aria-label="YouTube Video URL"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              oninput="handleUrlInputChange()"
+              onkeydown="if(event.key === 'Enter') handleFetchClick()"
+            />
+            <button type="button" class="url-clear-btn" id="url-clear-btn" aria-label="Clear URL input" onclick="clearUrlInput()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <button type="button" class="fetch-btn" id="fetch-video-btn" onclick="handleFetchClick()" disabled>
+            <span>Get Video</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
         </div>
-        <div class="fetch-bar-track">
-          <div class="fetch-bar-fill" id="clip-fetch-bar"></div>
+
+        <!-- Honest Status Badge (No Fake %) -->
+        <div class="status-badge" id="status-badge" role="status" aria-live="polite">
+          <div class="status-spinner" id="status-spinner"></div>
+          <span id="status-message">Connecting to YouTube...</span>
         </div>
-        <div class="fetch-loader-steps">
-          <span class="fetch-step" id="clip-step-1">🔗 Connecting</span>
-          <span class="fetch-step" id="clip-step-2">📡 Fetching Info</span>
-          <span class="fetch-step" id="clip-step-3">🎬 Loading Video</span>
-          <span class="fetch-step" id="clip-step-4">✅ Ready</span>
-        </div>
+      </section>
+
+      <!-- EMPTY STATE (Before Video Loaded) -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon" aria-hidden="true">🎬</div>
+        <h2 class="empty-title">Ready to Cut Any Video</h2>
+        <p class="empty-desc">Paste any YouTube video or Shorts link in the box above to load the interactive preview player and timestamp cutter.</p>
       </div>
 
-      <div class="supports-hint">
-        <span>🎬 Videos</span>
-        <span>⚡ Shorts</span>
-        <span>🔗 youtu.be</span>
-      </div>
+      <!-- ACTIVE STUDIO WORKSPACE (After Video Loaded) -->
+      <div class="studio-workspace" id="studio-workspace">
+        <div class="studio-grid">
 
-      <!-- Video Info -->
-      <div class="video-info" id="clip-video-info">
-        <div class="video-thumb-wrap">
-          <img class="video-thumb" id="clip-thumb" src="" alt="thumbnail">
-          <div class="video-thumb-overlay"></div>
-          <div class="video-dur-badge" id="clip-dur"></div>
-        </div>
-        <div class="video-meta">
-          <div class="video-meta-text">
-            <div class="video-title" id="clip-title"></div>
-            <div class="video-ready-tag">✅ Ready to clip</div>
+          <!-- LEFT COLUMN: PREVIEW PLAYER -->
+          <div class="player-col">
+            <div class="video-viewport-wrapper" id="player-viewport">
+              <div id="player-frame"></div>
+              <img id="player-fallback-thumb" class="video-fallback-thumb" src="" alt="Video thumbnail">
+            </div>
+
+            <div class="video-title-card">
+              <h2 class="video-live-title" id="loaded-video-title">YouTube Video</h2>
+              <div class="video-meta-pills">
+                <span class="badge-pill badge-dur" id="loaded-video-duration">00:00</span>
+                <span class="badge-pill badge-ready">✅ Ready to Cut</span>
+              </div>
+            </div>
+
+            <!-- Quick Player Actions (TubeChop Inspiration) -->
+            <div class="player-quick-actions" id="clip-quick-actions">
+              <button type="button" class="btn-quick" onclick="setTimeFromPlayer('start')" aria-label="Set start time to current player playback time">
+                ⏱️ Set to Current Time as Start
+              </button>
+              <button type="button" class="btn-quick" onclick="setTimeFromPlayer('end')" aria-label="Set end time to current player playback time">
+                ⏱️ Set to Current Time as End
+              </button>
+              <button type="button" class="btn-preview-clip" onclick="previewSelectedClip()" aria-label="Play selected clip segment in preview player">
+                ▶️ Preview Selected Segment in Player
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <hr class="divider" id="clip-divider" style="display:none">
+          <!-- RIGHT COLUMN: CUTTER & TIMESTAMPS -->
+          <div class="controls-col">
 
-      <!-- Time inputs -->
-      <div id="clip-settings" style="display:none">
-        <div class="time-row">
-          <div class="field">
-            <label>Start Time <span>(HH:MM:SS)</span></label>
-            <input class="time-input" id="clip-start" type="text" placeholder="00:00:00" oninput="onClipSettingsChange()">
+            <!-- CLIP CUTTER CONTROLS (Only visible in Clip mode) -->
+            <div id="clip-controls-group">
+
+              <!-- Interactive Timeline Scrubber -->
+              <div class="timeline-card">
+                <div class="timeline-header">
+                  <span class="timeline-title">✂️ Clip Range</span>
+                  <span class="timeline-clip-len valid" id="clip-duration-badge">Duration: 00:00</span>
+                </div>
+
+                <div class="slider-container" id="slider-container">
+                  <div class="slider-track-bg"></div>
+                  <div class="slider-track-highlight" id="slider-highlight"></div>
+                  <input type="range" class="range-input" id="slider-start" min="0" max="100" value="0" step="1" aria-label="Start time slider" oninput="handleSliderChange('start')">
+                  <input type="range" class="range-input" id="slider-end" min="0" max="100" value="60" step="1" aria-label="End time slider" oninput="handleSliderChange('end')">
+                </div>
+              </div>
+
+              <!-- Manual Timestamp Inputs -->
+              <div class="time-grid" style="margin-top: 14px;">
+                <div class="time-field-box">
+                  <label class="time-field-label" for="clip-start">
+                    Start Time
+                    <span>(HH:MM:SS)</span>
+                  </label>
+                  <div class="time-input-row">
+                    <input type="text" id="clip-start" class="time-text-input" value="00:00:00" placeholder="00:00:00" inputmode="numeric" oninput="handleManualTimeInput('start')">
+                    <div class="nudge-group">
+                      <button type="button" class="nudge-btn" title="Subtract 1 second" onclick="nudgeTime('start', -1)">-1s</button>
+                      <button type="button" class="nudge-btn" title="Add 1 second" onclick="nudgeTime('start', 1)">+1s</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="time-field-box">
+                  <label class="time-field-label" for="clip-end">
+                    End Time
+                    <span>(HH:MM:SS)</span>
+                  </label>
+                  <div class="time-input-row">
+                    <input type="text" id="clip-end" class="time-text-input" value="00:01:00" placeholder="00:01:00" inputmode="numeric" oninput="handleManualTimeInput('end')">
+                    <div class="nudge-group">
+                      <button type="button" class="nudge-btn" title="Subtract 1 second" onclick="nudgeTime('end', -1)">-1s</button>
+                      <button type="button" class="nudge-btn" title="Add 1 second" onclick="nudgeTime('end', 1)">+1s</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Real-time Validation Notice -->
+              <div class="time-validation-msg error" id="time-val-msg" role="alert" style="margin-top: 10px;">
+                End time must be after start time.
+              </div>
+
+            </div>
+
+            <!-- QUALITY / RESOLUTION SELECTION -->
+            <div class="res-section">
+              <div class="res-header">
+                <span>Select Quality</span>
+                <span style="font-size: 12px; color: var(--muted); font-weight: 500;">MP4 / M4A Audio</span>
+              </div>
+              <div class="res-pills-grid" id="resolution-grid" role="radiogroup" aria-label="Available Video Qualities">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- PRIMARY ACTION BUTTON -->
+            <button type="button" class="action-btn" id="primary-action-btn" onclick="handlePrimaryActionClick()">
+              <span id="action-btn-text">⬇ Download Clip</span>
+            </button>
+
+            <!-- HONEST PROCESSING STATE -->
+            <div class="processing-card" id="processing-card" role="region" aria-live="polite">
+              <div class="proc-header">
+                <span id="proc-step-title">Processing clip...</span>
+                <span style="font-size: 12px; color: var(--red); font-weight: 700;">Please wait</span>
+              </div>
+              <div class="proc-track">
+                <div class="proc-bar-indeterminate"></div>
+              </div>
+              <div class="proc-details">
+                <span id="proc-details-text">Connecting to video stream...</span>
+                <span id="proc-timer">0s</span>
+              </div>
+            </div>
+
           </div>
-          <div class="field">
-            <label>End Time <span>(HH:MM:SS)</span></label>
-            <input class="time-input" id="clip-end" type="text" placeholder="00:02:00" oninput="onClipSettingsChange()">
-          </div>
-        </div>
 
-        <span class="res-label">Select Quality</span>
-        <div class="res-grid" id="clip-res-grid"></div>
-
-        <button class="dl-btn" id="clip-dl-btn" onclick="startClip()" disabled>
-          ⬇ Download Clip
-        </button>
-
-        <div class="progress-wrap" id="clip-progress">
-          <div class="progress-bar-bg"><div class="progress-bar-fill" id="clip-bar"></div></div>
-          <div class="progress-text" id="clip-progress-text">Processing your clip...</div>
         </div>
       </div>
 
     </div>
 
-    <!-- ═══════════════ PANEL 2: VIDEO DOWNLOAD ═══════════════ -->
-    <div class="panel" id="panel-download">
-
-      <span class="url-label">YouTube Video URL</span>
-      <div class="url-row">
-        <input
-          class="url-input"
-          id="dl-url"
-          type="text"
-          placeholder="Paste YouTube URL here..."
-          oninput="onUrlInput('dl')"
-        />
-        <button class="fetch-btn" id="dl-fetch-btn" onclick="fetchInfo('dl')" disabled>
-          Continue
-        </button>
+    <!-- TRUST BADGES -->
+    <div class="trust-badges-wrap">
+      <div class="trust-badges">
+        <div class="trust-badge"><span>✅</span> No Watermark</div>
+        <div class="trust-badge"><span>✅</span> No Signup Required</div>
+        <div class="trust-badge"><span>✅</span> Up to 10 Min Clips</div>
+        <div class="trust-badge"><span>✅</span> 4K &amp; Audio Only</div>
+        <div class="trust-badge"><span>✅</span> High-Precision Cuts</div>
+        <div class="trust-badge"><span>✅</span> 100% Free Forever</div>
       </div>
-
-      <!-- Fetch Loading Bar - Download -->
-      <div class="fetch-loader" id="dl-fetch-loader">
-        <div class="fetch-loader-label">
-          <span id="dl-fetch-status">Fetching video info...</span>
-          <span class="fetch-loader-pct" id="dl-fetch-pct">0%</span>
-        </div>
-        <div class="fetch-bar-track">
-          <div class="fetch-bar-fill" id="dl-fetch-bar"></div>
-        </div>
-        <div class="fetch-loader-steps">
-          <span class="fetch-step" id="dl-step-1">🔗 Connecting</span>
-          <span class="fetch-step" id="dl-step-2">📡 Fetching Info</span>
-          <span class="fetch-step" id="dl-step-3">🎬 Loading Video</span>
-          <span class="fetch-step" id="dl-step-4">✅ Ready</span>
-        </div>
-      </div>
-
-      <div class="supports-hint">
-        <span>🎬 Videos</span>
-        <span>⚡ Shorts</span>
-        <span>🔗 youtu.be</span>
-      </div>
-
-      <!-- Video Info -->
-      <div class="video-info" id="dl-video-info">
-        <div class="video-thumb-wrap">
-          <img class="video-thumb" id="dl-thumb" src="" alt="thumbnail">
-          <div class="video-thumb-overlay"></div>
-          <div class="video-dur-badge" id="dl-dur"></div>
-        </div>
-        <div class="video-meta">
-          <div class="video-meta-text">
-            <div class="video-title" id="dl-title"></div>
-            <div class="video-ready-tag">✅ Ready to download</div>
-          </div>
-        </div>
-      </div>
-
-      <hr class="divider" id="dl-divider" style="display:none">
-
-      <div id="dl-settings" style="display:none">
-        <span class="res-label">Select Quality</span>
-        <div class="res-grid" id="dl-res-grid"></div>
-
-        <button class="dl-btn" id="dl-dl-btn" onclick="startDownload()" disabled>
-          ⬇ Download Video
-        </button>
-
-        <div class="progress-wrap" id="dl-progress">
-          <div class="progress-bar-bg"><div class="progress-bar-fill" id="dl-bar"></div></div>
-          <div class="progress-text" id="dl-progress-text">Preparing download...</div>
-        </div>
-      </div>
-
     </div>
+  </main>
 
-  </div><!-- /card -->
-
-  <!-- TRUST BADGES -->
-  <div class="trust-badges-wrap">
-    <div class="trust-badges">
-      <div class="trust-badge"><span>✅</span> No Watermark</div>
-      <div class="trust-badge"><span>✅</span> No Signup</div>
-      <div class="trust-badge"><span>✅</span> Up to 10 Min Clips</div>
-      <div class="trust-badge"><span>✅</span> Long Videos</div>
-      <div class="trust-badge"><span>✅</span> Live Streams</div>
-      <div class="trust-badge"><span>✅</span> Free Forever</div>
-    </div>
-  </div>
-
-</div><!-- /main -->
-
-<!-- HOW IT WORKS -->
+  <!-- HOW IT WORKS SECTION -->
+  <!-- HOW IT WORKS -->
 <div class="how">
   <h2>How it works</h2>
   <div class="steps-grid">
@@ -1186,7 +1725,9 @@ footer a { color: var(--red); text-decoration: none; }
       <p>Hit the download button and get your file in seconds. No sign-up required.</p>
     </div>
   </div>
-<!-- FEATURES SECTION -->
+
+  <!-- FEATURES SECTION -->
+  <!-- FEATURES SECTION -->
 <section class="features-section" aria-label="YTCuttr Features">
   <div class="section-header">
     <h2>Why Choose YTCuttr?</h2>
@@ -1305,7 +1846,8 @@ footer a { color: var(--red); text-decoration: none; }
   </div>
 </section>
 
-<!-- POPULAR USE CASES SECTION -->
+  <!-- POPULAR USE CASES SECTION -->
+  <!-- POPULAR USE CASES SECTION -->
 <section style="padding:48px 24px;background:var(--white);border-top:1px solid var(--border);" aria-label="Popular Use Cases">
   <div style="max-width:900px;margin:0 auto;">
     <h2 style="font-family:var(--display);font-size:clamp(22px,4vw,32px);font-weight:800;text-align:center;margin-bottom:8px;letter-spacing:-0.02em;">Popular Use Cases</h2>
@@ -1340,7 +1882,8 @@ footer a { color: var(--red); text-decoration: none; }
   </div>
 </section>
 
-<!-- ABOUT SECTION -->
+  <!-- ABOUT SECTION -->
+  <!-- ABOUT SECTION -->
 <section class="about-section" aria-label="About YTCuttr">
   <div class="about-inner">
     <h2>The Best Free YouTube Video Cutter &amp; Downloader</h2>
@@ -1352,7 +1895,8 @@ footer a { color: var(--red); text-decoration: none; }
   </div>
 </section>
 
-<!-- FAQ SECTION -->
+  <!-- FAQ SECTION -->
+  <!-- FAQ SECTION -->
 <section class="faq-section" aria-label="Frequently Asked Questions">
   <h2>Frequently Asked Questions</h2>
   <div id="faq-list">
@@ -1481,417 +2025,590 @@ footer a { color: var(--red); text-decoration: none; }
 </section>
 
 <!-- FOOTER -->
-<footer>
+
+  <!-- FOOTER -->
+  <footer>
   <p>© 2026 <a href="/">YTCuttr.com</a> &mdash; For personal use only. Respect content creators&rsquo; rights.</p>
   <p style="font-size:12px;margin-top:6px;"><a href="/about" style="color:var(--muted);text-decoration:none;">About</a> &nbsp;&middot;&nbsp; <a href="/privacy" style="color:var(--muted);text-decoration:none;">Privacy Policy</a> &nbsp;&middot;&nbsp; <a href="/terms" style="color:var(--muted);text-decoration:none;">Terms of Use</a> &nbsp;&middot;&nbsp; <a href="/contact" style="color:var(--muted);text-decoration:none;">Contact</a></p>
 </footer>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast" role="alert" aria-live="assertive"></div>
 
-<script>
-// ── CONFIG ────────────────────────────────────────────────
-// Replace with your Railway backend URL after deploy
-const API = "https://ytcuttr.onrender.com";
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    const API = "https://ytcuttr.onrender.com";
 
-// ── STATE ─────────────────────────────────────────────────
-let clipRes = "720p", dlRes = "720p";
-let clipJobId = null, dlJobId = null;
-let clipPollInterval = null, dlPollInterval = null;
+    // Application State
+    let currentMode = 'clip'; // 'clip' or 'full'
+    let currentVideoData = null; // { id, url, title, duration, thumbnail, resolutions }
+    let selectedQuality = '720p';
+    let clipStartSec = 0;
+    let clipEndSec = 60;
+    let ytPlayer = null;
+    let isPlayerReady = false;
+    let activeJobId = null;
+    let pollInterval = null;
+    let procTimerInterval = null;
+    let procSeconds = 0;
 
-// ── TAB SWITCH ────────────────────────────────────────────
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', (i===0 && tab==='clip') || (i===1 && tab==='download'));
-  });
-  document.getElementById('panel-clip').classList.toggle('active', tab==='clip');
-  document.getElementById('panel-download').classList.toggle('active', tab==='download');
-}
-
-// ── URL INPUT WATCHER ─────────────────────────────────────
-function onUrlInput(mode) {
-  const id = mode === 'clip' ? 'clip-url' : 'dl-url';
-  const btnId = mode === 'clip' ? 'clip-fetch-btn' : 'dl-fetch-btn';
-  const val = document.getElementById(id).value.trim();
-  const isYT = /youtube\.com|youtu\.be/.test(val);
-  const input = document.getElementById(id);
-  const btn   = document.getElementById(btnId);
-
-  input.classList.toggle('has-value', isYT);
-  btn.disabled = !isYT;
-  btn.classList.toggle('glowing', isYT);
-}
-
-// ── FETCH LOADER HELPERS ──────────────────────────────────
-let fetchLoaderInterval = null;
-
-function showFetchLoader(mode) {
-  const loader  = document.getElementById(mode === 'clip' ? 'clip-fetch-loader' : 'dl-fetch-loader');
-  const bar     = document.getElementById(mode === 'clip' ? 'clip-fetch-bar'    : 'dl-fetch-bar');
-  const pct     = document.getElementById(mode === 'clip' ? 'clip-fetch-pct'    : 'dl-fetch-pct');
-  const status  = document.getElementById(mode === 'clip' ? 'clip-fetch-status' : 'dl-fetch-status');
-  const steps   = [1,2,3,4].map(i => document.getElementById(`${mode}-step-${i}`));
-
-  // Reset
-  loader.classList.add('visible');
-  bar.style.width = '0%';
-  pct.textContent = '0%';
-  status.textContent = 'Connecting to YouTube...';
-  steps.forEach(s => { s.classList.remove('active','done'); });
-
-  const phases = [
-    { pct: 15,  label: 'Connecting to YouTube...',  stepIdx: 0 },
-    { pct: 40,  label: 'Fetching video info...',     stepIdx: 1 },
-    { pct: 70,  label: 'Loading video details...',   stepIdx: 2 },
-    { pct: 88,  label: 'Almost done...',             stepIdx: 2 },
-  ];
-  let phase = 0;
-
-  // Activate first step
-  steps[0].classList.add('active');
-
-  fetchLoaderInterval = setInterval(() => {
-    if (phase < phases.length) {
-      const p = phases[phase];
-      bar.style.width = p.pct + '%';
-      pct.textContent = p.pct + '%';
-      status.textContent = p.label;
-      // Step transitions
-      steps.forEach((s, i) => {
-        if (i < p.stepIdx)       { s.classList.add('done'); s.classList.remove('active'); }
-        else if (i === p.stepIdx) { s.classList.add('active'); s.classList.remove('done'); }
-        else                     { s.classList.remove('active','done'); }
-      });
-      phase++;
+    // ── URL PARSER ───────────────────────────────────────────
+    function extractVideoId(url) {
+      if (!url) return null;
+      const clean = url.trim();
+      const reg = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/i;
+      const m = clean.match(reg);
+      return m ? m[1] : null;
     }
-  }, 700);
-}
 
-function completeFetchLoader(mode, success) {
-  if (fetchLoaderInterval) { clearInterval(fetchLoaderInterval); fetchLoaderInterval = null; }
-  const loader = document.getElementById(mode === 'clip' ? 'clip-fetch-loader' : 'dl-fetch-loader');
-  const bar    = document.getElementById(mode === 'clip' ? 'clip-fetch-bar'    : 'dl-fetch-bar');
-  const pct    = document.getElementById(mode === 'clip' ? 'clip-fetch-pct'    : 'dl-fetch-pct');
-  const status = document.getElementById(mode === 'clip' ? 'clip-fetch-status' : 'dl-fetch-status');
-  const steps  = [1,2,3,4].map(i => document.getElementById(`${mode}-step-${i}`));
+    function handleUrlInputChange() {
+      const val = document.getElementById('main-url-input').value.trim();
+      const clearBtn = document.getElementById('url-clear-btn');
+      const fetchBtn = document.getElementById('fetch-video-btn');
+      const isYT = !!extractVideoId(val);
 
-  if (success) {
-    bar.style.width = '100%';
-    pct.textContent = '100%';
-    status.textContent = 'Video loaded! ✅';
-    steps.forEach((s, i) => { s.classList.remove('active'); s.classList.add('done'); });
-    setTimeout(() => { loader.classList.remove('visible'); }, 1200);
-  } else {
-    bar.style.background = '#dc2626';
-    bar.style.width = '100%';
-    status.textContent = 'Failed to load video ❌';
-    steps.forEach(s => { s.classList.remove('active','done'); });
-    setTimeout(() => {
-      loader.classList.remove('visible');
-      bar.style.background = '';
-      bar.style.width = '0%';
-    }, 1800);
-  }
-}
+      clearBtn.classList.toggle('visible', val.length > 0);
+      fetchBtn.disabled = !isYT;
+    }
 
-// ── FETCH VIDEO INFO ──────────────────────────────────────
-async function fetchInfo(mode) {
-  const urlId   = mode === 'clip' ? 'clip-url'   : 'dl-url';
-  const btnId   = mode === 'clip' ? 'clip-fetch-btn' : 'dl-fetch-btn';
-  const infoId  = mode === 'clip' ? 'clip-video-info' : 'dl-video-info';
-  const thumbId = mode === 'clip' ? 'clip-thumb'  : 'dl-thumb';
-  const titleId = mode === 'clip' ? 'clip-title'  : 'dl-title';
-  const durId   = mode === 'clip' ? 'clip-dur'    : 'dl-dur';
-  const divId   = mode === 'clip' ? 'clip-divider': 'dl-divider';
-  const setId   = mode === 'clip' ? 'clip-settings':'dl-settings';
-  const resId   = mode === 'clip' ? 'clip-res-grid':'dl-res-grid';
+    function clearUrlInput() {
+      const inp = document.getElementById('main-url-input');
+      inp.value = '';
+      inp.focus();
+      handleUrlInputChange();
+      hideStatus();
+    }
 
-  const url = document.getElementById(urlId).value.trim();
-  const btn = document.getElementById(btnId);
-  btn.textContent = "Loading...";
-  btn.disabled = true;
-  btn.classList.remove('glowing');
+    // ── MODE SWITCHING (Clip vs Full) ────────────────────────
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('tab-clip-btn').classList.toggle('active', mode === 'clip');
+      document.getElementById('tab-clip-btn').setAttribute('aria-selected', mode === 'clip');
+      document.getElementById('tab-full-btn').classList.toggle('active', mode === 'full');
+      document.getElementById('tab-full-btn').setAttribute('aria-selected', mode === 'full');
 
-  // Show fetch loading bar
-  showFetchLoader(mode);
+      document.getElementById('clip-controls-group').style.display = mode === 'clip' ? 'block' : 'none';
+      document.getElementById('clip-quick-actions').style.display = mode === 'clip' ? 'grid' : 'none';
 
-  // ── Retry helper (handles Render cold-start) ───────────────
-  const MAX_RETRIES = 3;
-  let lastError = null;
+      updatePrimaryButtonState();
+    }
 
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      // Update status message on retries
-      if (attempt > 1) {
-        const statusEl = document.getElementById(mode === 'clip' ? 'clip-fetch-status' : 'dl-fetch-status');
-        if (statusEl) statusEl.textContent = `⏳ Server waking up... (attempt ${attempt}/${MAX_RETRIES})`;
-        await new Promise(r => setTimeout(r, 5000)); // wait 5s before retry
+    // ── STATUS HELPERS (Honest Feedback) ──────────────────────
+    function showStatus(msg, type = 'info', showSpinner = true) {
+      const b = document.getElementById('status-badge');
+      const sp = document.getElementById('status-spinner');
+      const m = document.getElementById('status-message');
+      b.className = 'status-badge visible ' + type;
+      sp.style.display = showSpinner ? 'block' : 'none';
+      m.textContent = msg;
+    }
+
+    function hideStatus() {
+      document.getElementById('status-badge').className = 'status-badge';
+    }
+
+    // ── FETCH VIDEO INFO (Render Cold-Start Safe) ─────────────
+    async function handleFetchClick() {
+      const rawUrl = document.getElementById('main-url-input').value.trim();
+      const videoId = extractVideoId(rawUrl);
+      if (!videoId) {
+        showToast('Please enter a valid YouTube video URL', true);
+        return;
       }
 
-      const resp = await fetch(`${API}/info`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ url }),
-        signal: AbortSignal.timeout(55000) // 55 second timeout
-      });
+      const fetchBtn = document.getElementById('fetch-video-btn');
+      fetchBtn.disabled = true;
+      fetchBtn.querySelector('span').textContent = 'Loading...';
+      showStatus('Connecting to YouTube and fetching stream info...', 'info', true);
 
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.detail || `Server error (${resp.status})`);
+      const MAX_RETRIES = 3;
+      let lastErr = null;
+
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          if (attempt > 1) {
+            showStatus(`Server is waking up (attempt ${attempt}/${MAX_RETRIES})... Please wait 5s`, 'info', true);
+            await new Promise(r => setTimeout(r, 4500));
+          }
+
+          const resp = await fetch(`${API}/info`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: rawUrl }),
+            signal: AbortSignal.timeout(50000)
+          });
+
+          if (!resp.ok) {
+            const errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.detail || `Server error (${resp.status})`);
+          }
+
+          const data = await resp.json();
+          currentVideoData = {
+            id: videoId,
+            url: rawUrl,
+            title: data.title || 'YouTube Video',
+            duration: Number(data.duration) || 0,
+            thumbnail: data.thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+            resolutions: (data.resolutions && data.resolutions.length > 0)
+              ? data.resolutions
+              : ['1080p', '720p', '480p', '360p', 'Audio only']
+          };
+
+          // Successfully retrieved info
+          hideStatus();
+          displayLoadedVideo();
+          fetchBtn.disabled = false;
+          fetchBtn.querySelector('span').textContent = 'Get Video';
+          return;
+
+        } catch(e) {
+          lastErr = e;
+          const isNet = (e.name === 'TypeError' || e.name === 'AbortError' || e.message === 'Failed to fetch');
+          if (!isNet || attempt === MAX_RETRIES) break;
+        }
       }
-      const data = await resp.json();
 
-      // Complete loader with success
-      completeFetchLoader(mode, true);
+      // If failed after retries
+      fetchBtn.disabled = false;
+      fetchBtn.querySelector('span').textContent = 'Get Video';
+      const msg = (lastErr && (lastErr.name === 'AbortError' || lastErr.message === 'Failed to fetch'))
+        ? '⚠️ Server is currently waking up. Please click Get Video again in a few seconds.'
+        : (lastErr ? lastErr.message : 'Could not fetch video. Please check the URL.');
+      showStatus(msg, 'error', false);
+      showToast(msg, true);
+    }
 
-      // Show info
-      document.getElementById(thumbId).src = data.thumbnail;
-      document.getElementById(titleId).textContent = data.title;
-      document.getElementById(durId).textContent = formatDur(data.duration);
-      document.getElementById(infoId).classList.add('visible');
-      document.getElementById(divId).style.display = 'block';
-      document.getElementById(setId).style.display = 'block';
+    // ── DISPLAY LOADED VIDEO & INITIALIZE PLAYER ─────────────
+    function displayLoadedVideo() {
+      if (!currentVideoData) return;
 
-      // Build resolution buttons
-      const grid = document.getElementById(resId);
-      grid.innerHTML = '';
-      data.resolutions.forEach((r, i) => {
-        const b = document.createElement('button');
-        b.className = 'res-btn' + (i === 0 ? ' active' : '');
-        b.textContent = r;
-        b.onclick = () => selectRes(mode, r, b);
-        grid.appendChild(b);
-      });
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('studio-workspace').classList.add('visible');
 
-      if (mode === 'clip') {
-        clipRes = data.resolutions[0];
+      document.getElementById('loaded-video-title').textContent = currentVideoData.title;
+      document.getElementById('loaded-video-duration').textContent = formatSeconds(currentVideoData.duration);
+
+      // Initialize default start and end times
+      clipStartSec = 0;
+      clipEndSec = currentVideoData.duration > 0 ? Math.min(currentVideoData.duration, 120) : 60;
+
+      // Update resolution pills
+      renderResolutionPills();
+
+      // Update inputs & slider
+      syncUiTimestamps();
+
+      // Mount or Load YouTube IFrame Player
+      initYouTubePlayer(currentVideoData.id);
+
+      // Scroll smoothly to studio workspace on mobile
+      if (window.innerWidth < 768) {
+        document.getElementById('cutter-tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    // ── YOUTUBE IFRAME PLAYER INTEGRATION (TubeChop UX) ──────
+    function initYouTubePlayer(videoId) {
+      const fallbackImg = document.getElementById('player-fallback-thumb');
+      fallbackImg.src = currentVideoData.thumbnail;
+
+      if (!window.YT || !window.YT.Player) {
+        // Load YouTube IFrame API on-demand
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        window.onYouTubeIframeAPIReady = function() {
+          createPlayer(videoId);
+        };
       } else {
-        dlRes = data.resolutions[0];
-        checkDlReady();
+        createPlayer(videoId);
+      }
+    }
+
+    function createPlayer(videoId) {
+      try {
+        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+          ytPlayer.loadVideoById(videoId);
+          return;
+        }
+
+        ytPlayer = new YT.Player('player-frame', {
+          videoId: videoId,
+          playerVars: {
+            playsinline: 1,
+            rel: 0,
+            modestbranding: 1
+          },
+          events: {
+            onReady: () => {
+              isPlayerReady = true;
+              document.getElementById('player-fallback-thumb').classList.remove('visible');
+            },
+            onError: () => {
+              // Fallback to static thumbnail if embedding is disallowed for this video
+              document.getElementById('player-fallback-thumb').classList.add('visible');
+            }
+          }
+        });
+      } catch(e) {
+        document.getElementById('player-fallback-thumb').classList.add('visible');
+      }
+    }
+
+    function setTimeFromPlayer(target) {
+      if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') {
+        showToast('Start playing the video first to sync player time', true);
+        return;
+      }
+      const cur = Math.floor(ytPlayer.getCurrentTime() || 0);
+      if (target === 'start') {
+        clipStartSec = cur;
+        if (clipEndSec <= clipStartSec) {
+          clipEndSec = Math.min(clipStartSec + 60, currentVideoData.duration || clipStartSec + 60);
+        }
+      } else {
+        clipEndSec = cur;
+        if (clipEndSec <= clipStartSec) {
+          clipStartSec = Math.max(0, clipEndSec - 60);
+        }
+      }
+      syncUiTimestamps();
+      showToast(`Set ${target} time to ${formatSeconds(cur)}`);
+    }
+
+    function previewSelectedClip() {
+      if (!ytPlayer || typeof ytPlayer.seekTo !== 'function') {
+        showToast('Player preview not ready yet', true);
+        return;
+      }
+      ytPlayer.seekTo(clipStartSec, true);
+      ytPlayer.playVideo();
+      showToast(`Playing preview from ${formatSeconds(clipStartSec)}`);
+    }
+
+    // ── TIMELINE SLIDER & TIME INPUT SYNCHRONIZATION ──────────
+    function handleSliderChange(handle) {
+      const dur = currentVideoData && currentVideoData.duration ? currentVideoData.duration : 600;
+      const sVal = Number(document.getElementById('slider-start').value);
+      const eVal = Number(document.getElementById('slider-end').value);
+
+      if (handle === 'start') {
+        clipStartSec = Math.round((sVal / 100) * dur);
+        if (clipStartSec >= clipEndSec) {
+          clipStartSec = Math.max(0, clipEndSec - 1);
+        }
+      } else {
+        clipEndSec = Math.round((eVal / 100) * dur);
+        if (clipEndSec <= clipStartSec) {
+          clipEndSec = Math.min(dur, clipStartSec + 1);
+        }
       }
 
-      btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
+      syncUiTimestamps(false); // don't feedback into slider
+    }
+
+    function handleManualTimeInput(target) {
+      const sVal = document.getElementById('clip-start').value.trim();
+      const eVal = document.getElementById('clip-end').value.trim();
+
+      if (target === 'start') {
+        const parsed = parseTimeString(sVal);
+        if (parsed !== null) clipStartSec = parsed;
+      } else {
+        const parsed = parseTimeString(eVal);
+        if (parsed !== null) clipEndSec = parsed;
+      }
+
+      syncUiTimestamps(true);
+    }
+
+    function nudgeTime(target, deltaSec) {
+      const maxDur = currentVideoData && currentVideoData.duration ? currentVideoData.duration : 86400;
+      if (target === 'start') {
+        clipStartSec = Math.max(0, Math.min(maxDur, clipStartSec + deltaSec));
+        if (clipStartSec >= clipEndSec) clipEndSec = Math.min(maxDur, clipStartSec + 5);
+      } else {
+        clipEndSec = Math.max(0, Math.min(maxDur, clipEndSec + deltaSec));
+        if (clipEndSec <= clipStartSec) clipStartSec = Math.max(0, clipEndSec - 5);
+      }
+      syncUiTimestamps(true);
+    }
+
+    function syncUiTimestamps(updateSlider = true) {
+      const dur = (currentVideoData && currentVideoData.duration) ? currentVideoData.duration : 600;
+
+      // Update text fields
+      document.getElementById('clip-start').value = formatSeconds(clipStartSec);
+      document.getElementById('clip-end').value = formatSeconds(clipEndSec);
+
+      // Update range sliders
+      if (updateSlider && dur > 0) {
+        const sPct = Math.min(100, Math.max(0, (clipStartSec / dur) * 100));
+        const ePct = Math.min(100, Math.max(0, (clipEndSec / dur) * 100));
+        document.getElementById('slider-start').value = sPct;
+        document.getElementById('slider-end').value = ePct;
+
+        const highlight = document.getElementById('slider-highlight');
+        highlight.style.left = sPct + '%';
+        highlight.style.width = Math.max(0, ePct - sPct) + '%';
+      }
+
+      // Calculate clip length
+      const clipLen = clipEndSec - clipStartSec;
+      const badge = document.getElementById('clip-duration-badge');
+      const valMsg = document.getElementById('time-val-msg');
+
+      if (clipLen <= 0) {
+        badge.className = 'timeline-clip-len invalid';
+        badge.textContent = 'Invalid Range';
+        valMsg.textContent = 'End time must be greater than start time.';
+        valMsg.classList.add('visible');
+      } else if (clipLen > 600) {
+        badge.className = 'timeline-clip-len invalid';
+        badge.textContent = `Clip: ${formatSeconds(clipLen)} (Too Long)`;
+        valMsg.textContent = 'Maximum clip length is 10 minutes (600s). Please narrow your selection.';
+        valMsg.classList.add('visible');
+      } else if (currentVideoData && currentVideoData.duration && clipEndSec > currentVideoData.duration) {
+        badge.className = 'timeline-clip-len invalid';
+        badge.textContent = 'Exceeds Video';
+        valMsg.textContent = 'End time is beyond the video duration.';
+        valMsg.classList.add('visible');
+      } else {
+        badge.className = 'timeline-clip-len valid';
+        badge.textContent = `Clip: ${formatSeconds(clipLen)} (Max 10:00)`;
+        valMsg.classList.remove('visible');
+      }
+
+      updatePrimaryButtonState();
+    }
+
+    function updatePrimaryButtonState() {
+      const btn = document.getElementById('primary-action-btn');
+      const btnText = document.getElementById('action-btn-text');
+
+      if (currentMode === 'clip') {
+        btnText.textContent = '⬇ Download Clip';
+        const clipLen = clipEndSec - clipStartSec;
+        const isValid = clipLen > 0 && clipLen <= 600;
+        btn.disabled = !isValid;
+      } else {
+        btnText.textContent = '⬇ Download Full Video';
+        btn.disabled = false;
+      }
+    }
+
+    // ── QUALITY RESOLUTION PICKER ────────────────────────────
+    function renderResolutionPills() {
+      const grid = document.getElementById('resolution-grid');
+      grid.innerHTML = '';
+
+      if (!currentVideoData || !currentVideoData.resolutions) return;
+
+      currentVideoData.resolutions.forEach((res, i) => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'res-pill' + (i === 0 ? ' active' : '');
+        pill.setAttribute('role', 'radio');
+        pill.setAttribute('aria-checked', i === 0 ? 'true' : 'false');
+        pill.textContent = res;
+        pill.onclick = () => selectResolution(res, pill);
+        grid.appendChild(pill);
+      });
+
+      selectedQuality = currentVideoData.resolutions[0];
+    }
+
+    function selectResolution(res, el) {
+      selectedQuality = res;
+      document.querySelectorAll('#resolution-grid .res-pill').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+      });
+      el.classList.add('active');
+      el.setAttribute('aria-checked', 'true');
+    }
+
+    // ── PRIMARY ACTION TRIGGER (Clip / Download) ─────────────
+    async function handlePrimaryActionClick() {
+      if (!currentVideoData) return;
+
+      const btn = document.getElementById('primary-action-btn');
+      btn.disabled = true;
+      btn.classList.add('processing');
+
+      const isClip = currentMode === 'clip';
+      const qVal = selectedQuality === 'Audio only' ? 'audio' : selectedQuality;
+
+      showProcessingBox(isClip ? 'Submitting clip request...' : 'Preparing full video download...');
+
+      try {
+        let endpoint = isClip ? `${API}/clip` : `${API}/download`;
+        let payload = isClip ? {
+          url: currentVideoData.url,
+          start: formatSeconds(clipStartSec),
+          end: formatSeconds(clipEndSec),
+          quality: qVal
+        } : {
+          url: currentVideoData.url,
+          quality: qVal
+        };
+
+        const resp = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Failed to submit processing job');
+        }
+
+        const data = await resp.json();
+        activeJobId = data.job_id;
+        pollJobStatus(activeJobId, isClip);
+
+      } catch(e) {
+        hideProcessingBox();
+        resetPrimaryButton();
+        showToast(e.message || 'Processing failed. Please try again.', true);
+      }
+    }
+
+    // ── JOB POLLING (Honest Status Feedback) ──────────────────
+    function pollJobStatus(jobId, isClip) {
+      procSeconds = 0;
+      clearInterval(procTimerInterval);
+      clearInterval(pollInterval);
+
+      const timerEl = document.getElementById('proc-timer');
+      procTimerInterval = setInterval(() => {
+        procSeconds++;
+        timerEl.textContent = `${procSeconds}s`;
+      }, 1000);
+
+      const statusTitle = document.getElementById('proc-step-title');
+      const detailsText = document.getElementById('proc-details-text');
+
+      statusTitle.textContent = isClip ? 'Cutting & Transcoding Clip...' : 'Extracting Video Stream...';
+      detailsText.textContent = 'Server is processing video segment...';
+
+      const MAX_WAIT_SECONDS = 300; // 5 min maximum
+      let elapsed = 0;
+
+      pollInterval = setInterval(async () => {
+        elapsed += 2;
+
+        if (elapsed >= MAX_WAIT_SECONDS) {
+          clearInterval(pollInterval);
+          clearInterval(procTimerInterval);
+          hideProcessingBox();
+          resetPrimaryButton();
+          showToast('Job timed out. YouTube may be throttling server streams. Please retry.', true);
+          return;
+        }
+
+        try {
+          const statusResp = await fetch(`${API}/status/${jobId}`);
+          if (!statusResp.ok) throw new Error('Could not check job status');
+
+          const job = await statusResp.json();
+
+          if (job.status === 'queued') {
+            detailsText.textContent = 'Task queued — waiting for server worker...';
+          } else if (job.status === 'downloading') {
+            detailsText.textContent = isClip
+              ? `Trimming segment ${formatSeconds(clipStartSec)} &rarr; ${formatSeconds(clipEndSec)}...`
+              : 'Downloading full video stream from YouTube...';
+          } else if (job.status === 'done') {
+            clearInterval(pollInterval);
+            clearInterval(procTimerInterval);
+            statusTitle.textContent = '✅ Completed!';
+            detailsText.textContent = 'Starting file download...';
+
+            setTimeout(() => {
+              window.location.href = `${API}/file/${jobId}`;
+              showToast('✅ Download started successfully!');
+              hideProcessingBox();
+              resetPrimaryButton();
+            }, 800);
+
+          } else if (job.status === 'error') {
+            clearInterval(pollInterval);
+            clearInterval(procTimerInterval);
+            hideProcessingBox();
+            resetPrimaryButton();
+            showToast(job.error || 'Processing error on server. Try another quality.', true);
+          }
+        } catch(err) {
+          // Network hiccup during poll — will retry next tick
+        }
+      }, 2000);
+    }
+
+    function showProcessingBox(title) {
+      const box = document.getElementById('processing-card');
+      box.classList.add('visible');
+      document.getElementById('proc-step-title').textContent = title;
+      document.getElementById('proc-timer').textContent = '0s';
+    }
+
+    function hideProcessingBox() {
+      document.getElementById('processing-card').classList.remove('visible');
+      clearInterval(pollInterval);
+      clearInterval(procTimerInterval);
+    }
+
+    function resetPrimaryButton() {
+      const btn = document.getElementById('primary-action-btn');
       btn.disabled = false;
-      btn.classList.add('glowing');
-      return; // ✅ success — exit loop
-
-    } catch(e) {
-      lastError = e;
-      // Only retry on network errors (cold start), not on 4xx errors
-      const isNetworkErr = (e.name === 'TypeError' || e.name === 'AbortError' || e.message === 'Failed to fetch');
-      if (!isNetworkErr || attempt === MAX_RETRIES) break;
-    }
-  }
-
-  // All retries failed
-  completeFetchLoader(mode, false);
-  // All retries failed — show error
-  const errMsg = lastError
-    ? (lastError.message === 'Failed to fetch' || lastError.name === 'AbortError'
-        ? '⚠️ Server is starting up. Please try again in 30 seconds.'
-        : lastError.message)
-    : 'Something went wrong. Please try again.';
-  showToast(errMsg, true);
-  btn.textContent = mode === 'clip' ? "Get Video" : "Continue";
-  btn.disabled = false;
-  btn.classList.add('glowing');
-}
-
-function selectRes(mode, val, el) {
-  const gridId = mode === 'clip' ? 'clip-res-grid' : 'dl-res-grid';
-  document.querySelectorAll(`#${gridId} .res-btn`).forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  if (mode === 'clip') { clipRes = val; onClipSettingsChange(); }
-  else { dlRes = val; checkDlReady(); }
-}
-
-// ── CLIP LOGIC ────────────────────────────────────────────
-function onClipSettingsChange() {
-  const s = document.getElementById('clip-start').value.trim();
-  const e = document.getElementById('clip-end').value.trim();
-  const ready = s.length >= 4 && e.length >= 4;
-  const btn = document.getElementById('clip-dl-btn');
-  btn.disabled = !ready;
-  btn.classList.toggle('ready', ready);
-}
-
-async function startClip() {
-  const url   = document.getElementById('clip-url').value.trim();
-  const start = document.getElementById('clip-start').value.trim();
-  const end   = document.getElementById('clip-end').value.trim();
-  const btn   = document.getElementById('clip-dl-btn');
-
-  btn.classList.remove('ready');
-  btn.classList.add('loading');
-  btn.textContent = '⏳ Processing...';
-  btn.disabled = true;
-
-  showProgress('clip', 10, 'Sending request...');
-
-  try {
-    const resp = await fetch(`${API}/clip`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ url, start, end, quality: clipRes === 'Audio only' ? 'audio' : clipRes })
-    });
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.detail || "Failed to start clip");
-    }
-    const data = await resp.json();
-    clipJobId = data.job_id;
-    pollJob('clip', clipJobId);
-  } catch(e) {
-    showToast(e.message, true);
-    resetBtn('clip');
-  }
-}
-
-// ── DOWNLOAD LOGIC ────────────────────────────────────────
-function checkDlReady() {
-  const btn = document.getElementById('dl-dl-btn');
-  btn.disabled = false;
-  btn.classList.add('ready');
-}
-
-async function startDownload() {
-  const url = document.getElementById('dl-url').value.trim();
-  const btn = document.getElementById('dl-dl-btn');
-
-  btn.classList.remove('ready');
-  btn.classList.add('loading');
-  btn.textContent = '⏳ Processing...';
-  btn.disabled = true;
-
-  showProgress('dl', 10, 'Preparing download...');
-
-  try {
-    const resp = await fetch(`${API}/download`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ url, quality: dlRes === 'Audio only' ? 'audio' : dlRes })
-    });
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.detail || "Failed to start download");
-    }
-    const data = await resp.json();
-    dlJobId = data.job_id;
-    pollJob('dl', dlJobId);
-  } catch(e) {
-    showToast(e.message, true);
-    resetBtn('dl');
-  }
-}
-
-// ── POLLING ───────────────────────────────────────────────
-function pollJob(mode, jobId) {
-  let pct = 15;
-  let elapsed = 0;
-  const MAX_SEC = 300; // 5 min timeout
-
-  const messages = [
-    'Connecting to YouTube...',
-    'Fetching video stream...',
-    'Downloading...',
-    'Almost there...',
-  ];
-  let msgIdx = 0;
-
-  const interval = setInterval(async () => {
-    elapsed += 2;
-
-    // Timeout guard
-    if (elapsed >= MAX_SEC) {
-      clearInterval(interval);
-      showToast('Download timed out. YouTube may be blocking the request. Try again later.', true);
-      resetBtn(mode);
-      hideProgress(mode);
-      return;
+      btn.classList.remove('processing');
+      updatePrimaryButtonState();
     }
 
-    try {
-      const resp = await fetch(`${API}/status/${jobId}`);
-      const job  = await resp.json();
-
-      if (job.status === 'queued') {
-        showProgress(mode, pct, 'Queued — waiting to start...');
-      } else if (job.status === 'downloading') {
-        pct = Math.min(pct + 8, 88);
-        if (elapsed % 6 === 0) msgIdx = Math.min(msgIdx + 1, messages.length - 1);
-        showProgress(mode, pct, messages[msgIdx]);
-      } else if (job.status === 'done') {
-        clearInterval(interval);
-        showProgress(mode, 100, 'Done! Starting download...');
-        setTimeout(() => {
-          window.location.href = `${API}/file/${jobId}`;
-          showToast('✅ Download started!');
-          resetBtn(mode);
-          hideProgress(mode);
-        }, 800);
-      } else if (job.status === 'error') {
-        clearInterval(interval);
-        showToast(job.error || 'Something went wrong. Try again.', true);
-        resetBtn(mode);
-        hideProgress(mode);
-      }
-    } catch(e) {
-      clearInterval(interval);
-      showToast('Network error. Please try again.', true);
-      resetBtn(mode);
-      hideProgress(mode);
+    // ── TIME CONVERSION UTILITIES ─────────────────────────────
+    function formatSeconds(totalSec) {
+      const sec = Math.max(0, Math.floor(totalSec || 0));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      if (h > 0) return `${pad(h)}:${pad(m)}:${pad(s)}`;
+      return `00:${pad(m)}:${pad(s)}`;
     }
-  }, 2000);
-}
 
-// ── HELPERS ───────────────────────────────────────────────
-function showProgress(mode, pct, text) {
-  const wrap = document.getElementById(mode === 'clip' ? 'clip-progress' : 'dl-progress');
-  const bar  = document.getElementById(mode === 'clip' ? 'clip-bar' : 'dl-bar');
-  const txt  = document.getElementById(mode === 'clip' ? 'clip-progress-text' : 'dl-progress-text');
-  wrap.classList.add('visible');
-  bar.style.width = pct + '%';
-  txt.textContent = text;
-}
+    function parseTimeString(str) {
+      if (!str) return null;
+      const parts = str.trim().split(':').map(Number);
+      if (parts.some(isNaN)) return null;
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+      if (parts.length === 1) return parts[0];
+      return null;
+    }
 
-function hideProgress(mode) {
-  document.getElementById(mode === 'clip' ? 'clip-progress' : 'dl-progress').classList.remove('visible');
-}
+    // ── TOAST NOTIFICATION ────────────────────────────────────
+    let toastTimeout = null;
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + (isError ? 'error' : 'success');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        t.className = 'toast';
+      }, 3800);
+    }
 
-function resetBtn(mode) {
-  const btn = document.getElementById(mode === 'clip' ? 'clip-dl-btn' : 'dl-dl-btn');
-  btn.classList.remove('loading');
-  btn.classList.add('ready');
-  btn.disabled = false;
-  btn.textContent = mode === 'clip' ? '⬇ Download Clip' : '⬇ Download Video';
-}
-
-function formatDur(sec) {
-  if (!sec) return 'Unknown';
-  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
-  if (h > 0) return `${h}h ${m}m ${s}s`;
-  return `${m}m ${s}s`;
-}
-
-let toastTimer;
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (isError ? ' error' : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
-}
-
-// ── FAQ TOGGLE ────────────────────────────────────────────
-function toggleFaq(btn) {
-  const item = btn.closest('.faq-item');
-  const isOpen = item.classList.contains('open');
-  // Close all
-  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
-  // Open clicked if it was closed
-  if (!isOpen) item.classList.add('open');
-}
-
-</script>
+    // ── FAQ ACCORDION TOGGLE ──────────────────────────────────
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+  </script>
 </body>
 </html>
