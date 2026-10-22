@@ -22,9 +22,22 @@ jobs: dict = {}
 
 # Universal Cookie Resolver (Env var or Secret File)
 def get_cookies_file() -> str | None:
-    # 1. Check all env vars containing "COOKIE" (case-insensitive)
+    """Find valid YouTube cookies from /etc/secrets, env vars, or local files."""
+    # 1. Check secret files in /etc/secrets (resolve symlinks, look for youtube.com)
+    sec_dir = Path("/etc/secrets")
+    if sec_dir.exists():
+        for f in sec_dir.rglob("*"):
+            if f.is_file() and not f.name.startswith(".."):
+                try:
+                    content = f.read_text(encoding="utf-8", errors="ignore")
+                    if "youtube.com" in content:
+                        return str(f)
+                except Exception:
+                    pass
+
+    # 2. Check env vars containing actual youtube.com cookie lines
     for k, v in os.environ.items():
-        if "COOKIE" in k.upper() and v.strip():
+        if ("COOKIE" in k.upper() or "YT" in k.upper()) and "youtube.com" in v:
             content = v.strip()
             if "\\n" in content and "\n" not in content:
                 content = content.replace("\\n", "\n")
@@ -33,20 +46,16 @@ def get_cookies_file() -> str | None:
             cf.close()
             return cf.name
 
-    # 2. Check known secret file locations
-    for p_str in ["/etc/secrets/cookies.txt", "/etc/secrets/yt_cookies.txt", "cookies.txt", "yt_cookies.txt"]:
-        p = Path(p_str)
-        if p.exists() and p.stat().st_size > 0:
-            return str(p)
-        parent_p = Path(__file__).parent / p_str
-        if parent_p.exists() and parent_p.stat().st_size > 0:
-            return str(parent_p)
-
-    # 3. Check any file in /etc/secrets directory
-    if Path("/etc/secrets").exists():
-        for f in Path("/etc/secrets").glob("*"):
-            if f.is_file() and f.stat().st_size > 0:
-                return str(f)
+    # 3. Local file fallback
+    for name in ["cookies.txt", "yt_cookies.txt"]:
+        for p in [Path(name), Path(__file__).parent / name]:
+            if p.exists() and p.is_file():
+                try:
+                    content = p.read_text(encoding="utf-8", errors="ignore")
+                    if "youtube.com" in content:
+                        return str(p)
+                except Exception:
+                    pass
 
     return None
 
@@ -133,13 +142,29 @@ def fetch_oembed(url: str) -> dict | None:
 @app.get("/version")
 async def version():
     cf = get_cookies_file()
+    cf_details = {}
+    if cf:
+        try:
+            p = Path(cf)
+            cf_details = {"path": str(p), "size": p.stat().st_size}
+        except Exception as e:
+            cf_details = {"error": str(e)}
+
+    # List files in /etc/secrets
+    sec_files = []
+    if Path("/etc/secrets").exists():
+        for f in Path("/etc/secrets").rglob("*"):
+            if f.is_file():
+                sec_files.append({"name": f.name, "path": str(f), "size": f.stat().st_size})
+
     env_cookie_keys = [k for k in os.environ.keys() if "COOKIE" in k.upper() or "YT" in k.upper()]
-    secrets = [f.name for f in Path("/etc/secrets").glob("*")] if Path("/etc/secrets").exists() else []
+
     return {
-        "version": "2.4-robust-mp4-formats",
+        "version": "2.5-verified-youtube-cookies",
         "has_cookies": bool(cf),
-        "env_keys_detected": env_cookie_keys,
-        "secrets_detected": secrets
+        "cookie_file": cf_details,
+        "env_keys": env_cookie_keys,
+        "secret_files": sec_files
     }
 
 @app.get("/diag")
