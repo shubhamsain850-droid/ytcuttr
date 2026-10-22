@@ -20,20 +20,35 @@ CLIPS_DIR.mkdir(exist_ok=True)
 
 jobs: dict = {}
 
-# Cookie support via env variable or Render secret file
-COOKIES_FILE = None
-_cookies_content = os.environ.get("YT_COOKIES", "").strip()
-if _cookies_content:
-    if "\\n" in _cookies_content and "\n" not in _cookies_content:
-        _cookies_content = _cookies_content.replace("\\n", "\n")
-    _cf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
-    _cf.write(_cookies_content)
-    _cf.close()
-    COOKIES_FILE = _cf.name
-elif os.path.exists("/etc/secrets/cookies.txt"):
-    COOKIES_FILE = "/etc/secrets/cookies.txt"
-elif (Path(__file__).parent / "cookies.txt").exists():
-    COOKIES_FILE = str(Path(__file__).parent / "cookies.txt")
+# Universal Cookie Resolver (Env var or Secret File)
+def get_cookies_file() -> str | None:
+    # 1. Check all env vars containing "COOKIE" (case-insensitive)
+    for k, v in os.environ.items():
+        if "COOKIE" in k.upper() and v.strip():
+            content = v.strip()
+            if "\\n" in content and "\n" not in content:
+                content = content.replace("\\n", "\n")
+            cf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+            cf.write(content)
+            cf.close()
+            return cf.name
+
+    # 2. Check known secret file locations
+    for p_str in ["/etc/secrets/cookies.txt", "/etc/secrets/yt_cookies.txt", "cookies.txt", "yt_cookies.txt"]:
+        p = Path(p_str)
+        if p.exists() and p.stat().st_size > 0:
+            return str(p)
+        parent_p = Path(__file__).parent / p_str
+        if parent_p.exists() and parent_p.stat().st_size > 0:
+            return str(parent_p)
+
+    # 3. Check any file in /etc/secrets directory
+    if Path("/etc/secrets").exists():
+        for f in Path("/etc/secrets").glob("*"):
+            if f.is_file() and f.stat().st_size > 0:
+                return str(f)
+
+    return None
 
 # Player clients to try (in order).
 # Do not force fake user-agent, let yt-dlp send matching native headers.
@@ -89,8 +104,9 @@ def build_ytdlp_cmd(extra: list = [], client_override: str = None) -> list:
         "--rm-cache-dir",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
     ]
-    if COOKIES_FILE:
-        cmd += ["--cookies", COOKIES_FILE]
+    cf = get_cookies_file()
+    if cf:
+        cmd += ["--cookies", cf]
     else:
         chosen = client_override if client_override else ",".join(PLAYER_CLIENTS)
         cmd += ["--extractor-args", f"youtube:player_client={chosen}"]
@@ -116,10 +132,14 @@ def fetch_oembed(url: str) -> dict | None:
 
 @app.get("/version")
 async def version():
+    cf = get_cookies_file()
+    env_cookie_keys = [k for k in os.environ.keys() if "COOKIE" in k.upper() or "YT" in k.upper()]
+    secrets = [f.name for f in Path("/etc/secrets").glob("*")] if Path("/etc/secrets").exists() else []
     return {
-        "version": "2.2-local-cut-fix",
-        "clients": PLAYER_CLIENTS,
-        "has_cookies": bool(COOKIES_FILE)
+        "version": "2.3-universal-cookie-detect",
+        "has_cookies": bool(cf),
+        "env_keys_detected": env_cookie_keys,
+        "secrets_detected": secrets
     }
 
 @app.get("/diag")
