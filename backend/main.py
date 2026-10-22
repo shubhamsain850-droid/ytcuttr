@@ -31,7 +31,7 @@ if _cookies_content:
 
 # ── Player clients to try (in order) ────────────────────
 # These clients are less likely to trigger bot detection
-PLAYER_CLIENTS = ["android_vr", "mweb", "web_creator", "web"]
+PLAYER_CLIENTS = ["android", "ios"]
 
 # ── Models ──────────────────────────────────────────────
 class InfoRequest(BaseModel):
@@ -65,12 +65,12 @@ def to_hms(s: int) -> str:
     return f"{h:02d}:{m:02d}:{sec:02d}"
 
 QUALITY_MAP = {
-    "2160p": "bestvideo[height<=2160][ext=mp4]+bestaudio[ext=m4a]/best[height<=2160]",
-    "1080p": "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
-    "720p":  "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720]",
-    "480p":  "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480]",
-    "360p":  "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/best[height<=360]",
-    "audio": "bestaudio[ext=m4a]/bestaudio",
+    "2160p": "bestvideo[height<=2160]+bestaudio/best[height<=2160]/best",
+    "1080p": "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
+    "720p":  "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+    "480p":  "bestvideo[height<=480]+bestaudio/best[height<=480]/best",
+    "360p":  "bestvideo[height<=360]+bestaudio/best[height<=360]/best",
+    "audio": "bestaudio/best",
 }
 
 def build_ytdlp_cmd(extra: list = []) -> list:
@@ -217,6 +217,18 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     try:
         jobs[job_id]["status"] = "downloading"
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        if r.returncode != 0 or not out_path.exists():
+            # Robust fallback retry with 'best' format
+            fallback_cmd = build_ytdlp_cmd([
+                "--download-sections", f"*{start_hms}-{end_hms}",
+                "--force-keyframes-at-cuts",
+                "-f", "best",
+                "--merge-output-format", ext,
+                "-o", str(out_path),
+                url,
+            ])
+            r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=300)
+
         if r.returncode == 0 and out_path.exists():
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)
@@ -248,6 +260,16 @@ def _run_download(job_id: str, url: str, quality: str):
     try:
         jobs[job_id]["status"] = "downloading"
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        if r.returncode != 0 or not out_path.exists():
+            # Robust fallback retry with 'best' format
+            fallback_cmd = build_ytdlp_cmd([
+                "-f", "best",
+                "--merge-output-format", ext,
+                "-o", str(out_path),
+                url,
+            ])
+            r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=600)
+
         if r.returncode == 0 and out_path.exists():
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)

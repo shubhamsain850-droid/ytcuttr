@@ -3013,18 +3013,33 @@ footer a { color: var(--red); text-decoration: none; }
             detailsText.textContent = 'Starting file download...';
 
             setTimeout(() => {
-              window.location.href = `${API}/file/${jobId}`;
+              const fileUrl = `${API}/file/${jobId}`;
+              try {
+                const a = document.createElement('a');
+                a.href = fileUrl;
+                a.download = job.filename || (isClip ? 'ytcuttr_clip.mp4' : 'ytcuttr_video.mp4');
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              } catch(e) {
+                window.location.href = fileUrl;
+              }
               showToast('✅ Download started successfully!');
               hideProcessingBox();
               resetPrimaryButton();
-            }, 800);
+            }, 600);
 
           } else if (job.status === 'error') {
             clearInterval(pollInterval);
             clearInterval(procTimerInterval);
             hideProcessingBox();
             resetPrimaryButton();
-            showToast(job.error || 'Processing error on server. Try another quality.', true);
+            let msg = job.error || 'Processing error on server. Please try again.';
+            if (msg.includes('403') || msg.includes('Forbidden')) {
+              msg = 'YouTube stream temporarily restricted. Please retry or choose another quality.';
+            }
+            showToast(msg, true);
           }
         } catch(err) {
           // Network hiccup during poll
