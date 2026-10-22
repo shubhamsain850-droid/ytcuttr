@@ -468,11 +468,9 @@
     }
 
     .fetch-btn:disabled {
-      background: #cbd5e1;
-      color: #94a3b8;
-      cursor: not-allowed;
+      opacity: 0.75;
+      cursor: wait;
       box-shadow: none;
-      transform: none;
     }
 
     /* ── HONEST STATUS NOTIFICATION (No Fake Pct) ── */
@@ -1629,7 +1627,7 @@ footer a { color: var(--red); text-decoration: none; }
             </button>
           </div>
 
-          <button type="button" class="fetch-btn" id="fetch-video-btn" onclick="handleFetchClick()" disabled>
+          <button type="button" class="fetch-btn" id="fetch-video-btn" onclick="handleFetchClick()">
             <span>Get Video</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
@@ -2578,6 +2576,7 @@ footer a { color: var(--red); text-decoration: none; }
     function extractVideoId(url) {
       if (!url) return null;
       const clean = url.trim();
+      if (/^[0-9A-Za-z_-]{11}$/.test(clean)) return clean;
       const reg = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/i;
       const m = clean.match(reg);
       return m ? m[1] : null;
@@ -2586,11 +2585,7 @@ footer a { color: var(--red); text-decoration: none; }
     function handleUrlInputChange() {
       const val = document.getElementById('main-url-input').value.trim();
       const clearBtn = document.getElementById('url-clear-btn');
-      const fetchBtn = document.getElementById('fetch-video-btn');
-      const isYT = !!extractVideoId(val);
-
       if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
-      if (fetchBtn) fetchBtn.disabled = !isYT;
     }
 
     function clearUrlInput() {
@@ -2601,10 +2596,19 @@ footer a { color: var(--red); text-decoration: none; }
     }
 
     function handleFetchClick() {
-      const val = document.getElementById('main-url-input').value.trim();
+      const input = document.getElementById('main-url-input');
+      const val = input.value.trim();
+      if (!val) {
+        input.focus();
+        showStatus('Please paste a YouTube URL first', 'error', false);
+        showToast('Please paste a YouTube URL first', true);
+        return;
+      }
       const vid = extractVideoId(val);
       if (!vid) {
+        input.focus();
         showStatus('Please enter a valid YouTube video or Shorts link.', 'error', false);
+        showToast('Please enter a valid YouTube video or Shorts link.', true);
         return;
       }
       fetchVideoData(val, vid);
