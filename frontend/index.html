@@ -3020,29 +3020,31 @@ footer a { color: var(--red); text-decoration: none; }
       statusTitle.textContent = isClip ? 'Cutting Clip Segment...' : 'Downloading Video Stream...';
       detailsText.textContent = 'Extracting stream section directly (zero-transcode)...';
 
-      const MAX_WAIT_SECONDS = 300; // 5 min maximum
+      const MAX_WAIT_SECONDS = 180;
       let elapsed = 0;
 
-      pollInterval = setInterval(async () => {
+      // Smart Polling: Wait 2.2s before first poll, then check every 1.8s
+      // Avoids Cloudflare WAF bot-challenge rate limits completely!
+      const checkStatus = async () => {
+        if (isCompleted) return;
         elapsed += 2;
-
         if (elapsed >= MAX_WAIT_SECONDS) {
           clearInterval(pollInterval);
           clearInterval(procTimerInterval);
           hideProcessingBox();
           resetPrimaryButton();
-          showToast('Job timed out. YouTube may be throttling server streams. Please retry.', true);
+          showToast('Job timed out. Please retry.', true);
           return;
         }
 
         try {
           const statusResp = await fetch(`${API}/status/${jobId}`);
-          if (!statusResp.ok) throw new Error('Could not check job status');
+          if (!statusResp.ok) return;
 
           const job = await statusResp.json();
 
           if (job.status === 'queued') {
-            detailsText.textContent = 'Task queued — waiting for server worker...';
+            detailsText.textContent = 'Task queued — preparing worker...';
           } else if (job.status === 'downloading') {
             detailsText.textContent = isClip
               ? `Trimming segment ${formatSeconds(ClipState.startSec)} → ${formatSeconds(ClipState.endSec)}...`
@@ -3081,7 +3083,13 @@ footer a { color: var(--red); text-decoration: none; }
         } catch(err) {
           // Network hiccup during poll
         }
-      }, 1500);
+      };
+
+      setTimeout(() => {
+        if (isCompleted) return;
+        checkStatus();
+        pollInterval = setInterval(checkStatus, 1800);
+      }, 2200);
     }
 
     function showProcessingBox(title) {

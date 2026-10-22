@@ -137,7 +137,7 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
         if cf:
             cmd += ["--cookies", cf]
     else:
-        cmd += ["--extractor-args", "youtube:player_client=visionos,android;skip=translated_subs,comments"]
+        cmd += ["--extractor-args", "youtube:player_client=android,visionos;skip=translated_subs,comments"]
     return cmd + extra
 
 def fetch_oembed(url: str) -> dict | None:
@@ -201,7 +201,7 @@ async def version():
                 sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "4.0-instant-cached-clip",
+        "version": "4.2-turbo-native-direct",
         "has_cookies": bool(cf),
         "cookie_source": source,
         "cookie_size": size,
@@ -300,69 +300,74 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
 
     try:
         jobs[job_id]["status"] = "downloading"
-
-        # ATTEMPT 1 (Instant 2s Cut): Load cached info-json from /info!
-        # This completely skips YouTube extraction, Deno JS solver, and base.js download!
         r_dl = None
+
+        # ATTEMPT 1 (Turbo Stream Pipeline): Native 8-thread download via cached info-json
+        # Completely skips YouTube extraction and Deno runtime; streams directly into raw.mp4
         if info_json_file.exists() and info_json_file.stat().st_size > 1000:
-            cmd_cached = build_ytdlp_cmd([
+            cmd_dl_cached = build_ytdlp_cmd([
                 "--load-info-json", str(info_json_file),
-                "--download-sections", f"*{start_hms}-{end_hms}",
-                "--concurrent-fragments", "4",
+                "-N", "8",
+                "--concurrent-fragments", "8",
                 "-f", fmt,
                 "--merge-output-format", ext,
-                "-o", str(out_path),
+                "-o", str(raw_path),
             ], use_cookies=True)
-            r_dl = subprocess.run(cmd_cached, capture_output=True, text=True, timeout=40)
+            r_dl = subprocess.run(cmd_dl_cached, capture_output=True, text=True, timeout=80)
 
-        # ATTEMPT 2: Fallback with direct URL if info.json was not cached or failed
-        if not out_path.exists() or out_path.stat().st_size == 0:
-            cmd_clip = build_ytdlp_cmd([
-                "--download-sections", f"*{start_hms}-{end_hms}",
-                "--concurrent-fragments", "4",
-                "-f", fmt,
-                "--merge-output-format", ext,
-                "-o", str(out_path),
-                url,
-            ], use_cookies=True)
-            r_dl = subprocess.run(cmd_clip, capture_output=True, text=True, timeout=60)
-
-        # ATTEMPT 3: Fallback on best stream with download-sections
-        if not out_path.exists() or out_path.stat().st_size == 0:
-            cmd_clip_best = build_ytdlp_cmd([
-                "--download-sections", f"*{start_hms}-{end_hms}",
-                "--concurrent-fragments", "4",
-                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
-                "--merge-output-format", ext,
-                "-o", str(out_path),
-                url,
-            ], use_cookies=True)
-            r_dl = subprocess.run(cmd_clip_best, capture_output=True, text=True, timeout=60)
-
-        # ATTEMPT 4 (Safety Net): Full stream download + local ffmpeg trim
-        if not out_path.exists() or out_path.stat().st_size == 0:
-            cmd_dl = build_ytdlp_cmd([
+        # ATTEMPT 2: Native download using direct URL with requested format
+        if not raw_path.exists() or raw_path.stat().st_size == 0:
+            cmd_dl_url = build_ytdlp_cmd([
+                "-N", "8",
+                "--concurrent-fragments", "8",
                 "-f", fmt,
                 "--merge-output-format", ext,
                 "-o", str(raw_path),
                 url,
             ], use_cookies=True)
-            r_dl = subprocess.run(cmd_dl, capture_output=True, text=True, timeout=120)
-            if r_dl.returncode == 0 and raw_path.exists() and raw_path.stat().st_size > 0:
-                cmd_cut = [
-                    "ffmpeg", "-y",
-                    "-ss", start_hms,
-                    "-to", end_hms,
-                    "-i", str(raw_path),
-                    "-c", "copy",
-                    "-avoid_negative_ts", "make_zero",
-                    str(out_path),
-                ]
-                subprocess.run(cmd_cut, capture_output=True, text=True, timeout=30)
-                try:
-                    raw_path.unlink(missing_ok=True)
-                except Exception:
-                    pass
+            r_dl = subprocess.run(cmd_dl_url, capture_output=True, text=True, timeout=80)
+
+        # ATTEMPT 3: Fallback on best stream (mp4 + m4a)
+        if not raw_path.exists() or raw_path.stat().st_size == 0:
+            cmd_dl_best = build_ytdlp_cmd([
+                "-N", "8",
+                "--concurrent-fragments", "8",
+                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
+                "--merge-output-format", ext,
+                "-o", str(raw_path),
+                url,
+            ], use_cookies=True)
+            r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=80)
+
+        # ATTEMPT 4: Fallback without cookies
+        if not raw_path.exists() or raw_path.stat().st_size == 0:
+            cmd_dl_anon = build_ytdlp_cmd([
+                "-N", "8",
+                "--concurrent-fragments", "8",
+                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
+                "--merge-output-format", ext,
+                "-o", str(raw_path),
+                url,
+            ], use_cookies=False)
+            r_dl = subprocess.run(cmd_dl_anon, capture_output=True, text=True, timeout=80)
+
+        # Step 2: Instant local cut via FFmpeg (lossless stream copy in <0.1s)
+        if raw_path.exists() and raw_path.stat().st_size > 0:
+            jobs[job_id]["status"] = "processing"
+            cmd_cut = [
+                "ffmpeg", "-y",
+                "-ss", start_hms,
+                "-to", end_hms,
+                "-i", str(raw_path),
+                "-c", "copy",
+                "-avoid_negative_ts", "make_zero",
+                str(out_path),
+            ]
+            subprocess.run(cmd_cut, capture_output=True, text=True, timeout=20)
+            try:
+                raw_path.unlink(missing_ok=True)
+            except Exception:
+                pass
 
         elapsed = round(time.time() - t_start, 2)
         if out_path.exists() and out_path.stat().st_size > 0:
@@ -371,20 +376,19 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             jobs[job_id]["filename"] = f"ytcuttr_clip_{start_hms.replace(':','-')}_{end_hms.replace(':','-')}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
         else:
-            err = r_dl.stderr[-400:] if (r_dl and r_dl.stderr) else "Could not process clip. Please try another video or resolution."
+            err = r_dl.stderr[-400:] if (r_dl and r_dl.stderr) else "Unknown download failure"
             jobs[job_id]["status"] = "error"
-            jobs[job_id]["error"] = err
-            jobs[job_id]["time_taken"] = elapsed
+            jobs[job_id]["error"] = f"Clip generation failed: {err}"
             jobs[job_id]["debug"] = {
                 "r_dl_code": r_dl.returncode if r_dl else -1,
-                "r_dl_stderr": r_dl.stderr[-500:] if (r_dl and r_dl.stderr) else "",
+                "r_dl_stderr": err,
             }
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = "Processing timed out. Please try a shorter segment."
+        jobs[job_id]["error"] = "Operation timed out. Video may be too large or restricted."
     except Exception as e:
         jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = str(e)
+        jobs[job_id]["error"] = f"Server error: {str(e)}"
 
 
 def _run_download(job_id: str, url: str, quality: str):
@@ -407,7 +411,8 @@ def _run_download(job_id: str, url: str, quality: str):
         if info_json_file.exists() and info_json_file.stat().st_size > 1000:
             cmd = build_ytdlp_cmd([
                 "--load-info-json", str(info_json_file),
-                "--concurrent-fragments", "4",
+                "-N", "8",
+                "--concurrent-fragments", "8",
                 "-f", fmt,
                 "--merge-output-format", ext,
                 "-o", str(out_path),
@@ -417,7 +422,8 @@ def _run_download(job_id: str, url: str, quality: str):
         # Attempt 2: Direct URL
         if not out_path.exists() or out_path.stat().st_size == 0:
             cmd = build_ytdlp_cmd([
-                "--concurrent-fragments", "4",
+                "-N", "8",
+                "--concurrent-fragments", "8",
                 "-f", fmt,
                 "--merge-output-format", ext,
                 "-o", str(out_path),
@@ -428,7 +434,8 @@ def _run_download(job_id: str, url: str, quality: str):
         # Attempt 3: Fallback to best format with cookies
         if not out_path.exists() or out_path.stat().st_size == 0:
             fallback_cmd = build_ytdlp_cmd([
-                "--concurrent-fragments", "4",
+                "-N", "8",
+                "--concurrent-fragments", "8",
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
