@@ -2988,17 +2988,6 @@ footer a { color: var(--red); text-decoration: none; }
     // ── JOB POLLING (Honest Status Feedback) ──────────────────
     function triggerDirectDownload(fileUrl, fileName) {
       try {
-        let frame = document.getElementById('dl-hidden-frame');
-        if (!frame) {
-          frame = document.createElement('iframe');
-          frame.id = 'dl-hidden-frame';
-          frame.style.display = 'none';
-          document.body.appendChild(frame);
-        }
-        frame.src = fileUrl;
-      } catch(e) {}
-
-      try {
         const a = document.createElement('a');
         a.href = fileUrl;
         if (fileName) a.download = fileName;
@@ -3008,10 +2997,13 @@ footer a { color: var(--red); text-decoration: none; }
         setTimeout(() => {
           if (a.parentNode) a.parentNode.removeChild(a);
         }, 1000);
-      } catch(e) {}
+      } catch(e) {
+        window.location.assign(fileUrl);
+      }
     }
 
     function pollJobStatus(jobId, isClip) {
+      let isCompleted = false;
       procSeconds = 0;
       clearInterval(procTimerInterval);
       clearInterval(pollInterval);
@@ -3056,6 +3048,8 @@ footer a { color: var(--red); text-decoration: none; }
               ? `Trimming segment ${formatSeconds(ClipState.startSec)} → ${formatSeconds(ClipState.endSec)}...`
               : 'Downloading full video stream from YouTube...';
           } else if (job.status === 'done') {
+            if (isCompleted) return;
+            isCompleted = true;
             clearInterval(pollInterval);
             clearInterval(procTimerInterval);
             const fileUrl = `${API}/file/${jobId}`;
