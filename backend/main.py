@@ -134,6 +134,20 @@ def fetch_oembed(url: str) -> dict | None:
 
 # Routes
 
+
+@app.get("/diag")
+async def diag(url: str = "https://www.youtube.com/watch?v=aqz-KE-bpKQ"):
+    results = {}
+    for client in ["visionos,android", "android", "web", "visionos"]:
+        cmd = ["yt-dlp", "-4", "--no-warnings", "--extractor-args", f"youtube:player_client={client}", "-F", url]
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=20)
+        results[client] = {
+            "code": r.returncode,
+            "stdout_sample": [l for l in r.stdout.splitlines() if any(x in l for x in ["mp4", "webm", "18", "398", "720"])][:3],
+            "stderr": r.stderr[-300:] if r.stderr else ""
+        }
+    return results
+
 @app.get("/version")
 async def version():
     cf, source = get_cookies_file()
@@ -154,7 +168,7 @@ async def version():
                 sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "3.4-visionos-bypass",
+        "version": "3.5-diag-enabled",
         "has_cookies": bool(cf),
         "cookie_source": source,
         "cookie_size": size,
@@ -311,6 +325,12 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             err = r_dl.stderr[-400:] if r_dl.stderr else "Could not process clip. Please try another video or resolution."
             jobs[job_id]["status"] = "error"
             jobs[job_id]["error"] = err
+            jobs[job_id]["debug"] = {
+                "r_dl_code": r_dl.returncode,
+                "r_dl_stderr": r_dl.stderr[-500:] if r_dl.stderr else "",
+                "raw_exists": raw_path.exists(),
+                "raw_size": raw_path.stat().st_size if raw_path.exists() else 0
+            }
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = "Processing timed out. Please try a shorter segment."
