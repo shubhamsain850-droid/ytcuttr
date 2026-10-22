@@ -20,14 +20,20 @@ CLIPS_DIR.mkdir(exist_ok=True)
 
 jobs: dict = {}
 
-# Cookie support via env variable
+# Cookie support via env variable or Render secret file
 COOKIES_FILE = None
 _cookies_content = os.environ.get("YT_COOKIES", "").strip()
 if _cookies_content:
+    if "\\n" in _cookies_content and "\n" not in _cookies_content:
+        _cookies_content = _cookies_content.replace("\\n", "\n")
     _cf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
     _cf.write(_cookies_content)
     _cf.close()
     COOKIES_FILE = _cf.name
+elif os.path.exists("/etc/secrets/cookies.txt"):
+    COOKIES_FILE = "/etc/secrets/cookies.txt"
+elif (Path(__file__).parent / "cookies.txt").exists():
+    COOKIES_FILE = str(Path(__file__).parent / "cookies.txt")
 
 # Player clients to try (in order).
 # Do not force fake user-agent, let yt-dlp send matching native headers.
