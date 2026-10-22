@@ -743,37 +743,45 @@
       gap: 20px;
     }
 
-    /* Visual Timeline Scrubber */
+    
+    /* ── ROBUST TIMELINE SCRUBBER (Touch & Pointer Safe) ── */
     .timeline-card {
       background: var(--bg);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 16px 18px;
+      padding: 18px 20px 14px;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .timeline-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      gap: 10px;
     }
 
     .timeline-title {
       font-size: 13px;
       font-weight: 700;
       color: var(--text);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: -0.01em;
     }
 
     .timeline-clip-len {
       font-family: var(--mono);
-      font-size: 12.5px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: var(--white);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
       border: 1px solid var(--border);
+      background: var(--white);
+      white-space: nowrap;
+      transition: var(--transition);
     }
     .timeline-clip-len.valid {
       color: var(--success);
@@ -786,151 +794,204 @@
       background: var(--error-bg);
     }
 
-    /* Dual Range Track */
-    .slider-container {
+    /* Track Container & Dragging Surface */
+    .timeline-scrubber {
       position: relative;
-      height: 36px;
+      height: 48px;
       display: flex;
       align-items: center;
+      touch-action: none;
+      cursor: pointer;
     }
 
-    .slider-track-bg {
-      position: absolute;
+    .timeline-rail {
+      position: relative;
       width: 100%;
-      height: 8px;
+      height: 10px;
       background: #cbd5e1;
-      border-radius: 4px;
+      border-radius: 6px;
     }
 
-    .slider-track-highlight {
+    .timeline-segment {
       position: absolute;
-      height: 8px;
+      top: 0;
+      height: 100%;
       background: var(--red);
-      border-radius: 4px;
-      left: 0%;
-      width: 25%;
-    }
-
-    .range-input {
-      position: absolute;
-      width: 100%;
-      height: 8px;
-      background: transparent;
-      -webkit-appearance: none;
+      border-radius: 6px;
       pointer-events: none;
-      margin: 0;
+      box-shadow: 0 0 12px rgba(230, 48, 48, 0.45);
+      left: 0%;
+      width: 50%;
     }
 
-    .range-input::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      pointer-events: auto;
-      width: 22px;
-      height: 22px;
+    /* Draggable Thumbs */
+    .timeline-handle {
+      position: absolute;
+      top: 50%;
+      width: 28px;
+      height: 28px;
+      margin-top: -14px;
+      margin-left: -14px;
       border-radius: 50%;
       background: var(--white);
-      border: 3px solid var(--red);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      border: 3.5px solid var(--red);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
       cursor: grab;
-      transition: transform 0.1s;
+      touch-action: none;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      left: 0%;
     }
-    .range-input::-webkit-slider-thumb:active {
+
+    /* Extended touch target (44px) */
+    .timeline-handle::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      bottom: -10px;
+      left: -10px;
+      right: -10px;
+    }
+
+    .timeline-handle:hover,
+    .timeline-handle:focus-visible {
+      transform: scale(1.18);
+      box-shadow: 0 3px 14px rgba(230, 48, 48, 0.5);
+      outline: none;
+    }
+
+    .timeline-handle.dragging {
       cursor: grabbing;
-      transform: scale(1.15);
-    }
-    .range-input::-moz-range-thumb {
-      pointer-events: auto;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--white);
-      border: 3px solid var(--red);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      cursor: grab;
+      transform: scale(1.25);
+      border-color: #b91c1c;
+      box-shadow: 0 4px 18px rgba(185, 28, 28, 0.55);
+      z-index: 25;
     }
 
-    /* Manual Timestamp Boxes with Nudges */
+    .timeline-handle .handle-center-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--red);
+      pointer-events: none;
+    }
+
+    .timeline-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── ROBUST TIME INPUT CARDS (Full Width & No Clipping) ── */
     .time-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 580px) {
+      .time-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
     }
 
     .time-field-box {
       background: var(--bg);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 12px 14px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .time-field-label {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text);
     }
     .time-field-label span {
       font-weight: 500;
       color: var(--muted);
-      font-size: 11px;
-    }
-
-    .time-input-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 11.5px;
+      font-family: var(--mono);
     }
 
     .time-text-input {
       width: 100%;
-      height: 42px;
+      height: 48px;
+      padding: 0 14px;
+      box-sizing: border-box;
+      min-width: 0;
       border: 1.5px solid var(--border);
       border-radius: 8px;
       font-family: var(--mono);
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 17px;
+      font-weight: 700;
       color: var(--text);
+      letter-spacing: 0.5px;
       text-align: center;
       background: var(--white);
       outline: none;
       transition: var(--transition);
+      display: block;
     }
     .time-text-input:focus {
       border-color: var(--red);
+      box-shadow: 0 0 0 3px var(--red-glow);
     }
 
-    .nudge-group {
+    .time-quick-nudges {
       display: flex;
-      gap: 4px;
+      gap: 6px;
     }
+
     .nudge-btn {
-      height: 42px;
-      padding: 0 8px;
+      flex: 1;
+      height: 34px;
+      padding: 0;
       background: var(--white);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 11px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 11.5px;
       font-weight: 600;
-      color: var(--muted);
+      color: var(--text-soft);
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: var(--transition);
     }
     .nudge-btn:hover {
-      color: var(--text);
-      border-color: var(--border-focus);
+      color: var(--red);
+      border-color: var(--red);
+      background: var(--red-subtle);
     }
 
-    /* Validation Message Banner */
     .time-validation-msg {
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
       display: none;
+      margin-top: 12px;
+      line-height: 1.4;
+      animation: fadeIn 0.2s ease;
     }
     .time-validation-msg.visible { display: block; }
     .time-validation-msg.error {
@@ -938,8 +999,7 @@
       color: var(--error);
       border: 1px solid var(--error-bdr);
     }
-
-    /* Resolution Selector */
+/* Resolution Selector */
     .res-section {
       display: flex;
       flex-direction: column;
@@ -1600,54 +1660,97 @@ footer a { color: var(--red); text-decoration: none; }
             <!-- CLIP CUTTER CONTROLS (Only visible in Clip mode) -->
             <div id="clip-controls-group">
 
-              <!-- Interactive Timeline Scrubber -->
+              <!-- Interactive Dual-Handle Timeline Scrubber -->
               <div class="timeline-card">
                 <div class="timeline-header">
-                  <span class="timeline-title">✂️ Clip Range</span>
-                  <span class="timeline-clip-len valid" id="clip-duration-badge">Duration: 00:00</span>
+                  <span class="timeline-title">
+                    <span>✂️</span>
+                    <span>Clip Range Selector</span>
+                  </span>
+                  <span class="timeline-clip-len valid" id="clip-duration-badge">Clip: 00:01:00 (Max 10:00)</span>
                 </div>
 
-                <div class="slider-container" id="slider-container">
-                  <div class="slider-track-bg"></div>
-                  <div class="slider-track-highlight" id="slider-highlight"></div>
-                  <input type="range" class="range-input" id="slider-start" min="0" max="100" value="0" step="1" aria-label="Start time slider" oninput="handleSliderChange('start')">
-                  <input type="range" class="range-input" id="slider-end" min="0" max="100" value="60" step="1" aria-label="End time slider" oninput="handleSliderChange('end')">
-                </div>
-              </div>
-
-              <!-- Manual Timestamp Inputs -->
-              <div class="time-grid" style="margin-top: 14px;">
-                <div class="time-field-box">
-                  <label class="time-field-label" for="clip-start">
-                    Start Time
-                    <span>(HH:MM:SS)</span>
-                  </label>
-                  <div class="time-input-row">
-                    <input type="text" id="clip-start" class="time-text-input" value="00:00:00" placeholder="00:00:00" inputmode="numeric" oninput="handleManualTimeInput('start')">
-                    <div class="nudge-group">
-                      <button type="button" class="nudge-btn" title="Subtract 1 second" onclick="nudgeTime('start', -1)">-1s</button>
-                      <button type="button" class="nudge-btn" title="Add 1 second" onclick="nudgeTime('start', 1)">+1s</button>
+                <!-- Touch & Pointer Draggable Scrubber -->
+                <div class="timeline-scrubber" id="timeline-scrubber" aria-label="Visual Timeline Scrubber">
+                  <div class="timeline-rail" id="timeline-rail">
+                    <div class="timeline-segment" id="timeline-segment"></div>
+                    <div class="timeline-handle" id="handle-start" role="slider" tabindex="0" aria-label="Start Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                      <div class="handle-center-dot"></div>
+                    </div>
+                    <div class="timeline-handle" id="handle-end" role="slider" tabindex="0" aria-label="End Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60">
+                      <div class="handle-center-dot"></div>
                     </div>
                   </div>
                 </div>
 
+                <div class="timeline-ticks">
+                  <span id="timeline-tick-start">00:00:00</span>
+                  <span id="timeline-tick-mid">--:--:--</span>
+                  <span id="timeline-tick-end">--:--:--</span>
+                </div>
+              </div>
+
+              <!-- Manual Timestamp Inputs (Spacious & No-Clipping) -->
+              <div class="time-grid">
+                <!-- Start Time Box -->
                 <div class="time-field-box">
-                  <label class="time-field-label" for="clip-end">
-                    End Time
-                    <span>(HH:MM:SS)</span>
-                  </label>
-                  <div class="time-input-row">
-                    <input type="text" id="clip-end" class="time-text-input" value="00:01:00" placeholder="00:01:00" inputmode="numeric" oninput="handleManualTimeInput('end')">
-                    <div class="nudge-group">
-                      <button type="button" class="nudge-btn" title="Subtract 1 second" onclick="nudgeTime('end', -1)">-1s</button>
-                      <button type="button" class="nudge-btn" title="Add 1 second" onclick="nudgeTime('end', 1)">+1s</button>
-                    </div>
+                  <div class="time-field-label">
+                    <label for="clip-start">Start Timestamp</label>
+                    <span>HH:MM:SS</span>
+                  </div>
+                  <input
+                    type="text"
+                    id="clip-start"
+                    class="time-text-input"
+                    value="00:00:00"
+                    placeholder="00:00:00"
+                    maxlength="8"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                    oninput="handleTimeInputChange('start')"
+                    onblur="handleTimeInputBlur('start')"
+                    onkeydown="if(event.key === 'Enter') this.blur()"
+                  />
+                  <div class="time-quick-nudges" aria-label="Start time micro-adjustments">
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('start', -5)" title="Subtract 5s">-5s</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('start', -1)" title="Subtract 1s">-1s</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('start', 1)" title="Add 1s">+1s</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('start', 5)" title="Add 5s">+5s</button>
+                  </div>
+                </div>
+
+                <!-- End Time Box -->
+                <div class="time-field-box">
+                  <div class="time-field-label">
+                    <label for="clip-end">End Timestamp</label>
+                    <span>HH:MM:SS</span>
+                  </div>
+                  <input
+                    type="text"
+                    id="clip-end"
+                    class="time-text-input"
+                    value="00:01:00"
+                    placeholder="00:01:00"
+                    maxlength="8"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                    oninput="handleTimeInputChange('end')"
+                    onblur="handleTimeInputBlur('end')"
+                    onkeydown="if(event.key === 'Enter') this.blur()"
+                  />
+                  <div class="time-quick-nudges" aria-label="End time micro-adjustments">
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('end', -5)" title="Subtract 5s">-5s</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('end', -1)" title="Subtract 1s">-1s</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('end', 1)" title="Add 1s">+1s</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeTime('end', 5)" title="Add 5s">+5s</button>
                   </div>
                 </div>
               </div>
 
-              <!-- Real-time Validation Notice -->
-              <div class="time-validation-msg error" id="time-val-msg" role="alert" style="margin-top: 10px;">
+              <!-- Real-time Validation Banner -->
+              <div class="time-validation-msg error" id="time-val-msg" role="alert">
                 End time must be after start time.
               </div>
 
@@ -2039,18 +2142,327 @@ footer a { color: var(--red); text-decoration: none; }
   <script>
     const API = "https://ytcuttr.onrender.com";
 
-    // Application State
-    let currentMode = 'clip'; // 'clip' or 'full'
+    // ── APPLICATION STATE ─────────────────────────────────────
+    let currentMode = 'clip'; // 'clip' | 'full'
     let currentVideoData = null; // { id, url, title, duration, thumbnail, resolutions }
     let selectedQuality = '720p';
-    let clipStartSec = 0;
-    let clipEndSec = 60;
     let ytPlayer = null;
     let isPlayerReady = false;
-    let activeJobId = null;
     let pollInterval = null;
     let procTimerInterval = null;
     let procSeconds = 0;
+
+    // ── SINGLE SOURCE OF TRUTH FOR TIMESTAMPS ─────────────────
+    const ClipState = {
+      durationSec: 0,
+      startSec: 0,
+      endSec: 60,
+      maxClipLimit: 600, // 10 minutes backend max limit
+
+      init(duration) {
+        this.durationSec = Math.max(1, Math.round(Number(duration) || 0));
+        this.startSec = 0;
+        this.endSec = Math.min(this.durationSec, 60);
+        this.syncAll(true);
+        updateTimelineTicks(this.durationSec);
+      },
+
+      setStart(sec, syncInputField = true) {
+        sec = Math.max(0, Math.min(sec, this.durationSec));
+        // Boundary check: cannot cross end
+        if (sec >= this.endSec) {
+          if (sec + 1 <= this.durationSec) {
+            this.endSec = Math.min(this.durationSec, sec + 5);
+          } else {
+            sec = Math.max(0, this.endSec - 1);
+          }
+        }
+        this.startSec = sec;
+        this.syncAll(syncInputField);
+      },
+
+      setEnd(sec, syncInputField = true) {
+        sec = Math.max(0, Math.min(sec, this.durationSec));
+        // Boundary check: cannot fall behind start
+        if (sec <= this.startSec) {
+          if (sec - 1 >= 0) {
+            this.startSec = Math.max(0, sec - 5);
+          } else {
+            sec = Math.min(this.durationSec, this.startSec + 1);
+          }
+        }
+        this.endSec = sec;
+        this.syncAll(syncInputField);
+      },
+
+      getDuration() {
+        return Math.max(0, this.endSec - this.startSec);
+      },
+
+      validate() {
+        const len = this.getDuration();
+        if (this.startSec < 0) return { valid: false, error: "Start timestamp cannot be negative." };
+        if (this.endSec <= this.startSec) return { valid: false, error: "End timestamp must be strictly greater than start timestamp." };
+        if (this.durationSec > 0 && this.endSec > this.durationSec) return { valid: false, error: "End timestamp exceeds the video duration." };
+        if (len > this.maxClipLimit) return { valid: false, error: `Clip length exceeds 10 minute limit (current: ${formatSeconds(len)}).` };
+        return { valid: true, error: "" };
+      },
+
+      syncAll(syncInputField = true) {
+        // 1. Update text fields if not currently focused
+        if (syncInputField) {
+          const sInput = document.getElementById('clip-start');
+          const eInput = document.getElementById('clip-end');
+          if (sInput && document.activeElement !== sInput) sInput.value = formatSeconds(this.startSec);
+          if (eInput && document.activeElement !== eInput) eInput.value = formatSeconds(this.endSec);
+        }
+
+        // 2. Update visual timeline
+        updateTimelineHandles(this.startSec, this.endSec, this.durationSec);
+
+        // 3. Validation & Duration Badge
+        const val = this.validate();
+        const badge = document.getElementById('clip-duration-badge');
+        const valMsg = document.getElementById('time-val-msg');
+        const actionBtn = document.getElementById('primary-action-btn');
+        const len = this.getDuration();
+
+        if (badge) {
+          if (val.valid) {
+            badge.className = 'timeline-clip-len valid';
+            badge.textContent = `Clip: ${formatSeconds(len)} (Max 10:00)`;
+          } else {
+            badge.className = 'timeline-clip-len invalid';
+            badge.textContent = `Clip: ${formatSeconds(len)}`;
+          }
+        }
+
+        if (valMsg) {
+          if (val.valid) {
+            valMsg.className = 'time-validation-msg';
+            valMsg.textContent = '';
+          } else {
+            valMsg.className = 'time-validation-msg error visible';
+            valMsg.textContent = val.error;
+          }
+        }
+
+        if (actionBtn && currentMode === 'clip') {
+          actionBtn.disabled = !val.valid;
+        }
+      }
+    };
+
+    // ── TIME FORMATTING & PARSING ─────────────────────────────
+    function formatSeconds(totalSec) {
+      const sec = Math.max(0, Math.floor(Number(totalSec) || 0));
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
+    function parseTimeString(rawStr) {
+      if (typeof rawStr !== 'string') return null;
+      const clean = rawStr.trim();
+      if (!clean) return null;
+
+      // Allow colon or dot delimiters
+      const parts = clean.replace(/\./g, ':').split(':');
+      if (parts.some(p => p.trim() === '' || isNaN(Number(p)))) {
+        return null;
+      }
+      const nums = parts.map(p => Math.floor(Number(p)));
+      if (nums.some(n => n < 0)) return null;
+
+      if (nums.length === 3) {
+        const [h, m, s] = nums;
+        return h * 3600 + m * 60 + s;
+      }
+      if (nums.length === 2) {
+        const [m, s] = nums;
+        return m * 60 + s;
+      }
+      if (nums.length === 1) {
+        return nums[0];
+      }
+      return null;
+    }
+
+    // ── TEXT INPUT EVENT HANDLERS (Non-Overwriting) ───────────
+    function handleTimeInputChange(target) {
+      const inputEl = document.getElementById(target === 'start' ? 'clip-start' : 'clip-end');
+      if (!inputEl) return;
+
+      const val = parseTimeString(inputEl.value);
+      if (val !== null) {
+        if (target === 'start') {
+          ClipState.setStart(val, false); // false = do NOT overwrite text value while typing!
+        } else {
+          ClipState.setEnd(val, false);
+        }
+      }
+    }
+
+    function handleTimeInputBlur(target) {
+      // On blur, format cleanly to canonical HH:MM:SS
+      const inputEl = document.getElementById(target === 'start' ? 'clip-start' : 'clip-end');
+      if (!inputEl) return;
+
+      const parsed = parseTimeString(inputEl.value);
+      if (parsed !== null) {
+        if (target === 'start') ClipState.setStart(parsed, true);
+        else ClipState.setEnd(parsed, true);
+      } else {
+        // Restore to current valid state
+        inputEl.value = formatSeconds(target === 'start' ? ClipState.startSec : ClipState.endSec);
+        ClipState.syncAll(true);
+      }
+    }
+
+    function nudgeTime(target, deltaSec) {
+      if (target === 'start') {
+        ClipState.setStart(ClipState.startSec + deltaSec, true);
+      } else {
+        ClipState.setEnd(ClipState.endSec + deltaSec, true);
+      }
+    }
+
+    // ── ROBUST POINTER-DRAGGABLE TIMELINE SCRUBBER ───────────
+    let activePointerDrag = null; // 'start' | 'end' | null
+
+    function initTimelineScrubber() {
+      const scrubber = document.getElementById('timeline-scrubber');
+      const rail = document.getElementById('timeline-rail');
+      const handleStart = document.getElementById('handle-start');
+      const handleEnd = document.getElementById('handle-end');
+
+      if (!scrubber || !rail || !handleStart || !handleEnd) return;
+
+      function getSecFromPointerX(clientX) {
+        const rect = rail.getBoundingClientRect();
+        const clampedX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const pct = clampedX / rect.width;
+        return Math.round(pct * ClipState.durationSec);
+      }
+
+      // Handle Start Dragging
+      handleStart.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        activePointerDrag = 'start';
+        handleStart.classList.add('dragging');
+        handleStart.setPointerCapture(e.pointerId);
+      });
+
+      // Handle End Dragging
+      handleEnd.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        activePointerDrag = 'end';
+        handleEnd.classList.add('dragging');
+        handleEnd.setPointerCapture(e.pointerId);
+      });
+
+      // Pointer Move on Document / Window
+      window.addEventListener('pointermove', (e) => {
+        if (!activePointerDrag) return;
+        const targetSec = getSecFromPointerX(e.clientX);
+        if (activePointerDrag === 'start') {
+          ClipState.setStart(targetSec, true);
+        } else if (activePointerDrag === 'end') {
+          ClipState.setEnd(targetSec, true);
+        }
+      });
+
+      // Pointer Up on Document / Window
+      function endDrag(e) {
+        if (activePointerDrag) {
+          handleStart.classList.remove('dragging');
+          handleEnd.classList.remove('dragging');
+          activePointerDrag = null;
+        }
+      }
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
+
+      // Clicking Rail to jump closest handle
+      rail.addEventListener('pointerdown', (e) => {
+        if (e.target === handleStart || e.target === handleEnd) return;
+        const targetSec = getSecFromPointerX(e.clientX);
+        const distStart = Math.abs(targetSec - ClipState.startSec);
+        const distEnd = Math.abs(targetSec - ClipState.endSec);
+
+        if (distStart <= distEnd) {
+          ClipState.setStart(targetSec, true);
+          activePointerDrag = 'start';
+          handleStart.classList.add('dragging');
+          handleStart.setPointerCapture(e.pointerId);
+        } else {
+          ClipState.setEnd(targetSec, true);
+          activePointerDrag = 'end';
+          handleEnd.classList.add('dragging');
+          handleEnd.setPointerCapture(e.pointerId);
+        }
+      });
+
+      // Keyboard Accessibility on Handles
+      handleStart.addEventListener('keydown', (e) => {
+        const step = e.shiftKey ? 5 : 1;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+          ClipState.setStart(ClipState.startSec - step, true);
+          e.preventDefault();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+          ClipState.setStart(ClipState.startSec + step, true);
+          e.preventDefault();
+        }
+      });
+
+      handleEnd.addEventListener('keydown', (e) => {
+        const step = e.shiftKey ? 5 : 1;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+          ClipState.setEnd(ClipState.endSec - step, true);
+          e.preventDefault();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+          ClipState.setEnd(ClipState.endSec + step, true);
+          e.preventDefault();
+        }
+      });
+    }
+
+    function updateTimelineHandles(startSec, endSec, totalDuration) {
+      const dur = Math.max(1, totalDuration || 1);
+      const startPct = Math.min(100, Math.max(0, (startSec / dur) * 100));
+      const endPct = Math.min(100, Math.max(0, (endSec / dur) * 100));
+
+      const hStart = document.getElementById('handle-start');
+      const hEnd = document.getElementById('handle-end');
+      const seg = document.getElementById('timeline-segment');
+
+      if (hStart) {
+        hStart.style.left = startPct + '%';
+        hStart.setAttribute('aria-valuenow', startSec);
+      }
+      if (hEnd) {
+        hEnd.style.left = endPct + '%';
+        hEnd.setAttribute('aria-valuenow', endSec);
+      }
+      if (seg) {
+        seg.style.left = startPct + '%';
+        seg.style.width = Math.max(0, endPct - startPct) + '%';
+      }
+    }
+
+    function updateTimelineTicks(totalDuration) {
+      const tStart = document.getElementById('timeline-tick-start');
+      const tMid = document.getElementById('timeline-tick-mid');
+      const tEnd = document.getElementById('timeline-tick-end');
+
+      if (tStart) tStart.textContent = '00:00:00';
+      if (tMid) tMid.textContent = formatSeconds(Math.round(totalDuration / 2));
+      if (tEnd) tEnd.textContent = formatSeconds(totalDuration);
+    }
 
     // ── URL PARSER ───────────────────────────────────────────
     function extractVideoId(url) {
@@ -2090,7 +2502,19 @@ footer a { color: var(--red); text-decoration: none; }
       document.getElementById('clip-controls-group').style.display = mode === 'clip' ? 'block' : 'none';
       document.getElementById('clip-quick-actions').style.display = mode === 'clip' ? 'grid' : 'none';
 
-      updatePrimaryButtonState();
+      updatePrimaryButtonText();
+    }
+
+    function updatePrimaryButtonText() {
+      const btnText = document.getElementById('action-btn-text');
+      const btn = document.getElementById('primary-action-btn');
+      if (currentMode === 'clip') {
+        btnText.textContent = '⬇ Download Clip';
+        btn.disabled = !ClipState.validate().valid;
+      } else {
+        btnText.textContent = '⬇ Download Full Video';
+        btn.disabled = false;
+      }
     }
 
     // ── STATUS HELPERS (Honest Feedback) ──────────────────────
@@ -2189,20 +2613,19 @@ footer a { color: var(--red); text-decoration: none; }
       document.getElementById('loaded-video-title').textContent = currentVideoData.title;
       document.getElementById('loaded-video-duration').textContent = formatSeconds(currentVideoData.duration);
 
-      // Initialize default start and end times
-      clipStartSec = 0;
-      clipEndSec = currentVideoData.duration > 0 ? Math.min(currentVideoData.duration, 120) : 60;
+      // Initialize Single Source of Truth
+      ClipState.init(currentVideoData.duration);
 
       // Update resolution pills
       renderResolutionPills();
 
-      // Update inputs & slider
-      syncUiTimestamps();
-
       // Mount or Load YouTube IFrame Player
       initYouTubePlayer(currentVideoData.id);
 
-      // Scroll smoothly to studio workspace on mobile
+      // Ensure timeline scrubber is bound
+      initTimelineScrubber();
+
+      // Smooth scroll on mobile
       if (window.innerWidth < 768) {
         document.getElementById('cutter-tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -2214,7 +2637,6 @@ footer a { color: var(--red); text-decoration: none; }
       fallbackImg.src = currentVideoData.thumbnail;
 
       if (!window.YT || !window.YT.Player) {
-        // Load YouTube IFrame API on-demand
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -2248,7 +2670,6 @@ footer a { color: var(--red); text-decoration: none; }
               document.getElementById('player-fallback-thumb').classList.remove('visible');
             },
             onError: () => {
-              // Fallback to static thumbnail if embedding is disallowed for this video
               document.getElementById('player-fallback-thumb').classList.add('visible');
             }
           }
@@ -2265,17 +2686,10 @@ footer a { color: var(--red); text-decoration: none; }
       }
       const cur = Math.floor(ytPlayer.getCurrentTime() || 0);
       if (target === 'start') {
-        clipStartSec = cur;
-        if (clipEndSec <= clipStartSec) {
-          clipEndSec = Math.min(clipStartSec + 60, currentVideoData.duration || clipStartSec + 60);
-        }
+        ClipState.setStart(cur, true);
       } else {
-        clipEndSec = cur;
-        if (clipEndSec <= clipStartSec) {
-          clipStartSec = Math.max(0, clipEndSec - 60);
-        }
+        ClipState.setEnd(cur, true);
       }
-      syncUiTimestamps();
       showToast(`Set ${target} time to ${formatSeconds(cur)}`);
     }
 
@@ -2284,120 +2698,9 @@ footer a { color: var(--red); text-decoration: none; }
         showToast('Player preview not ready yet', true);
         return;
       }
-      ytPlayer.seekTo(clipStartSec, true);
+      ytPlayer.seekTo(ClipState.startSec, true);
       ytPlayer.playVideo();
-      showToast(`Playing preview from ${formatSeconds(clipStartSec)}`);
-    }
-
-    // ── TIMELINE SLIDER & TIME INPUT SYNCHRONIZATION ──────────
-    function handleSliderChange(handle) {
-      const dur = currentVideoData && currentVideoData.duration ? currentVideoData.duration : 600;
-      const sVal = Number(document.getElementById('slider-start').value);
-      const eVal = Number(document.getElementById('slider-end').value);
-
-      if (handle === 'start') {
-        clipStartSec = Math.round((sVal / 100) * dur);
-        if (clipStartSec >= clipEndSec) {
-          clipStartSec = Math.max(0, clipEndSec - 1);
-        }
-      } else {
-        clipEndSec = Math.round((eVal / 100) * dur);
-        if (clipEndSec <= clipStartSec) {
-          clipEndSec = Math.min(dur, clipStartSec + 1);
-        }
-      }
-
-      syncUiTimestamps(false); // don't feedback into slider
-    }
-
-    function handleManualTimeInput(target) {
-      const sVal = document.getElementById('clip-start').value.trim();
-      const eVal = document.getElementById('clip-end').value.trim();
-
-      if (target === 'start') {
-        const parsed = parseTimeString(sVal);
-        if (parsed !== null) clipStartSec = parsed;
-      } else {
-        const parsed = parseTimeString(eVal);
-        if (parsed !== null) clipEndSec = parsed;
-      }
-
-      syncUiTimestamps(true);
-    }
-
-    function nudgeTime(target, deltaSec) {
-      const maxDur = currentVideoData && currentVideoData.duration ? currentVideoData.duration : 86400;
-      if (target === 'start') {
-        clipStartSec = Math.max(0, Math.min(maxDur, clipStartSec + deltaSec));
-        if (clipStartSec >= clipEndSec) clipEndSec = Math.min(maxDur, clipStartSec + 5);
-      } else {
-        clipEndSec = Math.max(0, Math.min(maxDur, clipEndSec + deltaSec));
-        if (clipEndSec <= clipStartSec) clipStartSec = Math.max(0, clipEndSec - 5);
-      }
-      syncUiTimestamps(true);
-    }
-
-    function syncUiTimestamps(updateSlider = true) {
-      const dur = (currentVideoData && currentVideoData.duration) ? currentVideoData.duration : 600;
-
-      // Update text fields
-      document.getElementById('clip-start').value = formatSeconds(clipStartSec);
-      document.getElementById('clip-end').value = formatSeconds(clipEndSec);
-
-      // Update range sliders
-      if (updateSlider && dur > 0) {
-        const sPct = Math.min(100, Math.max(0, (clipStartSec / dur) * 100));
-        const ePct = Math.min(100, Math.max(0, (clipEndSec / dur) * 100));
-        document.getElementById('slider-start').value = sPct;
-        document.getElementById('slider-end').value = ePct;
-
-        const highlight = document.getElementById('slider-highlight');
-        highlight.style.left = sPct + '%';
-        highlight.style.width = Math.max(0, ePct - sPct) + '%';
-      }
-
-      // Calculate clip length
-      const clipLen = clipEndSec - clipStartSec;
-      const badge = document.getElementById('clip-duration-badge');
-      const valMsg = document.getElementById('time-val-msg');
-
-      if (clipLen <= 0) {
-        badge.className = 'timeline-clip-len invalid';
-        badge.textContent = 'Invalid Range';
-        valMsg.textContent = 'End time must be greater than start time.';
-        valMsg.classList.add('visible');
-      } else if (clipLen > 600) {
-        badge.className = 'timeline-clip-len invalid';
-        badge.textContent = `Clip: ${formatSeconds(clipLen)} (Too Long)`;
-        valMsg.textContent = 'Maximum clip length is 10 minutes (600s). Please narrow your selection.';
-        valMsg.classList.add('visible');
-      } else if (currentVideoData && currentVideoData.duration && clipEndSec > currentVideoData.duration) {
-        badge.className = 'timeline-clip-len invalid';
-        badge.textContent = 'Exceeds Video';
-        valMsg.textContent = 'End time is beyond the video duration.';
-        valMsg.classList.add('visible');
-      } else {
-        badge.className = 'timeline-clip-len valid';
-        badge.textContent = `Clip: ${formatSeconds(clipLen)} (Max 10:00)`;
-        valMsg.classList.remove('visible');
-      }
-
-      updatePrimaryButtonState();
-    }
-
-    function updatePrimaryButtonState() {
-      const btn = document.getElementById('primary-action-btn');
-      const btnText = document.getElementById('action-btn-text');
-
-      if (currentMode === 'clip') {
-        btnText.textContent = '⬇ Download Clip';
-        const clipLen = clipEndSec - clipStartSec;
-        const isValid = clipLen > 0 && clipLen <= 600;
-        btn.disabled = !isValid;
-      } else {
-        btnText.textContent = '⬇ Download Full Video';
-        btn.disabled = false;
-      }
+      showToast(`Playing preview from ${formatSeconds(ClipState.startSec)}`);
     }
 
     // ── QUALITY RESOLUTION PICKER ────────────────────────────
@@ -2435,11 +2738,20 @@ footer a { color: var(--red); text-decoration: none; }
     async function handlePrimaryActionClick() {
       if (!currentVideoData) return;
 
+      const isClip = currentMode === 'clip';
       const btn = document.getElementById('primary-action-btn');
+
+      if (isClip) {
+        const val = ClipState.validate();
+        if (!val.valid) {
+          showToast(val.error, true);
+          return;
+        }
+      }
+
       btn.disabled = true;
       btn.classList.add('processing');
 
-      const isClip = currentMode === 'clip';
       const qVal = selectedQuality === 'Audio only' ? 'audio' : selectedQuality;
 
       showProcessingBox(isClip ? 'Submitting clip request...' : 'Preparing full video download...');
@@ -2448,8 +2760,8 @@ footer a { color: var(--red); text-decoration: none; }
         let endpoint = isClip ? `${API}/clip` : `${API}/download`;
         let payload = isClip ? {
           url: currentVideoData.url,
-          start: formatSeconds(clipStartSec),
-          end: formatSeconds(clipEndSec),
+          start: formatSeconds(ClipState.startSec),
+          end: formatSeconds(ClipState.endSec),
           quality: qVal
         } : {
           url: currentVideoData.url,
@@ -2468,8 +2780,7 @@ footer a { color: var(--red); text-decoration: none; }
         }
 
         const data = await resp.json();
-        activeJobId = data.job_id;
-        pollJobStatus(activeJobId, isClip);
+        pollJobStatus(data.job_id, isClip);
 
       } catch(e) {
         hideProcessingBox();
@@ -2521,7 +2832,7 @@ footer a { color: var(--red); text-decoration: none; }
             detailsText.textContent = 'Task queued — waiting for server worker...';
           } else if (job.status === 'downloading') {
             detailsText.textContent = isClip
-              ? `Trimming segment ${formatSeconds(clipStartSec)} &rarr; ${formatSeconds(clipEndSec)}...`
+              ? `Trimming segment ${formatSeconds(ClipState.startSec)} → ${formatSeconds(ClipState.endSec)}...`
               : 'Downloading full video stream from YouTube...';
           } else if (job.status === 'done') {
             clearInterval(pollInterval);
@@ -2544,7 +2855,7 @@ footer a { color: var(--red); text-decoration: none; }
             showToast(job.error || 'Processing error on server. Try another quality.', true);
           }
         } catch(err) {
-          // Network hiccup during poll — will retry next tick
+          // Network hiccup during poll
         }
       }, 2000);
     }
@@ -2566,28 +2877,7 @@ footer a { color: var(--red); text-decoration: none; }
       const btn = document.getElementById('primary-action-btn');
       btn.disabled = false;
       btn.classList.remove('processing');
-      updatePrimaryButtonState();
-    }
-
-    // ── TIME CONVERSION UTILITIES ─────────────────────────────
-    function formatSeconds(totalSec) {
-      const sec = Math.max(0, Math.floor(totalSec || 0));
-      const h = Math.floor(sec / 3600);
-      const m = Math.floor((sec % 3600) / 60);
-      const s = sec % 60;
-      const pad = (n) => String(n).padStart(2, '0');
-      if (h > 0) return `${pad(h)}:${pad(m)}:${pad(s)}`;
-      return `00:${pad(m)}:${pad(s)}`;
-    }
-
-    function parseTimeString(str) {
-      if (!str) return null;
-      const parts = str.trim().split(':').map(Number);
-      if (parts.some(isNaN)) return null;
-      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-      if (parts.length === 2) return parts[0] * 60 + parts[1];
-      if (parts.length === 1) return parts[0];
-      return null;
+      updatePrimaryButtonText();
     }
 
     // ── TOAST NOTIFICATION ────────────────────────────────────
@@ -2609,6 +2899,11 @@ footer a { color: var(--red); text-decoration: none; }
       document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
       if (!isOpen) item.classList.add('open');
     }
+
+    // Initialize timeline scrubber listeners on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      initTimelineScrubber();
+    });
   </script>
 </body>
 </html>
