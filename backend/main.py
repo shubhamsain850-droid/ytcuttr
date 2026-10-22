@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
-import subprocess, uuid, os, re, shutil, json, urllib.request
+import subprocess, uuid, os, re, shutil, json, tempfile, urllib.request
 from pathlib import Path
 from urllib.parse import quote
 
@@ -19,6 +19,42 @@ CLIPS_DIR = Path("/tmp/ytcuttr")
 CLIPS_DIR.mkdir(exist_ok=True)
 
 jobs: dict = {}
+
+# Dynamic Cookie Resolver
+def get_cookies_file() -> str | None:
+    """Find valid YouTube cookies from /etc/secrets, env vars, or local files."""
+    sec_dir = Path("/etc/secrets")
+    if sec_dir.exists():
+        for f in sec_dir.rglob("*"):
+            if f.is_file() and not f.name.startswith(".."):
+                try:
+                    content = f.read_text(encoding="utf-8", errors="ignore")
+                    if "youtube.com" in content:
+                        return str(f)
+                except Exception:
+                    pass
+
+    for k, v in os.environ.items():
+        if ("COOKIE" in k.upper() or "YT" in k.upper()) and "youtube.com" in v:
+            content = v.strip()
+            if "\\n" in content and "\n" not in content:
+                content = content.replace("\\n", "\n")
+            cf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+            cf.write(content)
+            cf.close()
+            return cf.name
+
+    for name in ["cookies.txt", "yt_cookies.txt"]:
+        for p in [Path(name), Path(__file__).parent / name]:
+            if p.exists() and p.is_file():
+                try:
+                    content = p.read_text(encoding="utf-8", errors="ignore")
+                    if "youtube.com" in content:
+                        return str(p)
+                except Exception:
+                    pass
+
+    return None
 
 # Models
 class InfoRequest(BaseModel):
@@ -61,15 +97,21 @@ QUALITY_MAP = {
 }
 
 def build_ytdlp_cmd(extra: list = []) -> list:
-    """Builds yt-dlp command using android player client (100% standalone, no cookies needed)."""
-    return [
+    """Builds yt-dlp command using cookies if present, or android client as fallback."""
+    cmd = [
         "yt-dlp",
         "-4",
         "--no-playlist",
         "--no-warnings",
         "--rm-cache-dir",
-        "--extractor-args", "youtube:player_client=android",
-    ] + extra
+        "--add-header", "Accept-Language:en-US,en;q=0.9",
+    ]
+    cf = get_cookies_file()
+    if cf:
+        cmd += ["--cookies", cf]
+    else:
+        cmd += ["--extractor-args", "youtube:player_client=android"]
+    return cmd + extra
 
 def fetch_oembed(url: str) -> dict | None:
     """Fast video metadata via YouTube oEmbed (instant, no bot checks)."""
@@ -91,9 +133,19 @@ def fetch_oembed(url: str) -> dict | None:
 
 @app.get("/version")
 async def version():
+    cf = get_cookies_file()
+    cf_details = {}
+    if cf:
+        try:
+            p = Path(cf)
+            cf_details = {"path": str(p), "size": p.stat().st_size}
+        except Exception as e:
+            cf_details = {"error": str(e)}
+
     return {
-        "version": "3.0-standalone-no-cookies-needed",
-        "mode": "android-native-stream",
+        "version": "3.1-cookies-verified-format-fixed",
+        "has_cookies": bool(cf),
+        "cookie_file": cf_details,
         "status": "ready"
     }
 
