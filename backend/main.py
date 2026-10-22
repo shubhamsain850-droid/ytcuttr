@@ -107,7 +107,7 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
         "--no-playlist",
         "--no-warnings",
         "--rm-cache-dir",
-        "--js-runtimes", "node",
+        
         "--add-header", "Accept-Language:en-US,en;q=0.9",
     ]
     if use_cookies:
@@ -141,26 +141,22 @@ def fetch_oembed(url: str) -> dict | None:
 async def diag(url: str = "https://www.youtube.com/watch?v=aqz-KE-bpKQ"):
     cf, source = get_cookies_file()
     results = {"cookie_source": source, "cookie_file": cf}
-    
-    # Test 1: With cookies (web client)
-    cmd_cookie = ["yt-dlp", "-4", "--no-warnings", "--js-runtimes", "node"]
+    try:
+        deno_res = subprocess.run(["deno", "--version"], capture_output=True, text=True, timeout=5)
+        results["deno"] = deno_res.stdout.splitlines()[0] if deno_res.stdout else "empty"
+    except Exception as e:
+        results["deno"] = str(e)
+
+    cmd_cookie = ["yt-dlp", "-4", "--no-warnings"]
     if cf:
         cmd_cookie += ["--cookies", cf]
     cmd_cookie += ["-F", url]
     r1 = subprocess.run(cmd_cookie, capture_output=True, text=True, timeout=25)
     results["with_cookies"] = {
         "code": r1.returncode,
+        "formats_found": len([l for l in r1.stdout.splitlines() if any(x in l for x in ["mp4", "webm", "18", "398", "720"])]),
         "stdout_sample": [l for l in r1.stdout.splitlines() if any(x in l for x in ["mp4", "webm", "18", "398", "720"])][:4],
         "stderr": r1.stderr[-400:] if r1.stderr else ""
-    }
-    
-    # Test 2: Without cookies (visionos,android)
-    cmd_anon = ["yt-dlp", "-4", "--no-warnings", "--extractor-args", "youtube:player_client=visionos,android", "-F", url]
-    r2 = subprocess.run(cmd_anon, capture_output=True, text=True, timeout=25)
-    results["without_cookies"] = {
-        "code": r2.returncode,
-        "stdout_sample": [l for l in r2.stdout.splitlines() if any(x in l for x in ["mp4", "webm", "18", "398", "720"])][:4],
-        "stderr": r2.stderr[-400:] if r2.stderr else ""
     }
     return results
 
@@ -184,7 +180,7 @@ async def version():
                 sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "3.6-ejs-authenticated",
+        "version": "3.7-deno-runtime",
         "has_cookies": bool(cf),
         "cookie_source": source,
         "cookie_size": size,

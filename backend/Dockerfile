@@ -1,7 +1,9 @@
 FROM python:3.11-slim
 
+COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
+
 RUN apt-get update && \
-    apt-get install -y ffmpeg nodejs && \
+    apt-get install -y ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
