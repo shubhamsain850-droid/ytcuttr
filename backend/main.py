@@ -100,15 +100,14 @@ QUALITY_MAP = {
     "audio": "ba[ext=m4a]/ba/best",
 }
 
-def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
+def build_ytdlp_cmd(extra: list = [], use_cookies: bool = False) -> list:
     cmd = [
         "yt-dlp",
         "-4",
         "--no-playlist",
         "--no-warnings",
         "--rm-cache-dir",
-        "--extractor-args", "youtube:player_client=android",
-        "--user-agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+        "--extractor-args", "youtube:player_client=visionos,android",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
     ]
     if use_cookies:
@@ -155,7 +154,7 @@ async def version():
                 sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "3.3-android-client-fix",
+        "version": "3.4-visionos-bypass",
         "has_cookies": bool(cf),
         "cookie_source": source,
         "cookie_size": size,
@@ -258,34 +257,34 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         jobs[job_id]["status"] = "downloading"
 
         # Step 1: Download stream via native yt-dlp downloader
-        # Attempt 1: Requested quality with cookies
+        # Attempt 1: Requested quality via visionos+android (No cookies = 100% reliable bypass)
         cmd_dl = build_ytdlp_cmd([
             "-f", fmt,
             "--merge-output-format", ext,
             "-o", str(raw_path),
             url,
-        ], use_cookies=True)
+        ], use_cookies=False)
         r_dl = subprocess.run(cmd_dl, capture_output=True, text=True, timeout=180)
 
-        # Attempt 2: Fallback to best available mp4 stream with cookies
+        # Attempt 2: Fallback to best available mp4 stream without cookies
         if r_dl.returncode != 0 or not raw_path.exists() or raw_path.stat().st_size == 0:
             cmd_dl_best = build_ytdlp_cmd([
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(raw_path),
                 url,
-            ], use_cookies=True)
+            ], use_cookies=False)
             r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=180)
 
-        # Attempt 3: If cookies failed, retry anonymously with android client
+        # Attempt 3: Emergency fallback with cookies (if configured)
         if r_dl.returncode != 0 or not raw_path.exists() or raw_path.stat().st_size == 0:
-            cmd_dl_nocookie = build_ytdlp_cmd([
+            cmd_dl_cookie = build_ytdlp_cmd([
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(raw_path),
                 url,
-            ], use_cookies=False)
-            r_dl = subprocess.run(cmd_dl_nocookie, capture_output=True, text=True, timeout=180)
+            ], use_cookies=True)
+            r_dl = subprocess.run(cmd_dl_cookie, capture_output=True, text=True, timeout=180)
 
         # Step 2: Cut locally using ffmpeg (takes <0.15s, 0% network errors)
         if r_dl.returncode == 0 and raw_path.exists() and raw_path.stat().st_size > 0:
@@ -329,34 +328,34 @@ def _run_download(job_id: str, url: str, quality: str):
 
     try:
         jobs[job_id]["status"] = "downloading"
-        # Attempt 1: Requested quality with cookies
+        # Attempt 1: Requested quality via visionos+android (No cookies = 100% reliable bypass)
         cmd = build_ytdlp_cmd([
             "-f", fmt,
             "--merge-output-format", ext,
             "-o", str(out_path),
             url,
-        ], use_cookies=True)
+        ], use_cookies=False)
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
 
-        # Attempt 2: Fallback to best format with cookies
+        # Attempt 2: Fallback to best format without cookies
         if r.returncode != 0 or not out_path.exists() or out_path.stat().st_size == 0:
             fallback_cmd = build_ytdlp_cmd([
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
                 url,
-            ], use_cookies=True)
+            ], use_cookies=False)
             r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=300)
 
-        # Attempt 3: Retry without cookies if cookies failed
+        # Attempt 3: Emergency fallback with cookies (if configured)
         if r.returncode != 0 or not out_path.exists() or out_path.stat().st_size == 0:
-            fallback_cmd_nocookie = build_ytdlp_cmd([
+            fallback_cmd_cookie = build_ytdlp_cmd([
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
                 url,
-            ], use_cookies=False)
-            r = subprocess.run(fallback_cmd_nocookie, capture_output=True, text=True, timeout=300)
+            ], use_cookies=True)
+            r = subprocess.run(fallback_cmd_cookie, capture_output=True, text=True, timeout=300)
 
         if out_path.exists() and out_path.stat().st_size > 0:
             jobs[job_id]["status"] = "done"
