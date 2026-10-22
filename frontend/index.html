@@ -588,20 +588,25 @@
     /* ── ACTIVE STUDIO WORKSPACE ── */
     .studio-workspace {
       display: none;
-      padding: 28px;
+      padding: 24px;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
     }
     .studio-workspace.visible { display: block; }
 
     .studio-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 28px;
+      gap: 24px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    @media (min-width: 880px) {
+    @media (min-width: 960px) {
       .studio-grid {
-        grid-template-columns: 1.15fr 1fr;
-        gap: 32px;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        gap: 28px;
         align-items: start;
       }
     }
@@ -611,6 +616,18 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .controls-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .video-viewport-wrapper {
@@ -736,12 +753,7 @@
       color: var(--red);
     }
 
-    /* ── RIGHT COLUMN: CUTTER & TIMESTAMPS ── */
-    .controls-col {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    /* Controls Column styled above */
 
     
     /* ── ROBUST TIMELINE SCRUBBER (Touch & Pointer Safe) ── */
@@ -890,17 +902,20 @@
     }
 
     /* ── ROBUST TIME INPUT CARDS (Full Width & No Clipping) ── */
+    /* ── ROBUST TIME INPUT CARDS (Full Width, Zero Overflow & No Clipping) ── */
     .time-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     @media (max-width: 580px) {
       .time-grid {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 10px;
       }
     }
 
@@ -908,39 +923,42 @@
       background: var(--bg);
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 14px 16px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       min-width: 0;
+      width: 100%;
       box-sizing: border-box;
+      overflow: hidden;
     }
 
     .time-field-label {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       color: var(--text);
     }
+
     .time-field-label span {
       font-weight: 500;
       color: var(--muted);
-      font-size: 11.5px;
+      font-size: 11px;
       font-family: var(--mono);
     }
 
     .time-text-input {
       width: 100%;
-      height: 48px;
-      padding: 0 14px;
+      height: 44px;
+      padding: 0 10px;
       box-sizing: border-box;
       min-width: 0;
       border: 1.5px solid var(--border);
       border-radius: 8px;
       font-family: var(--mono);
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--text);
       letter-spacing: 0.5px;
@@ -950,6 +968,7 @@
       transition: var(--transition);
       display: block;
     }
+
     .time-text-input:focus {
       border-color: var(--red);
       box-shadow: 0 0 0 3px var(--red-glow);
@@ -957,18 +976,21 @@
 
     .time-quick-nudges {
       display: flex;
-      gap: 6px;
+      gap: 4px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .nudge-btn {
-      flex: 1;
-      height: 34px;
-      padding: 0;
+      flex: 1 1 0;
+      min-width: 0;
+      height: 32px;
+      padding: 0 2px;
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 6px;
       font-family: var(--mono);
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-soft);
       cursor: pointer;
@@ -976,11 +998,19 @@
       align-items: center;
       justify-content: center;
       transition: var(--transition);
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
     }
+
     .nudge-btn:hover {
       color: var(--red);
       border-color: var(--red);
       background: var(--red-subtle);
+    }
+
+    .nudge-btn:active {
+      transform: scale(0.96);
     }
 
     .time-validation-msg {
@@ -2152,73 +2182,126 @@ footer a { color: var(--red); text-decoration: none; }
     let procTimerInterval = null;
     let procSeconds = 0;
 
-    // ── SINGLE SOURCE OF TRUTH FOR TIMESTAMPS ─────────────────
+    // ── AUTHORITATIVE SINGLE SOURCE OF TRUTH FOR TIMESTAMPS ──
     const ClipState = {
-      durationSec: 0,
-      startSec: 0,
-      endSec: 60,
+      videoDurationSeconds: 600,
+      startSeconds: 0,
+      endSeconds: 60,
       maxClipLimit: 600, // 10 minutes backend max limit
+      isDurationEstimated: true,
+
+      // Compatibility getters and setters
+      get durationSec() { return this.videoDurationSeconds; },
+      set durationSec(v) { this.videoDurationSeconds = v; },
+      get startSec() { return this.startSeconds; },
+      set startSec(v) { this.startSeconds = v; },
+      get endSec() { return this.endSeconds; },
+      set endSec(v) { this.endSeconds = v; },
 
       init(duration) {
-        this.durationSec = Math.max(1, Math.round(Number(duration) || 0));
-        this.startSec = 0;
-        this.endSec = Math.min(this.durationSec, 60);
+        const d = Math.round(Number(duration) || 0);
+        if (d > 1) {
+          this.videoDurationSeconds = d;
+          this.isDurationEstimated = false;
+        } else {
+          // If video duration is unknown (0 from oEmbed), use a generous 600s baseline.
+          // NEVER lock the user into an unusable 1-second freeze!
+          this.videoDurationSeconds = 600;
+          this.isDurationEstimated = true;
+        }
+        this.startSeconds = 0;
+        this.endSeconds = Math.min(this.videoDurationSeconds, 60);
         this.syncAll(true);
-        updateTimelineTicks(this.durationSec);
+        updateTimelineTicks(this.videoDurationSeconds);
+      },
+
+      updateVideoDuration(newDuration) {
+        const d = Math.max(1, Math.round(Number(newDuration) || 0));
+        this.videoDurationSeconds = d;
+        this.isDurationEstimated = false;
+
+        // Ensure start and end fit within the new duration
+        if (this.startSeconds >= d) {
+          this.startSeconds = Math.max(0, d - 10);
+        }
+        if (this.endSeconds > d || this.endSeconds <= this.startSeconds) {
+          this.endSeconds = Math.min(d, Math.max(this.startSeconds + 1, Math.min(60, d)));
+        }
+        if ((this.endSeconds - this.startSeconds) > this.maxClipLimit) {
+          this.endSeconds = Math.min(d, this.startSeconds + this.maxClipLimit);
+        }
+        this.syncAll(true);
+        updateTimelineTicks(this.videoDurationSeconds);
       },
 
       setStart(sec, syncInputField = true) {
-        sec = Math.max(0, Math.min(sec, this.durationSec));
-        // Boundary check: cannot cross end
-        if (sec >= this.endSec) {
-          if (sec + 1 <= this.durationSec) {
-            this.endSec = Math.min(this.durationSec, sec + 5);
+        sec = Math.round(Number(sec) || 0);
+        sec = Math.max(0, Math.min(sec, this.videoDurationSeconds - 1));
+
+        // Enforce: start < end
+        if (sec >= this.endSeconds) {
+          if (sec + 1 <= this.videoDurationSeconds) {
+            this.endSeconds = Math.min(this.videoDurationSeconds, sec + 5);
           } else {
-            sec = Math.max(0, this.endSec - 1);
+            sec = Math.max(0, this.endSeconds - 1);
           }
         }
-        this.startSec = sec;
+
+        // Enforce max clip limit: (end - start) <= 600
+        if ((this.endSeconds - sec) > this.maxClipLimit) {
+          this.endSeconds = Math.min(this.videoDurationSeconds, sec + this.maxClipLimit);
+        }
+
+        this.startSeconds = sec;
         this.syncAll(syncInputField);
       },
 
       setEnd(sec, syncInputField = true) {
-        sec = Math.max(0, Math.min(sec, this.durationSec));
-        // Boundary check: cannot fall behind start
-        if (sec <= this.startSec) {
+        sec = Math.round(Number(sec) || 0);
+        sec = Math.max(1, Math.min(sec, this.videoDurationSeconds));
+
+        // Enforce: end > start
+        if (sec <= this.startSeconds) {
           if (sec - 1 >= 0) {
-            this.startSec = Math.max(0, sec - 5);
+            this.startSeconds = Math.max(0, sec - 5);
           } else {
-            sec = Math.min(this.durationSec, this.startSec + 1);
+            sec = Math.min(this.videoDurationSeconds, this.startSeconds + 1);
           }
         }
-        this.endSec = sec;
+
+        // Enforce max clip limit: (end - start) <= 600
+        if ((sec - this.startSeconds) > this.maxClipLimit) {
+          sec = Math.min(this.videoDurationSeconds, this.startSeconds + this.maxClipLimit);
+        }
+
+        this.endSeconds = sec;
         this.syncAll(syncInputField);
       },
 
       getDuration() {
-        return Math.max(0, this.endSec - this.startSec);
+        return Math.max(0, this.endSeconds - this.startSeconds);
       },
 
       validate() {
         const len = this.getDuration();
-        if (this.startSec < 0) return { valid: false, error: "Start timestamp cannot be negative." };
-        if (this.endSec <= this.startSec) return { valid: false, error: "End timestamp must be strictly greater than start timestamp." };
-        if (this.durationSec > 0 && this.endSec > this.durationSec) return { valid: false, error: "End timestamp exceeds the video duration." };
+        if (this.startSeconds < 0) return { valid: false, error: "Start timestamp cannot be negative." };
+        if (this.endSeconds <= this.startSeconds) return { valid: false, error: "End timestamp must be strictly greater than start timestamp." };
+        if (this.videoDurationSeconds > 0 && this.endSeconds > this.videoDurationSeconds) return { valid: false, error: "End timestamp exceeds the video duration." };
         if (len > this.maxClipLimit) return { valid: false, error: `Clip length exceeds 10 minute limit (current: ${formatSeconds(len)}).` };
         return { valid: true, error: "" };
       },
 
       syncAll(syncInputField = true) {
-        // 1. Update text fields if not currently focused
+        // 1. Update text fields if not currently focused by keyboard
         if (syncInputField) {
           const sInput = document.getElementById('clip-start');
           const eInput = document.getElementById('clip-end');
-          if (sInput && document.activeElement !== sInput) sInput.value = formatSeconds(this.startSec);
-          if (eInput && document.activeElement !== eInput) eInput.value = formatSeconds(this.endSec);
+          if (sInput && document.activeElement !== sInput) sInput.value = formatSeconds(this.startSeconds);
+          if (eInput && document.activeElement !== eInput) eInput.value = formatSeconds(this.endSeconds);
         }
 
-        // 2. Update visual timeline
-        updateTimelineHandles(this.startSec, this.endSec, this.durationSec);
+        // 2. Update visual timeline scrubber & highlighted track
+        updateTimelineHandles(this.startSeconds, this.endSeconds, this.videoDurationSeconds);
 
         // 3. Validation & Duration Badge
         const val = this.validate();
@@ -2252,20 +2335,25 @@ footer a { color: var(--red); text-decoration: none; }
         }
       }
     };
+    window.ClipState = ClipState;
 
-    // ── TIME FORMATTING & PARSING ─────────────────────────────
+    // ── TIME FORMATTING & PARSING ────────────────────────────
     function formatSeconds(totalSec) {
       const sec = Math.max(0, Math.floor(Number(totalSec) || 0));
       const h = Math.floor(sec / 3600);
       const m = Math.floor((sec % 3600) / 60);
       const s = sec % 60;
-      const pad = (n) => String(n).padStart(2, '0');
-      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+      return [
+        String(h).padStart(2, '0'),
+        String(m).padStart(2, '0'),
+        String(s).padStart(2, '0')
+      ].join(':');
     }
+    window.formatSeconds = formatSeconds;
 
-    function parseTimeString(rawStr) {
-      if (typeof rawStr !== 'string') return null;
-      const clean = rawStr.trim();
+    function parseTimeString(str) {
+      if (!str || typeof str !== 'string') return null;
+      const clean = str.trim();
       if (!clean) return null;
 
       // Allow colon or dot delimiters
@@ -2289,8 +2377,9 @@ footer a { color: var(--red); text-decoration: none; }
       }
       return null;
     }
+    window.parseTimeString = parseTimeString;
 
-    // ── TEXT INPUT EVENT HANDLERS (Non-Overwriting) ───────────
+    // ── TEXT INPUT EVENT HANDLERS (Non-Overwriting while typing) ──
     function handleTimeInputChange(target) {
       const inputEl = document.getElementById(target === 'start' ? 'clip-start' : 'clip-end');
       if (!inputEl) return;
@@ -2304,9 +2393,10 @@ footer a { color: var(--red); text-decoration: none; }
         }
       }
     }
+    window.handleTimeInputChange = handleTimeInputChange;
 
     function handleTimeInputBlur(target) {
-      // On blur, format cleanly to canonical HH:MM:SS
+      // On blur or Enter, format cleanly to canonical HH:MM:SS
       const inputEl = document.getElementById(target === 'start' ? 'clip-start' : 'clip-end');
       if (!inputEl) return;
 
@@ -2316,20 +2406,25 @@ footer a { color: var(--red); text-decoration: none; }
         else ClipState.setEnd(parsed, true);
       } else {
         // Restore to current valid state
-        inputEl.value = formatSeconds(target === 'start' ? ClipState.startSec : ClipState.endSec);
+        inputEl.value = formatSeconds(target === 'start' ? ClipState.startSeconds : ClipState.endSeconds);
         ClipState.syncAll(true);
       }
     }
+    window.handleTimeInputBlur = handleTimeInputBlur;
 
+    // ── NUDGE BUTTONS (Direct Micro-Adjustments) ──────────────
     function nudgeTime(target, deltaSec) {
+      deltaSec = Number(deltaSec) || 0;
       if (target === 'start') {
-        ClipState.setStart(ClipState.startSec + deltaSec, true);
-      } else {
-        ClipState.setEnd(ClipState.endSec + deltaSec, true);
+        ClipState.setStart(ClipState.startSeconds + deltaSec, true);
+      } else if (target === 'end') {
+        ClipState.setEnd(ClipState.endSeconds + deltaSec, true);
       }
     }
+    window.nudgeTime = nudgeTime;
 
     // ── ROBUST POINTER-DRAGGABLE TIMELINE SCRUBBER ───────────
+    let scrubberInitialized = false;
     let activePointerDrag = null; // 'start' | 'end' | null
 
     function initTimelineScrubber() {
@@ -2340,33 +2435,33 @@ footer a { color: var(--red); text-decoration: none; }
 
       if (!scrubber || !rail || !handleStart || !handleEnd) return;
 
+      // Always update positions
+      updateTimelineHandles(ClipState.startSeconds, ClipState.endSeconds, ClipState.videoDurationSeconds);
+
+      // Only attach listeners once to avoid duplicates on video reload or tab switch
+      if (scrubberInitialized) return;
+      scrubberInitialized = true;
+
       function getSecFromPointerX(clientX) {
         const rect = rail.getBoundingClientRect();
+        if (!rect.width) return 0;
         const clampedX = Math.max(0, Math.min(clientX - rect.left, rect.width));
         const pct = clampedX / rect.width;
-        return Math.round(pct * ClipState.durationSec);
+        return Math.round(pct * ClipState.videoDurationSeconds);
       }
 
-      // Handle Start Dragging
-      handleStart.addEventListener('pointerdown', (e) => {
+      function startDrag(target, e) {
         e.preventDefault();
         e.stopPropagation();
-        activePointerDrag = 'start';
-        handleStart.classList.add('dragging');
-        handleStart.setPointerCapture(e.pointerId);
-      });
+        activePointerDrag = target;
+        const el = target === 'start' ? handleStart : handleEnd;
+        el.classList.add('dragging');
+        try {
+          el.setPointerCapture(e.pointerId);
+        } catch(err) {}
+      }
 
-      // Handle End Dragging
-      handleEnd.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        activePointerDrag = 'end';
-        handleEnd.classList.add('dragging');
-        handleEnd.setPointerCapture(e.pointerId);
-      });
-
-      // Pointer Move on Document / Window
-      window.addEventListener('pointermove', (e) => {
+      function onPointerMove(e) {
         if (!activePointerDrag) return;
         const targetSec = getSecFromPointerX(e.clientX);
         if (activePointerDrag === 'start') {
@@ -2374,36 +2469,48 @@ footer a { color: var(--red); text-decoration: none; }
         } else if (activePointerDrag === 'end') {
           ClipState.setEnd(targetSec, true);
         }
-      });
-
-      // Pointer Up on Document / Window
-      function endDrag(e) {
-        if (activePointerDrag) {
-          handleStart.classList.remove('dragging');
-          handleEnd.classList.remove('dragging');
-          activePointerDrag = null;
-        }
       }
-      window.addEventListener('pointerup', endDrag);
-      window.addEventListener('pointercancel', endDrag);
+
+      function onPointerEnd(e) {
+        if (!activePointerDrag) return;
+        const el = activePointerDrag === 'start' ? handleStart : handleEnd;
+        el.classList.remove('dragging');
+        try {
+          if (e.pointerId !== undefined) el.releasePointerCapture(e.pointerId);
+        } catch(err) {}
+        activePointerDrag = null;
+      }
+
+      // Handle Start Dragging
+      handleStart.addEventListener('pointerdown', (e) => startDrag('start', e));
+      handleStart.addEventListener('pointermove', onPointerMove);
+      handleStart.addEventListener('pointerup', onPointerEnd);
+      handleStart.addEventListener('pointercancel', onPointerEnd);
+
+      // Handle End Dragging
+      handleEnd.addEventListener('pointerdown', (e) => startDrag('end', e));
+      handleEnd.addEventListener('pointermove', onPointerMove);
+      handleEnd.addEventListener('pointerup', onPointerEnd);
+      handleEnd.addEventListener('pointercancel', onPointerEnd);
+
+      // Window pointermove/pointerup as universal fallback
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerEnd);
+      window.addEventListener('pointercancel', onPointerEnd);
 
       // Clicking Rail to jump closest handle
       rail.addEventListener('pointerdown', (e) => {
         if (e.target === handleStart || e.target === handleEnd) return;
         const targetSec = getSecFromPointerX(e.clientX);
-        const distStart = Math.abs(targetSec - ClipState.startSec);
-        const distEnd = Math.abs(targetSec - ClipState.endSec);
+        const distStart = Math.abs(targetSec - ClipState.startSeconds);
+        const distEnd = Math.abs(targetSec - ClipState.endSeconds);
 
         if (distStart <= distEnd) {
           ClipState.setStart(targetSec, true);
-          activePointerDrag = 'start';
-          handleStart.classList.add('dragging');
-          handleStart.setPointerCapture(e.pointerId);
+          startDrag('start', e);
         } else {
           ClipState.setEnd(targetSec, true);
-          activePointerDrag = 'end';
-          handleEnd.classList.add('dragging');
-          handleEnd.setPointerCapture(e.pointerId);
+          startDrag('end', e);
         }
       });
 
@@ -2411,10 +2518,10 @@ footer a { color: var(--red); text-decoration: none; }
       handleStart.addEventListener('keydown', (e) => {
         const step = e.shiftKey ? 5 : 1;
         if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-          ClipState.setStart(ClipState.startSec - step, true);
+          ClipState.setStart(ClipState.startSeconds - step, true);
           e.preventDefault();
         } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-          ClipState.setStart(ClipState.startSec + step, true);
+          ClipState.setStart(ClipState.startSeconds + step, true);
           e.preventDefault();
         }
       });
@@ -2422,14 +2529,15 @@ footer a { color: var(--red); text-decoration: none; }
       handleEnd.addEventListener('keydown', (e) => {
         const step = e.shiftKey ? 5 : 1;
         if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-          ClipState.setEnd(ClipState.endSec - step, true);
+          ClipState.setEnd(ClipState.endSeconds - step, true);
           e.preventDefault();
         } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-          ClipState.setEnd(ClipState.endSec + step, true);
+          ClipState.setEnd(ClipState.endSeconds + step, true);
           e.preventDefault();
         }
       });
     }
+    window.initTimelineScrubber = initTimelineScrubber;
 
     function updateTimelineHandles(startSec, endSec, totalDuration) {
       const dur = Math.max(1, totalDuration || 1);
@@ -2453,6 +2561,7 @@ footer a { color: var(--red); text-decoration: none; }
         seg.style.width = Math.max(0, endPct - startPct) + '%';
       }
     }
+    window.updateTimelineHandles = updateTimelineHandles;
 
     function updateTimelineTicks(totalDuration) {
       const tStart = document.getElementById('timeline-tick-start');
@@ -2463,6 +2572,7 @@ footer a { color: var(--red); text-decoration: none; }
       if (tMid) tMid.textContent = formatSeconds(Math.round(totalDuration / 2));
       if (tEnd) tEnd.textContent = formatSeconds(totalDuration);
     }
+    window.updateTimelineTicks = updateTimelineTicks;
 
     // ── URL PARSER ───────────────────────────────────────────
     function extractVideoId(url) {
@@ -2479,16 +2589,25 @@ footer a { color: var(--red); text-decoration: none; }
       const fetchBtn = document.getElementById('fetch-video-btn');
       const isYT = !!extractVideoId(val);
 
-      clearBtn.classList.toggle('visible', val.length > 0);
-      fetchBtn.disabled = !isYT;
+      if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+      if (fetchBtn) fetchBtn.disabled = !isYT;
     }
 
     function clearUrlInput() {
-      const inp = document.getElementById('main-url-input');
-      inp.value = '';
-      inp.focus();
+      const input = document.getElementById('main-url-input');
+      input.value = '';
       handleUrlInputChange();
-      hideStatus();
+      input.focus();
+    }
+
+    function handleFetchClick() {
+      const val = document.getElementById('main-url-input').value.trim();
+      const vid = extractVideoId(val);
+      if (!vid) {
+        showStatus('Please enter a valid YouTube video or Shorts link.', 'error', false);
+        return;
+      }
+      fetchVideoData(val, vid);
     }
 
     // ── MODE SWITCHING (Clip vs Full) ────────────────────────
@@ -2502,12 +2621,18 @@ footer a { color: var(--red); text-decoration: none; }
       document.getElementById('clip-controls-group').style.display = mode === 'clip' ? 'block' : 'none';
       document.getElementById('clip-quick-actions').style.display = mode === 'clip' ? 'grid' : 'none';
 
+      if (mode === 'clip') {
+        ClipState.syncAll(true);
+      }
       updatePrimaryButtonText();
     }
+    window.switchMode = switchMode;
 
     function updatePrimaryButtonText() {
       const btnText = document.getElementById('action-btn-text');
       const btn = document.getElementById('primary-action-btn');
+      if (!btnText || !btn) return;
+
       if (currentMode === 'clip') {
         btnText.textContent = '⬇ Download Clip';
         btn.disabled = !ClipState.validate().valid;
@@ -2517,29 +2642,25 @@ footer a { color: var(--red); text-decoration: none; }
       }
     }
 
-    // ── STATUS HELPERS (Honest Feedback) ──────────────────────
-    function showStatus(msg, type = 'info', showSpinner = true) {
-      const b = document.getElementById('status-badge');
-      const sp = document.getElementById('status-spinner');
-      const m = document.getElementById('status-message');
-      b.className = 'status-badge visible ' + type;
-      sp.style.display = showSpinner ? 'block' : 'none';
-      m.textContent = msg;
+    // ── STATUS HELPERS (Honest Feedback) ─────────────────────
+    function showStatus(msg, type = 'info', spinning = false) {
+      const badge = document.getElementById('status-badge');
+      const messageEl = document.getElementById('status-message');
+      const spinner = document.getElementById('status-spinner');
+      if (!badge || !messageEl || !spinner) return;
+
+      badge.className = `status-badge visible ${type}`;
+      messageEl.textContent = msg;
+      spinner.style.display = spinning ? 'block' : 'none';
     }
 
     function hideStatus() {
-      document.getElementById('status-badge').className = 'status-badge';
+      const badge = document.getElementById('status-badge');
+      if (badge) badge.className = 'status-badge';
     }
 
     // ── FETCH VIDEO INFO (Render Cold-Start Safe) ─────────────
-    async function handleFetchClick() {
-      const rawUrl = document.getElementById('main-url-input').value.trim();
-      const videoId = extractVideoId(rawUrl);
-      if (!videoId) {
-        showToast('Please enter a valid YouTube video URL', true);
-        return;
-      }
-
+    async function fetchVideoData(rawUrl, videoId) {
       const fetchBtn = document.getElementById('fetch-video-btn');
       fetchBtn.disabled = true;
       fetchBtn.querySelector('span').textContent = 'Loading...';
@@ -2603,6 +2724,39 @@ footer a { color: var(--red); text-decoration: none; }
       showToast(msg, true);
     }
 
+    // ── DURATION POLLING & PLAYER SYNCHRONIZATION ────────────
+    let durationPollTimer = null;
+
+    function trySyncDurationFromPlayer() {
+      if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return false;
+      try {
+        const dur = Math.round(ytPlayer.getDuration() || 0);
+        if (dur > 1) {
+          if (currentVideoData) {
+            currentVideoData.duration = dur;
+          }
+          const durEl = document.getElementById('loaded-video-duration');
+          if (durEl) durEl.textContent = formatSeconds(dur);
+          ClipState.updateVideoDuration(dur);
+          return true;
+        }
+      } catch(e) {}
+      return false;
+    }
+
+    function startDurationPolling() {
+      if (durationPollTimer) clearInterval(durationPollTimer);
+      let attempts = 0;
+      durationPollTimer = setInterval(() => {
+        attempts++;
+        const synced = trySyncDurationFromPlayer();
+        if (synced || attempts >= 20) {
+          clearInterval(durationPollTimer);
+          durationPollTimer = null;
+        }
+      }, 500);
+    }
+
     // ── DISPLAY LOADED VIDEO & INITIALIZE PLAYER ─────────────
     function displayLoadedVideo() {
       if (!currentVideoData) return;
@@ -2611,7 +2765,10 @@ footer a { color: var(--red); text-decoration: none; }
       document.getElementById('studio-workspace').classList.add('visible');
 
       document.getElementById('loaded-video-title').textContent = currentVideoData.title;
-      document.getElementById('loaded-video-duration').textContent = formatSeconds(currentVideoData.duration);
+      const durDisplay = currentVideoData.duration > 1
+        ? formatSeconds(currentVideoData.duration)
+        : 'Detecting duration...';
+      document.getElementById('loaded-video-duration').textContent = durDisplay;
 
       // Initialize Single Source of Truth
       ClipState.init(currentVideoData.duration);
@@ -2622,6 +2779,9 @@ footer a { color: var(--red); text-decoration: none; }
       // Mount or Load YouTube IFrame Player
       initYouTubePlayer(currentVideoData.id);
 
+      // Start duration sync polling
+      startDurationPolling();
+
       // Ensure timeline scrubber is bound
       initTimelineScrubber();
 
@@ -2630,11 +2790,14 @@ footer a { color: var(--red); text-decoration: none; }
         document.getElementById('cutter-tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
+    window.displayLoadedVideo = displayLoadedVideo;
 
     // ── YOUTUBE IFRAME PLAYER INTEGRATION (TubeChop UX) ──────
     function initYouTubePlayer(videoId) {
       const fallbackImg = document.getElementById('player-fallback-thumb');
-      fallbackImg.src = currentVideoData.thumbnail;
+      if (fallbackImg && currentVideoData) {
+        fallbackImg.src = currentVideoData.thumbnail;
+      }
 
       if (!window.YT || !window.YT.Player) {
         const tag = document.createElement('script');
@@ -2654,6 +2817,7 @@ footer a { color: var(--red); text-decoration: none; }
       try {
         if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
           ytPlayer.loadVideoById(videoId);
+          startDurationPolling();
           return;
         }
 
@@ -2665,17 +2829,25 @@ footer a { color: var(--red); text-decoration: none; }
             modestbranding: 1
           },
           events: {
-            onReady: () => {
+            onReady: (event) => {
               isPlayerReady = true;
-              document.getElementById('player-fallback-thumb').classList.remove('visible');
+              const thumb = document.getElementById('player-fallback-thumb');
+              if (thumb) thumb.classList.remove('visible');
+              trySyncDurationFromPlayer();
+              startDurationPolling();
+            },
+            onStateChange: (event) => {
+              trySyncDurationFromPlayer();
             },
             onError: () => {
-              document.getElementById('player-fallback-thumb').classList.add('visible');
+              const thumb = document.getElementById('player-fallback-thumb');
+              if (thumb) thumb.classList.add('visible');
             }
           }
         });
       } catch(e) {
-        document.getElementById('player-fallback-thumb').classList.add('visible');
+        const thumb = document.getElementById('player-fallback-thumb');
+        if (thumb) thumb.classList.add('visible');
       }
     }
 
@@ -2690,18 +2862,18 @@ footer a { color: var(--red); text-decoration: none; }
       } else {
         ClipState.setEnd(cur, true);
       }
-      showToast(`Set ${target} time to ${formatSeconds(cur)}`);
     }
+    window.setTimeFromPlayer = setTimeFromPlayer;
 
     function previewSelectedClip() {
       if (!ytPlayer || typeof ytPlayer.seekTo !== 'function') {
-        showToast('Player preview not ready yet', true);
+        showToast('Video player not ready yet', true);
         return;
       }
-      ytPlayer.seekTo(ClipState.startSec, true);
+      ytPlayer.seekTo(ClipState.startSeconds, true);
       ytPlayer.playVideo();
-      showToast(`Playing preview from ${formatSeconds(ClipState.startSec)}`);
     }
+    window.previewSelectedClip = previewSelectedClip;
 
     // ── QUALITY RESOLUTION PICKER ────────────────────────────
     function renderResolutionPills() {
