@@ -2880,20 +2880,26 @@ footer a { color: var(--red); text-decoration: none; }
       const grid = document.getElementById('resolution-grid');
       grid.innerHTML = '';
 
-      if (!currentVideoData || !currentVideoData.resolutions) return;
+      if (!currentVideoData || !currentVideoData.resolutions || currentVideoData.resolutions.length === 0) return;
+
+      // Select 720p by default for fast mobile streaming, or 1080p, else first available
+      let defIdx = currentVideoData.resolutions.findIndex(r => r.startsWith('720p'));
+      if (defIdx === -1) defIdx = currentVideoData.resolutions.findIndex(r => r.startsWith('1080p'));
+      if (defIdx === -1) defIdx = 0;
 
       currentVideoData.resolutions.forEach((res, i) => {
+        const isSelected = (i === defIdx);
         const pill = document.createElement('button');
         pill.type = 'button';
-        pill.className = 'res-pill' + (i === 0 ? ' active' : '');
+        pill.className = 'res-pill' + (isSelected ? ' active' : '');
         pill.setAttribute('role', 'radio');
-        pill.setAttribute('aria-checked', i === 0 ? 'true' : 'false');
+        pill.setAttribute('aria-checked', isSelected ? 'true' : 'false');
         pill.textContent = res;
         pill.onclick = () => selectResolution(res, pill);
         grid.appendChild(pill);
       });
 
-      selectedQuality = currentVideoData.resolutions[0];
+      selectedQuality = currentVideoData.resolutions[defIdx];
     }
 
     function selectResolution(res, el) {
@@ -2962,6 +2968,31 @@ footer a { color: var(--red); text-decoration: none; }
     }
 
     // ── JOB POLLING (Honest Status Feedback) ──────────────────
+    function triggerDirectDownload(fileUrl, fileName) {
+      try {
+        let frame = document.getElementById('dl-hidden-frame');
+        if (!frame) {
+          frame = document.createElement('iframe');
+          frame.id = 'dl-hidden-frame';
+          frame.style.display = 'none';
+          document.body.appendChild(frame);
+        }
+        frame.src = fileUrl;
+      } catch(e) {}
+
+      try {
+        const a = document.createElement('a');
+        a.href = fileUrl;
+        if (fileName) a.download = fileName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (a.parentNode) a.parentNode.removeChild(a);
+        }, 1000);
+      } catch(e) {}
+    }
+
     function pollJobStatus(jobId, isClip) {
       procSeconds = 0;
       clearInterval(procTimerInterval);
@@ -3009,26 +3040,20 @@ footer a { color: var(--red); text-decoration: none; }
           } else if (job.status === 'done') {
             clearInterval(pollInterval);
             clearInterval(procTimerInterval);
-            statusTitle.textContent = '✅ Completed!';
-            detailsText.textContent = 'Starting file download...';
+            const fileUrl = `${API}/file/${jobId}`;
+            const fileName = job.filename || (isClip ? 'ytcuttr_clip.mp4' : 'ytcuttr_video.mp4');
+
+            statusTitle.textContent = '✅ Download Ready!';
+            detailsText.innerHTML = `Downloading automatically...<br><a href="${fileUrl}" download="${fileName}" style="display:inline-block;margin-top:8px;color:#38bdf8;text-decoration:underline;font-weight:600;">Click here if download didn't start</a>`;
+
+            // Trigger direct non-popup download
+            triggerDirectDownload(fileUrl, fileName);
+            showToast('✅ Download started!');
 
             setTimeout(() => {
-              const fileUrl = `${API}/file/${jobId}`;
-              try {
-                const a = document.createElement('a');
-                a.href = fileUrl;
-                a.download = job.filename || (isClip ? 'ytcuttr_clip.mp4' : 'ytcuttr_video.mp4');
-                a.target = '_blank';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-              } catch(e) {
-                window.location.href = fileUrl;
-              }
-              showToast('✅ Download started successfully!');
               hideProcessingBox();
               resetPrimaryButton();
-            }, 600);
+            }, 3500);
 
           } else if (job.status === 'error') {
             clearInterval(pollInterval);

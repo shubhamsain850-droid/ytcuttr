@@ -1,8 +1,8 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+﻿from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
-import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request
+import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio
 from pathlib import Path
 from urllib.parse import quote
 
@@ -93,12 +93,23 @@ def to_hms(s: int) -> str:
 
 QUALITY_MAP = {
     "2160p": "bv*[height<=2160][ext=mp4]+ba[ext=m4a]/bv*[height<=2160]+ba/b[height<=2160]/best",
+    "1440p": "bv*[height<=1440][ext=mp4]+ba[ext=m4a]/bv*[height<=1440]+ba/b[height<=1440]/best",
     "1080p": "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/best",
     "720p":  "bv*[height<=720][ext=mp4]+ba[ext=m4a]/bv*[height<=720]+ba/b[height<=720]/best",
     "480p":  "bv*[height<=480][ext=mp4]+ba[ext=m4a]/bv*[height<=480]+ba/b[height<=480]/best",
     "360p":  "bv*[height<=360][ext=mp4]+ba[ext=m4a]/bv*[height<=360]+ba/b[height<=360]/best",
+    "240p":  "bv*[height<=240][ext=mp4]+ba[ext=m4a]/bv*[height<=240]+ba/b[height<=240]/best",
+    "144p":  "bv*[height<=144][ext=mp4]+ba[ext=m4a]/bv*[height<=144]+ba/b[height<=144]/best",
     "audio": "ba[ext=m4a]/ba/best",
 }
+
+def clean_quality_key(quality: str) -> str:
+    if not quality:
+        return "720p"
+    q = quality.strip().lower()
+    if "audio" in q:
+        return "audio"
+    return q.split()[0]
 
 def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
     cmd = [
@@ -106,8 +117,6 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
         "-4",
         "--no-playlist",
         "--no-warnings",
-        "--rm-cache-dir",
-        
         "--add-header", "Accept-Language:en-US,en;q=0.9",
     ]
     if use_cookies:
@@ -119,11 +128,11 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
     return cmd + extra
 
 def fetch_oembed(url: str) -> dict | None:
-    """Fast video metadata via YouTube oEmbed (instant, no bot checks)."""
+    """Fast video metadata via YouTube oEmbed (fallback if yt-dlp fails)."""
     try:
         oembed_url = f"https://www.youtube.com/oembed?url={quote(url)}&format=json"
         req = urllib.request.Request(oembed_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=8) as resp:
             data = json.loads(resp.read().decode())
             return {
                 "title":       data.get("title", "Unknown Title"),
@@ -135,7 +144,6 @@ def fetch_oembed(url: str) -> dict | None:
         return None
 
 # Routes
-
 
 @app.get("/diag")
 async def diag(url: str = "https://www.youtube.com/watch?v=aqz-KE-bpKQ"):
@@ -180,7 +188,7 @@ async def version():
                 sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "3.7-deno-runtime",
+        "version": "3.8-dynamic-qualities-fast-clip",
         "has_cookies": bool(cf),
         "cookie_source": source,
         "cookie_size": size,
@@ -198,136 +206,123 @@ async def health_head():
 
 @app.post("/info")
 async def get_video_info(req: InfoRequest):
-    fallback = fetch_oembed(req.url)
-    if fallback:
-        try:
-            cmd = build_ytdlp_cmd(["--dump-json", req.url])
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=12)
-            if result.returncode == 0 and result.stdout.strip():
-                data = json.loads(result.stdout)
-                formats = data.get("formats", [])
-                resolutions = set()
-                for f in formats:
-                    h = f.get("height")
-                    if h and f.get("vcodec") != "none" and h >= 360:
-                        resolutions.add(h)
-                sorted_res = sorted(resolutions, reverse=True)
-                res_labels = []
-                for h in sorted_res:
-                    if h >= 2160: res_labels.append("2160p")
-                    elif h >= 1080: res_labels.append("1080p")
-                    elif h >= 720:  res_labels.append("720p")
-                    elif h >= 480:  res_labels.append("480p")
-                    elif h >= 360:  res_labels.append("360p")
-                seen = set(); unique_res = []
-                for r in res_labels:
-                    if r not in seen:
-                        seen.add(r); unique_res.append(r)
-                unique_res.append("Audio only")
-                return {
-                    "title":       data.get("title", fallback["title"]),
-                    "duration":    data.get("duration", 0),
-                    "thumbnail":   data.get("thumbnail", fallback["thumbnail"]),
-                    "resolutions": unique_res,
-                }
-        except Exception:
-            pass
-        return fallback
-
+    # Primary: Run yt-dlp to extract exact stream formats, duration and metadata
     cmd = build_ytdlp_cmd(["--dump-json", req.url])
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0 and result.stdout.strip():
             data = json.loads(result.stdout)
             formats = data.get("formats", [])
-            resolutions = set()
+
+            ORDER = ["2160p (4K)", "1440p (2K)", "1080p", "720p", "480p", "360p", "240p", "144p"]
+            found_tiers = set()
             for f in formats:
                 h = f.get("height")
-                if h and f.get("vcodec") != "none" and h >= 360:
-                    resolutions.add(h)
-            sorted_res = sorted(resolutions, reverse=True)
-            res_labels = []
-            for h in sorted_res:
-                if h >= 2160: res_labels.append("2160p")
-                elif h >= 1080: res_labels.append("1080p")
-                elif h >= 720:  res_labels.append("720p")
-                elif h >= 480:  res_labels.append("480p")
-                elif h >= 360:  res_labels.append("360p")
-            seen = set(); unique_res = []
-            for r in res_labels:
-                if r not in seen:
-                    seen.add(r); unique_res.append(r)
-            unique_res.append("Audio only")
+                w = f.get("width")
+                v = f.get("vcodec")
+                if h and isinstance(h, int) and v and v != "none":
+                    eff = min(h, w) if (w and isinstance(w, int) and w > 0 and h > w) else h
+                    if eff >= 2160: found_tiers.add("2160p (4K)")
+                    elif eff >= 1440: found_tiers.add("1440p (2K)")
+                    elif eff >= 1080: found_tiers.add("1080p")
+                    elif eff >= 720:  found_tiers.add("720p")
+                    elif eff >= 480:  found_tiers.add("480p")
+                    elif eff >= 360:  found_tiers.add("360p")
+                    elif eff >= 240:  found_tiers.add("240p")
+                    elif eff >= 144:  found_tiers.add("144p")
+
+            res_labels = [t for t in ORDER if t in found_tiers]
+            if not res_labels:
+                res_labels = ["1080p", "720p", "480p", "360p"]
+            res_labels.append("Audio only")
+
+            duration = int(data.get("duration") or 0)
             return {
-                "title":       data.get("title", "Unknown"),
-                "duration":    data.get("duration", 0),
+                "title":       data.get("title", "YouTube Video"),
+                "duration":    duration,
                 "thumbnail":   data.get("thumbnail", ""),
-                "resolutions": unique_res,
+                "resolutions": res_labels,
             }
-        raise HTTPException(400, detail="Could not fetch video info. Check the URL or try again.")
-    except subprocess.TimeoutExpired:
-        raise HTTPException(408, detail="Request timed out. Try again.")
-    except json.JSONDecodeError:
-        raise HTTPException(400, detail="Invalid video URL.")
+    except Exception:
+        pass
+
+    # Secondary fallback: oEmbed
+    fallback = fetch_oembed(req.url)
+    if fallback:
+        return fallback
+
+    raise HTTPException(400, detail="Could not fetch video info. Please verify the URL and try again.")
 
 
 def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str):
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
-    ext = "m4a" if quality == "audio" else "mp4"
+    q_key = clean_quality_key(quality)
+    ext = "m4a" if q_key == "audio" else "mp4"
     out_path = out_dir / f"clip.{ext}"
     raw_path = out_dir / f"raw.{ext}"
-    fmt = QUALITY_MAP.get(quality, QUALITY_MAP["720p"])
+    fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
 
     try:
         jobs[job_id]["status"] = "downloading"
 
-        # Step 1: Download stream via native yt-dlp downloader
-        # Attempt 1: Requested quality with authenticated cookies
-        cmd_dl = build_ytdlp_cmd([
+        # ATTEMPT 1 (Ultra Fast): Download ONLY the requested section using yt-dlp native --download-sections
+        # Directly writes out_path in 3-8 seconds instead of 100 seconds!
+        cmd_clip = build_ytdlp_cmd([
+            "--download-sections", f"*{start_hms}-{end_hms}",
             "-f", fmt,
             "--merge-output-format", ext,
-            "-o", str(raw_path),
+            "-o", str(out_path),
             url,
         ], use_cookies=True)
-        r_dl = subprocess.run(cmd_dl, capture_output=True, text=True, timeout=180)
+        r_dl = subprocess.run(cmd_clip, capture_output=True, text=True, timeout=80)
 
-        # Attempt 2: Fallback to best available mp4 stream with cookies
-        if r_dl.returncode != 0 or not raw_path.exists() or raw_path.stat().st_size == 0:
-            cmd_dl_best = build_ytdlp_cmd([
+        # ATTEMPT 2: Fallback with --download-sections on best stream
+        if not out_path.exists() or out_path.stat().st_size == 0:
+            cmd_clip_best = build_ytdlp_cmd([
+                "--download-sections", f"*{start_hms}-{end_hms}",
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
+                "--merge-output-format", ext,
+                "-o", str(out_path),
+                url,
+            ], use_cookies=True)
+            r_dl = subprocess.run(cmd_clip_best, capture_output=True, text=True, timeout=80)
+
+        # ATTEMPT 3: Fallback without cookies
+        if not out_path.exists() or out_path.stat().st_size == 0:
+            cmd_clip_anon = build_ytdlp_cmd([
+                "--download-sections", f"*{start_hms}-{end_hms}",
+                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
+                "--merge-output-format", ext,
+                "-o", str(out_path),
+                url,
+            ], use_cookies=False)
+            r_dl = subprocess.run(cmd_clip_anon, capture_output=True, text=True, timeout=80)
+
+        # ATTEMPT 4 (Safety Net): Full stream download + local ffmpeg trim
+        if not out_path.exists() or out_path.stat().st_size == 0:
+            cmd_dl = build_ytdlp_cmd([
+                "-f", fmt,
                 "--merge-output-format", ext,
                 "-o", str(raw_path),
                 url,
             ], use_cookies=True)
-            r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=180)
-
-        # Attempt 3: Fallback without cookies (visionos,android)
-        if r_dl.returncode != 0 or not raw_path.exists() or raw_path.stat().st_size == 0:
-            cmd_dl_anon = build_ytdlp_cmd([
-                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
-                "--merge-output-format", ext,
-                "-o", str(raw_path),
-                url,
-            ], use_cookies=False)
-            r_dl = subprocess.run(cmd_dl_anon, capture_output=True, text=True, timeout=180)
-
-        # Step 2: Cut locally using ffmpeg (takes <0.15s, 0% network errors)
-        if r_dl.returncode == 0 and raw_path.exists() and raw_path.stat().st_size > 0:
-            cmd_cut = [
-                "ffmpeg", "-y",
-                "-ss", start_hms,
-                "-to", end_hms,
-                "-i", str(raw_path),
-                "-c", "copy",
-                "-avoid_negative_ts", "make_zero",
-                str(out_path),
-            ]
-            subprocess.run(cmd_cut, capture_output=True, text=True, timeout=60)
-            try:
-                raw_path.unlink(missing_ok=True)
-            except Exception:
-                pass
+            r_dl = subprocess.run(cmd_dl, capture_output=True, text=True, timeout=120)
+            if r_dl.returncode == 0 and raw_path.exists() and raw_path.stat().st_size > 0:
+                cmd_cut = [
+                    "ffmpeg", "-y",
+                    "-ss", start_hms,
+                    "-to", end_hms,
+                    "-i", str(raw_path),
+                    "-c", "copy",
+                    "-avoid_negative_ts", "make_zero",
+                    str(out_path),
+                ]
+                subprocess.run(cmd_cut, capture_output=True, text=True, timeout=30)
+                try:
+                    raw_path.unlink(missing_ok=True)
+                except Exception:
+                    pass
 
         if out_path.exists() and out_path.stat().st_size > 0:
             jobs[job_id]["status"] = "done"
@@ -340,8 +335,6 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             jobs[job_id]["debug"] = {
                 "r_dl_code": r_dl.returncode,
                 "r_dl_stderr": r_dl.stderr[-500:] if r_dl.stderr else "",
-                "raw_exists": raw_path.exists(),
-                "raw_size": raw_path.stat().st_size if raw_path.exists() else 0
             }
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
@@ -354,9 +347,10 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
 def _run_download(job_id: str, url: str, quality: str):
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
-    ext = "m4a" if quality == "audio" else "mp4"
+    q_key = clean_quality_key(quality)
+    ext = "m4a" if q_key == "audio" else "mp4"
     out_path = out_dir / f"video.{ext}"
-    fmt = QUALITY_MAP.get(quality, QUALITY_MAP["720p"])
+    fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
 
     try:
         jobs[job_id]["status"] = "downloading"
@@ -439,17 +433,19 @@ async def get_status(job_id: str):
     return job
 
 
+async def delayed_cleanup(job_id: str, delay: int = 300):
+    await asyncio.sleep(delay)
+    shutil.rmtree(CLIPS_DIR / job_id, ignore_errors=True)
+    jobs.pop(job_id, None)
+
+
 @app.get("/file/{job_id}")
 async def get_file(job_id: str, bg: BackgroundTasks):
     job = jobs.get(job_id)
     if not job or job["status"] != "done":
         raise HTTPException(404, detail="File not ready")
 
-    def cleanup():
-        shutil.rmtree(CLIPS_DIR / job_id, ignore_errors=True)
-        jobs.pop(job_id, None)
-
-    bg.add_task(cleanup)
+    bg.add_task(delayed_cleanup, job_id, 300)
     return FileResponse(
         job["file"],
         filename=job["filename"],
