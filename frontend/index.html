@@ -2664,7 +2664,21 @@ footer a { color: var(--red); text-decoration: none; }
       const fetchBtn = document.getElementById('fetch-video-btn');
       fetchBtn.disabled = true;
       fetchBtn.querySelector('span').textContent = 'Loading...';
-      showStatus('Connecting to YouTube and fetching stream info...', 'info', true);
+
+      // Instant Optimistic Mount: Display loaded video player & workspace immediately!
+      if (videoId && (!currentVideoData || currentVideoData.id !== videoId)) {
+        currentVideoData = {
+          id: videoId,
+          url: rawUrl,
+          title: 'YouTube Video',
+          duration: 0,
+          thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+          resolutions: ['720p', '480p', '360p', 'Audio only']
+        };
+        displayLoadedVideo();
+      }
+
+      showStatus('Fetching available stream qualities...', 'info', true);
 
       const MAX_RETRIES = 3;
       let lastErr = null;
@@ -3007,8 +3021,8 @@ footer a { color: var(--red); text-decoration: none; }
       const statusTitle = document.getElementById('proc-step-title');
       const detailsText = document.getElementById('proc-details-text');
 
-      statusTitle.textContent = isClip ? 'Cutting & Transcoding Clip...' : 'Extracting Video Stream...';
-      detailsText.textContent = 'Server is processing video segment...';
+      statusTitle.textContent = isClip ? 'Cutting Clip Segment...' : 'Downloading Video Stream...';
+      detailsText.textContent = 'Extracting stream section directly (zero-transcode)...';
 
       const MAX_WAIT_SECONDS = 300; // 5 min maximum
       let elapsed = 0;
@@ -3069,7 +3083,7 @@ footer a { color: var(--red); text-decoration: none; }
         } catch(err) {
           // Network hiccup during poll
         }
-      }, 2000);
+      }, 1200);
     }
 
     function showProcessingBox(title) {

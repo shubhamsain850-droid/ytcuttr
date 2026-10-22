@@ -2,7 +2,7 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
-import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio
+import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio, time
 from pathlib import Path
 from urllib.parse import quote
 
@@ -18,7 +18,12 @@ app.add_middleware(
 CLIPS_DIR = Path("/tmp/ytcuttr")
 CLIPS_DIR.mkdir(exist_ok=True)
 
+CACHE_DIR = Path("/tmp/ytdlp_cache")
+CACHE_DIR.mkdir(exist_ok=True)
+
 jobs: dict = {}
+INFO_CACHE: dict = {}
+INFO_CACHE_TTL = 3600  # 1 hour cache
 
 # Dynamic Cookie Resolver
 def get_cookies_file() -> tuple[str | None, str]:
@@ -91,15 +96,20 @@ def to_hms(s: int) -> str:
     m, sec = divmod(rem, 60)
     return f"{h:02d}:{m:02d}:{sec:02d}"
 
+def get_video_id(url: str) -> str:
+    m = re.search(r'(?:v=|\/|be\/|shorts\/)([0-9A-Za-z_-]{11})', url)
+    return m.group(1) if m else url
+
+# QUALITY MAP: Strictly prioritizes AVC (H.264) + AAC (M4A) for zero-transcode instant cutting
 QUALITY_MAP = {
-    "2160p": "bv*[height<=2160][ext=mp4]+ba[ext=m4a]/bv*[height<=2160]+ba/b[height<=2160]/best",
-    "1440p": "bv*[height<=1440][ext=mp4]+ba[ext=m4a]/bv*[height<=1440]+ba/b[height<=1440]/best",
-    "1080p": "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/best",
-    "720p":  "bv*[height<=720][ext=mp4]+ba[ext=m4a]/bv*[height<=720]+ba/b[height<=720]/best",
-    "480p":  "bv*[height<=480][ext=mp4]+ba[ext=m4a]/bv*[height<=480]+ba/b[height<=480]/best",
-    "360p":  "bv*[height<=360][ext=mp4]+ba[ext=m4a]/bv*[height<=360]+ba/b[height<=360]/best",
-    "240p":  "bv*[height<=240][ext=mp4]+ba[ext=m4a]/bv*[height<=240]+ba/b[height<=240]/best",
-    "144p":  "bv*[height<=144][ext=mp4]+ba[ext=m4a]/bv*[height<=144]+ba/b[height<=144]/best",
+    "2160p": "bv*[vcodec^=avc][height<=2160]+ba[ext=m4a]/bv*[height<=2160][ext=mp4]+ba[ext=m4a]/bv*[height<=2160]+ba/b[height<=2160]/best",
+    "1440p": "bv*[vcodec^=avc][height<=1440]+ba[ext=m4a]/bv*[height<=1440][ext=mp4]+ba[ext=m4a]/bv*[height<=1440]+ba/b[height<=1440]/best",
+    "1080p": "bv*[vcodec^=avc][height<=1080]+ba[ext=m4a]/bv*[height<=1080][ext=mp4]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/best",
+    "720p":  "22/bv*[vcodec^=avc][height<=720]+ba[ext=m4a]/bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4]/best",
+    "480p":  "bv*[vcodec^=avc][height<=480]+ba[ext=m4a]/bv*[height<=480][ext=mp4]+ba[ext=m4a]/b[height<=480][ext=mp4]/best",
+    "360p":  "18/bv*[vcodec^=avc][height<=360]+ba[ext=m4a]/bv*[height<=360][ext=mp4]+ba[ext=m4a]/b[height<=360][ext=mp4]/best",
+    "240p":  "bv*[vcodec^=avc][height<=240]+ba[ext=m4a]/bv*[height<=240][ext=mp4]+ba[ext=m4a]/b[height<=240][ext=mp4]/best",
+    "144p":  "bv*[vcodec^=avc][height<=144]+ba[ext=m4a]/bv*[height<=144][ext=mp4]+ba[ext=m4a]/b[height<=144][ext=mp4]/best",
     "audio": "ba[ext=m4a]/ba/best",
 }
 
@@ -117,22 +127,25 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
         "-4",
         "--no-playlist",
         "--no-warnings",
+        "--cache-dir", str(CACHE_DIR),
+        "--no-check-formats",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
+        "--extractor-args", "youtube:skip=translated_subs,comments",
     ]
     if use_cookies:
         cf, source = get_cookies_file()
         if cf:
             cmd += ["--cookies", cf]
     else:
-        cmd += ["--extractor-args", "youtube:player_client=visionos,android"]
+        cmd += ["--extractor-args", "youtube:player_client=visionos,android;skip=translated_subs,comments"]
     return cmd + extra
 
 def fetch_oembed(url: str) -> dict | None:
-    """Fast video metadata via YouTube oEmbed (fallback if yt-dlp fails)."""
+    """Fast video metadata via YouTube oEmbed (instant, no bot checks)."""
     try:
         oembed_url = f"https://www.youtube.com/oembed?url={quote(url)}&format=json"
         req = urllib.request.Request(oembed_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=8) as resp:
+        with urllib.request.urlopen(req, timeout=6) as resp:
             data = json.loads(resp.read().decode())
             return {
                 "title":       data.get("title", "Unknown Title"),
@@ -155,7 +168,7 @@ async def diag(url: str = "https://www.youtube.com/watch?v=aqz-KE-bpKQ"):
     except Exception as e:
         results["deno"] = str(e)
 
-    cmd_cookie = ["yt-dlp", "-4", "--no-warnings"]
+    cmd_cookie = ["yt-dlp", "-4", "--no-warnings", "--cache-dir", str(CACHE_DIR)]
     if cf:
         cmd_cookie += ["--cookies", cf]
     cmd_cookie += ["-F", url]
@@ -188,7 +201,7 @@ async def version():
                 sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "3.8-dynamic-qualities-fast-clip",
+        "version": "3.9-ultrafast-pipeline",
         "has_cookies": bool(cf),
         "cookie_source": source,
         "cookie_size": size,
@@ -206,10 +219,18 @@ async def health_head():
 
 @app.post("/info")
 async def get_video_info(req: InfoRequest):
+    vid = get_video_id(req.url)
+    now = time.time()
+    # Cache hit: instant 1ms response
+    if vid in INFO_CACHE:
+        cached_time, cached_data = INFO_CACHE[vid]
+        if (now - cached_time) < INFO_CACHE_TTL:
+            return cached_data
+
     # Primary: Run yt-dlp to extract exact stream formats, duration and metadata
     cmd = build_ytdlp_cmd(["--dump-json", req.url])
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
         if result.returncode == 0 and result.stdout.strip():
             data = json.loads(result.stdout)
             formats = data.get("formats", [])
@@ -237,12 +258,14 @@ async def get_video_info(req: InfoRequest):
             res_labels.append("Audio only")
 
             duration = int(data.get("duration") or 0)
-            return {
+            res_dict = {
                 "title":       data.get("title", "YouTube Video"),
                 "duration":    duration,
                 "thumbnail":   data.get("thumbnail", ""),
                 "resolutions": res_labels,
             }
+            INFO_CACHE[vid] = (now, res_dict)
+            return res_dict
     except Exception:
         pass
 
@@ -255,6 +278,7 @@ async def get_video_info(req: InfoRequest):
 
 
 def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str):
+    t_start = time.time()
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
     q_key = clean_quality_key(quality)
@@ -267,37 +291,40 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         jobs[job_id]["status"] = "downloading"
 
         # ATTEMPT 1 (Ultra Fast): Download ONLY the requested section using yt-dlp native --download-sections
-        # Directly writes out_path in 3-8 seconds instead of 100 seconds!
+        # with concurrent fragments and AVC/AAC stream copy (Zero transcoding!)
         cmd_clip = build_ytdlp_cmd([
             "--download-sections", f"*{start_hms}-{end_hms}",
+            "--concurrent-fragments", "4",
             "-f", fmt,
             "--merge-output-format", ext,
             "-o", str(out_path),
             url,
         ], use_cookies=True)
-        r_dl = subprocess.run(cmd_clip, capture_output=True, text=True, timeout=80)
+        r_dl = subprocess.run(cmd_clip, capture_output=True, text=True, timeout=75)
 
         # ATTEMPT 2: Fallback with --download-sections on best stream
         if not out_path.exists() or out_path.stat().st_size == 0:
             cmd_clip_best = build_ytdlp_cmd([
                 "--download-sections", f"*{start_hms}-{end_hms}",
+                "--concurrent-fragments", "4",
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
                 url,
             ], use_cookies=True)
-            r_dl = subprocess.run(cmd_clip_best, capture_output=True, text=True, timeout=80)
+            r_dl = subprocess.run(cmd_clip_best, capture_output=True, text=True, timeout=75)
 
         # ATTEMPT 3: Fallback without cookies
         if not out_path.exists() or out_path.stat().st_size == 0:
             cmd_clip_anon = build_ytdlp_cmd([
                 "--download-sections", f"*{start_hms}-{end_hms}",
+                "--concurrent-fragments", "4",
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
                 url,
             ], use_cookies=False)
-            r_dl = subprocess.run(cmd_clip_anon, capture_output=True, text=True, timeout=80)
+            r_dl = subprocess.run(cmd_clip_anon, capture_output=True, text=True, timeout=75)
 
         # ATTEMPT 4 (Safety Net): Full stream download + local ffmpeg trim
         if not out_path.exists() or out_path.stat().st_size == 0:
@@ -324,14 +351,17 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 except Exception:
                     pass
 
+        elapsed = round(time.time() - t_start, 2)
         if out_path.exists() and out_path.stat().st_size > 0:
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_clip_{start_hms.replace(':','-')}_{end_hms.replace(':','-')}.{ext}"
+            jobs[job_id]["time_taken"] = elapsed
         else:
             err = r_dl.stderr[-400:] if r_dl.stderr else "Could not process clip. Please try another video or resolution."
             jobs[job_id]["status"] = "error"
             jobs[job_id]["error"] = err
+            jobs[job_id]["time_taken"] = elapsed
             jobs[job_id]["debug"] = {
                 "r_dl_code": r_dl.returncode,
                 "r_dl_stderr": r_dl.stderr[-500:] if r_dl.stderr else "",
@@ -345,6 +375,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
 
 
 def _run_download(job_id: str, url: str, quality: str):
+    t_start = time.time()
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
     q_key = clean_quality_key(quality)
@@ -356,6 +387,7 @@ def _run_download(job_id: str, url: str, quality: str):
         jobs[job_id]["status"] = "downloading"
         # Attempt 1: Requested quality with cookies
         cmd = build_ytdlp_cmd([
+            "--concurrent-fragments", "4",
             "-f", fmt,
             "--merge-output-format", ext,
             "-o", str(out_path),
@@ -366,6 +398,7 @@ def _run_download(job_id: str, url: str, quality: str):
         # Attempt 2: Fallback to best format with cookies
         if r.returncode != 0 or not out_path.exists() or out_path.stat().st_size == 0:
             fallback_cmd = build_ytdlp_cmd([
+                "--concurrent-fragments", "4",
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
@@ -376,6 +409,7 @@ def _run_download(job_id: str, url: str, quality: str):
         # Attempt 3: Fallback without cookies
         if r.returncode != 0 or not out_path.exists() or out_path.stat().st_size == 0:
             fallback_cmd_anon = build_ytdlp_cmd([
+                "--concurrent-fragments", "4",
                 "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
                 "--merge-output-format", ext,
                 "-o", str(out_path),
@@ -383,13 +417,16 @@ def _run_download(job_id: str, url: str, quality: str):
             ], use_cookies=False)
             r = subprocess.run(fallback_cmd_anon, capture_output=True, text=True, timeout=300)
 
+        elapsed = round(time.time() - t_start, 2)
         if out_path.exists() and out_path.stat().st_size > 0:
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_video.{ext}"
+            jobs[job_id]["time_taken"] = elapsed
         else:
             jobs[job_id]["status"] = "error"
             jobs[job_id]["error"] = r.stderr[-400:] if r.stderr else "Download failed"
+            jobs[job_id]["time_taken"] = elapsed
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = "Download timed out."
