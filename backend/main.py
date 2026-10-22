@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
-import subprocess, uuid, os, re, shutil, json, tempfile, urllib.request
+import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request
 from pathlib import Path
 from urllib.parse import quote
 
@@ -21,8 +21,9 @@ CLIPS_DIR.mkdir(exist_ok=True)
 jobs: dict = {}
 
 # Dynamic Cookie Resolver
-def get_cookies_file() -> str | None:
-    """Find valid YouTube cookies from /etc/secrets, env vars, or local files."""
+def get_cookies_file() -> tuple[str | None, str]:
+    """Find valid YouTube cookies from /etc/secrets, Base64 env var, or raw env var."""
+    # 1. Check secret files in /etc/secrets
     sec_dir = Path("/etc/secrets")
     if sec_dir.exists():
         for f in sec_dir.rglob("*"):
@@ -30,31 +31,34 @@ def get_cookies_file() -> str | None:
                 try:
                     content = f.read_text(encoding="utf-8", errors="ignore")
                     if "youtube.com" in content:
-                        return str(f)
+                        return str(f), f"secret_file:{f.name}"
                 except Exception:
                     pass
 
+    # 2. Check env vars (try Base64 first to avoid HTML newline stripping)
     for k, v in os.environ.items():
-        if ("COOKIE" in k.upper() or "YT" in k.upper()) and "youtube.com" in v:
-            content = v.strip()
-            if "\\n" in content and "\n" not in content:
-                content = content.replace("\\n", "\n")
-            cf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
-            cf.write(content)
-            cf.close()
-            return cf.name
+        if "COOKIE" in k.upper() or "YT" in k.upper():
+            val = v.strip()
+            # Try base64 decoding
+            try:
+                decoded = base64.b64decode(val).decode("utf-8", errors="ignore")
+                if "youtube.com" in decoded and len(decoded.splitlines()) > 5:
+                    cf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+                    cf.write(decoded)
+                    cf.close()
+                    return cf.name, f"env_base64:{k}"
+            except Exception:
+                pass
 
-    for name in ["cookies.txt", "yt_cookies.txt"]:
-        for p in [Path(name), Path(__file__).parent / name]:
-            if p.exists() and p.is_file():
-                try:
-                    content = p.read_text(encoding="utf-8", errors="ignore")
-                    if "youtube.com" in content:
-                        return str(p)
-                except Exception:
-                    pass
+            # Try raw env var
+            if "youtube.com" in val:
+                raw = val.replace("\\n", "\n")
+                cf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+                cf.write(raw)
+                cf.close()
+                return cf.name, f"env_raw:{k}"
 
-    return None
+    return None, "none"
 
 # Models
 class InfoRequest(BaseModel):
@@ -97,7 +101,6 @@ QUALITY_MAP = {
 }
 
 def build_ytdlp_cmd(extra: list = []) -> list:
-    """Builds yt-dlp command using cookies if present, or android client as fallback."""
     cmd = [
         "yt-dlp",
         "-4",
@@ -106,7 +109,7 @@ def build_ytdlp_cmd(extra: list = []) -> list:
         "--rm-cache-dir",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
     ]
-    cf = get_cookies_file()
+    cf, source = get_cookies_file()
     if cf:
         cmd += ["--cookies", cf]
     else:
@@ -133,20 +136,30 @@ def fetch_oembed(url: str) -> dict | None:
 
 @app.get("/version")
 async def version():
-    cf = get_cookies_file()
-    cf_details = {}
+    cf, source = get_cookies_file()
+    lines_count = 0
+    size = 0
     if cf:
         try:
             p = Path(cf)
-            cf_details = {"path": str(p), "size": p.stat().st_size}
-        except Exception as e:
-            cf_details = {"error": str(e)}
+            size = p.stat().st_size
+            lines_count = len(p.read_text(encoding="utf-8", errors="ignore").splitlines())
+        except Exception:
+            pass
+
+    sec_files = []
+    if Path("/etc/secrets").exists():
+        for f in Path("/etc/secrets").rglob("*"):
+            if f.is_file() and not f.name.startswith(".."):
+                sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "3.1-cookies-verified-format-fixed",
+        "version": "3.2-base64-secretfile-support",
         "has_cookies": bool(cf),
-        "cookie_file": cf_details,
-        "status": "ready"
+        "cookie_source": source,
+        "cookie_size": size,
+        "cookie_lines": lines_count,
+        "secret_files_found": sec_files
     }
 
 @app.get("/health")
