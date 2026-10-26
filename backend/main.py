@@ -27,7 +27,11 @@ INFO_CACHE_TTL = 3600  # 1 hour cache
 
 # Dynamic Cookie Resolver
 def get_cookies_file() -> tuple[str | None, str]:
-    """Find valid YouTube cookies from /etc/secrets, Base64 env var, or raw env var."""
+    """Find valid YouTube cookies from bundled cookies, /etc/secrets, Base64 env var, or raw env var."""
+    # 0. Check bundled cookies in backend directory
+    bundled = Path(__file__).parent / "cookies.txt"
+    if bundled.exists() and bundled.stat().st_size > 100:
+        return str(bundled), "bundled_file:cookies.txt"
     # 1. Check secret files in /etc/secrets
     sec_dir = Path("/etc/secrets")
     if sec_dir.exists():
