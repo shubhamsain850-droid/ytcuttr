@@ -34,13 +34,23 @@ def get_cookies_file() -> tuple[str | None, str]:
         for f in sec_dir.rglob("*"):
             if f.is_file() and not f.name.startswith(".."):
                 try:
-                    content = f.read_text(encoding="utf-8", errors="ignore")
-                    if "youtube.com" in content:
+                    sec_content = f.read_text(encoding="utf-8", errors="ignore")
+                    if "youtube.com" in sec_content:
                         return str(f), f"secret_file:{f.name}"
                 except Exception:
                     pass
 
-    # 2. Check env vars (try Base64 first to avoid HTML newline stripping)
+    # 2. Check bundled cookies.txt inside backend directory
+    bundled_cookie = Path(__file__).parent / "cookies.txt"
+    if bundled_cookie.exists():
+        try:
+            b_content = bundled_cookie.read_text(encoding="utf-8", errors="ignore")
+            if "youtube.com" in b_content and len(b_content.strip()) > 100:
+                return str(bundled_cookie), "bundled_file:cookies.txt"
+        except Exception:
+            pass
+
+    # 3. Check env vars (try Base64 first to avoid HTML newline stripping)
     for k, v in os.environ.items():
         if "COOKIE" in k.upper() or "YT" in k.upper():
             val = v.strip()
