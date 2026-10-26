@@ -206,7 +206,7 @@ async def version():
         "cookie_source": source,
         "cookie_size": size,
         "cookie_lines": lines_count,
-        "secret_files_found": sec_files, "env_keys": [k for k in os.environ if any(x in k.upper() for x in ["COOKIE", "YT", "SECRET"])]
+        "secret_files_found": sec_files
     }
 
 @app.get("/health")
