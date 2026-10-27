@@ -2168,7 +2168,7 @@ footer a { color: var(--red); text-decoration: none; }
 
   <!-- JAVASCRIPT APP LOGIC -->
   <script>
-    const API = "https://ytcuttr.onrender.com";
+    const API = "https://shubhamsain858-ytcuttr-api.hf.space";
 
     // ── APPLICATION STATE ─────────────────────────────────────
     let currentMode = 'clip'; // 'clip' | 'full'
@@ -3054,7 +3054,7 @@ footer a { color: var(--red); text-decoration: none; }
             isCompleted = true;
             clearInterval(pollInterval);
             clearInterval(procTimerInterval);
-            const fileUrl = `${API}/file/${jobId}`;
+            const fileUrl = `${API}/download-file/${jobId}`;
             const fileName = job.filename || (isClip ? 'ytcuttr_clip.mp4' : 'ytcuttr_video.mp4');
 
             statusTitle.textContent = '✅ Download Ready!';
