@@ -1,6 +1,6 @@
-﻿from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel
 import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio, time
 from pathlib import Path
@@ -178,12 +178,14 @@ async def diag(url: str = "https://www.youtube.com/watch?v=aqz-KE-bpKQ"):
     except Exception as e:
         results["deno"] = str(e)
 
-    cmd_cookie = ["yt-dlp", "-4", "--no-warnings", "--cache-dir", str(CACHE_DIR)]
+    cmd_cookie = ["yt-dlp", "-v", "-4", "--cache-dir", str(CACHE_DIR)]
     if cf:
         cmd_cookie += ["--cookies", cf]
     cmd_cookie += ["-F", url]
     r1 = subprocess.run(cmd_cookie, capture_output=True, text=True, timeout=25)
     results["with_cookies"] = {
+        "raw_stdout": r1.stdout[:1500] if r1.stdout else "",
+        "raw_stderr": r1.stderr[:2000] if r1.stderr else "",
         "code": r1.returncode,
         "formats_found": len([l for l in r1.stdout.splitlines() if any(x in l for x in ["mp4", "webm", "18", "398", "720"])]),
         "stdout_sample": [l for l in r1.stdout.splitlines() if any(x in l for x in ["mp4", "webm", "18", "398", "720"])][:4],
@@ -512,15 +514,33 @@ async def delayed_cleanup(job_id: str, delay: int = 300):
     jobs.pop(job_id, None)
 
 
+def iterfile(file_path):
+    with open(file_path, mode="rb") as f:
+        while chunk := f.read(1024 * 1024):
+            yield chunk
+
+@app.get("/download-file/{job_id}")
 @app.get("/file/{job_id}")
 async def get_file(job_id: str, bg: BackgroundTasks):
     job = jobs.get(job_id)
     if not job or job["status"] != "done":
         raise HTTPException(404, detail="File not ready")
 
+    file_path = Path(job["file"])
+    if not file_path.exists():
+        raise HTTPException(404, detail="File not found")
+
     bg.add_task(delayed_cleanup, job_id, 300)
-    return FileResponse(
-        job["file"],
-        filename=job["filename"],
-        media_type="application/octet-stream"
+    file_size = file_path.stat().st_size
+    filename = job.get("filename", "clip.mp4")
+
+    headers = {
+        "Content-Disposition": f'attachment; filename="{filename}"',
+        "Content-Length": str(file_size),
+        "Accept-Ranges": "bytes",
+    }
+    return StreamingResponse(
+        iterfile(file_path),
+        media_type="application/octet-stream",
+        headers=headers,
     )
