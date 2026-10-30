@@ -512,39 +512,89 @@
       flex-shrink: 0;
     }
 
-    /* ── TABS BAR ── */
+    /* ── TABS BAR (ANIMATED SLIDING SWITCH) ── */
     .tabs-bar {
       display: flex;
-      background: #f8fafc;
-      border-bottom: 1px solid var(--border);
-      padding: 0 28px;
-      gap: 8px;
+      background: #f1f5f9;
+      border-radius: 14px;
+      padding: 4px;
+      margin: 16px 24px 0;
+      position: relative;
+      border: 1px solid #e2e8f0;
+      user-select: none;
+    }
+
+    .tab-slider-bg {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tabs-bar[data-active="full"] .tab-slider-bg {
+      transform: translateX(100%);
     }
 
     .tab-item {
-      padding: 14px 20px;
+      flex: 1;
+      position: relative;
+      z-index: 2;
       border: none;
       background: transparent;
-      font-size: 14px;
+      padding: 10px 16px;
+      font-size: 13.5px;
       font-weight: 600;
-      color: var(--muted);
+      color: #64748b;
       cursor: pointer;
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      transition: var(--transition);
-      min-height: 48px;
+      border-radius: 10px;
+      transition: color 0.2s ease;
+      min-height: 44px;
     }
 
     .tab-item:hover:not(.active) {
-      color: var(--text);
+      color: #1e293b;
     }
 
     .tab-item.active {
       color: var(--red);
-      border-bottom-color: var(--red);
+      font-weight: 700;
+    }
+
+    .full-mode-notice {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.25s ease;
+    }
+    .notice-icon-box {
+      font-size: 20px;
+      line-height: 1;
+    }
+    .notice-text {
+      font-size: 13px;
+      color: #1e3a8a;
+      line-height: 1.45;
+    }
+    .notice-text strong {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 2px;
     }
 
     /* ── EMPTY STATE ── */
@@ -1113,14 +1163,15 @@
       cursor: wait;
     }
 
-    /* Live Processing Progress Box */
+    /* Dynamic Percentage Progress Box */
     .processing-card {
       display: none;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
       padding: 16px 18px;
-      margin-top: 10px;
+      margin-top: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
       animation: fadeIn 0.25s ease;
     }
     .processing-card.visible { display: block; }
@@ -1129,42 +1180,74 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .proc-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .proc-percent-badge {
+      font-size: 14px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--red);
+      background: #fef2f2;
+      padding: 2px 10px;
+      border-radius: 99px;
+      border: 1px solid #fecaca;
+      min-width: 52px;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+    .proc-percent-badge.complete {
+      color: #15803d;
+      background: #f0fdf4;
+      border-color: #bbf7d0;
     }
 
     .proc-track {
       width: 100%;
-      height: 6px;
-      background: #e2e8f0;
+      height: 10px;
+      background: #f1f5f9;
       border-radius: 99px;
       overflow: hidden;
       position: relative;
     }
 
-    .proc-bar-indeterminate {
-      width: 40%;
+    .proc-progress-fill {
+      width: 0%;
       height: 100%;
-      background: var(--red);
+      background: linear-gradient(90deg, #e63030 0%, #ff5252 100%);
       border-radius: 99px;
-      position: absolute;
-      animation: indeterminate 1.6s infinite ease-in-out;
+      position: relative;
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .proc-progress-fill.complete {
+      background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
     }
 
-    @keyframes indeterminate {
-      0%   { left: -40%; width: 40%; }
-      50%  { left: 30%;  width: 50%; }
-      100% { left: 100%; width: 30%; }
+    .proc-bar-glow {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 24px;
+      background: rgba(255, 255, 255, 0.45);
+      filter: blur(2px);
+      border-radius: 99px;
     }
 
     .proc-details {
-      margin-top: 8px;
+      margin-top: 10px;
       font-size: 12.5px;
-      color: var(--muted);
+      color: #64748b;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
     /* ── TRUST BADGES ── */
@@ -1238,12 +1321,16 @@
 
     /* ── RESPONSIVE BREAKPOINTS (Phase 3 Strict Requirements) ── */
     @media (max-width: 768px) {
-      nav { height: 58px; padding: 0 16px; }
-      .hero { padding: 36px 16px 20px; }
-      .workspace-wrap { padding: 0 16px 40px; }
-      .url-section { padding: 20px 16px 16px; }
-      .tabs-bar { padding: 0 16px; }
-      .studio-workspace { padding: 20px 16px; }
+      nav { height: 54px; padding: 0 16px; }
+      .hero { padding: 20px 16px 8px; }
+      .hero h1 { font-size: clamp(24px, 6.2vw, 32px); line-height: 1.2; margin-bottom: 6px; }
+      .hero h1 span { font-size: clamp(19px, 5.2vw, 25px); }
+      .hero-lead { font-size: 14px; line-height: 1.45; margin-top: 6px; }
+      .hero-subtitle { display: none; } /* Clean mobile above-the-fold */
+      .hero-pills { display: none; } /* Reduces vertical clutter on phone screens */
+      .workspace-wrap { padding: 0 12px 32px; }
+      .url-section { padding: 16px 14px 14px; }
+      .studio-workspace { padding: 16px 14px; }
     }
 
     @media (max-width: 540px) {
@@ -1253,7 +1340,9 @@
       .time-grid { grid-template-columns: 1fr; }
       .player-quick-actions { grid-template-columns: 1fr; }
       .btn-quick { height: 44px; }
-      .tab-item { padding: 12px 14px; font-size: 13px; }
+      .tabs-bar { margin: 12px 12px 0; padding: 3px; border-radius: 12px; }
+      .tab-item { padding: 9px 8px; font-size: 12.5px; gap: 5px; min-height: 40px; }
+      .tab-slider-bg { top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 9px; }
     }
 
     @media (max-width: 380px) {
@@ -1571,8 +1660,8 @@ footer a { color: var(--red); text-decoration: none; }
 
   <!-- HERO -->
   <header class="hero">
-    <h1>YouTube Clip Cutter<br><span>Download Any Part of a YouTube Video Free</span></h1>
-    <p class="hero-lead">Paste a YouTube URL, select your exact start and end timestamp, and download just the segment you need in crisp quality. No watermarks. No signup.</p>
+    <h1>YouTube Clip Cutter<br><span>Cut &amp; Download Any Part Free</span></h1>
+    <p class="hero-lead">Paste a YouTube URL, select your start and end timestamp, and download your clip in seconds. 100% Free &amp; no watermark.</p>
     <p class="hero-subtitle">Select any start &amp; end timestamp &rarr; Download only that segment.<br>Works on long videos, 8-hour live recordings &amp; YouTube Shorts.</p>
     <div class="hero-pills" aria-label="Key Capabilities">
       <span>✅ Regular Videos</span>
@@ -1587,13 +1676,16 @@ footer a { color: var(--red); text-decoration: none; }
   <main class="workspace-wrap" id="cutter-tool">
     <div class="tool-card">
 
-      <!-- TABS BAR -->
-      <div class="tabs-bar" role="tablist" aria-label="Tool Selection">
-        <button class="tab-item active" id="tab-clip-btn" role="tab" aria-selected="true" aria-controls="clip-mode" onclick="switchMode('clip')">
-          ✂️ Clip Cutter (Time Selection)
+      <!-- TABS BAR (ANIMATED SLIDING SWITCH) -->
+      <div class="tabs-bar" id="tabs-bar-container" data-active="clip" role="tablist" aria-label="Tool Selection">
+        <div class="tab-slider-bg" id="tab-slider-bg" aria-hidden="true"></div>
+        <button class="tab-item active" id="tab-clip-btn" role="tab" aria-selected="true" aria-controls="clip-controls-group" onclick="switchMode('clip')">
+          <span class="tab-icon">✂️</span>
+          <span class="tab-text">Clip Cutter</span>
         </button>
-        <button class="tab-item" id="tab-full-btn" role="tab" aria-selected="false" aria-controls="full-mode" onclick="switchMode('full')">
-          ⬇️ Full Video &amp; Shorts
+        <button class="tab-item" id="tab-full-btn" role="tab" aria-selected="false" aria-controls="full-mode-notice" onclick="switchMode('full')">
+          <span class="tab-icon">⬇️</span>
+          <span class="tab-text">Full Video &amp; Shorts</span>
         </button>
       </div>
 
@@ -1795,19 +1887,33 @@ footer a { color: var(--red); text-decoration: none; }
               </div>
             </div>
 
+            <!-- FULL VIDEO NOTICE (When in Full Mode) -->
+            <div id="full-mode-notice" class="full-mode-notice" style="display:none;">
+              <div class="notice-icon-box">⬇️</div>
+              <div class="notice-text">
+                <strong>Full Video &amp; Shorts Mode</strong>
+                <span>Downloads the complete video or Short in your chosen resolution with crisp audio.</span>
+              </div>
+            </div>
+
             <!-- PRIMARY ACTION BUTTON -->
             <button type="button" class="action-btn" id="primary-action-btn" onclick="handlePrimaryActionClick()">
               <span id="action-btn-text">⬇ Download Clip</span>
             </button>
 
-            <!-- HONEST PROCESSING STATE -->
+            <!-- DYNAMIC PERCENTAGE PROCESSING STATE -->
             <div class="processing-card" id="processing-card" role="region" aria-live="polite">
               <div class="proc-header">
-                <span id="proc-step-title">Processing clip...</span>
-                <span style="font-size: 12px; color: var(--red); font-weight: 700;">Please wait</span>
+                <div class="proc-header-left">
+                  <span id="proc-status-icon">⏳</span>
+                  <span id="proc-step-title">Processing clip...</span>
+                </div>
+                <span id="proc-percent-badge" class="proc-percent-badge">0%</span>
               </div>
               <div class="proc-track">
-                <div class="proc-bar-indeterminate"></div>
+                <div id="proc-progress-fill" class="proc-progress-fill" style="width: 0%;">
+                  <span class="proc-bar-glow"></span>
+                </div>
               </div>
               <div class="proc-details">
                 <span id="proc-details-text">Connecting to video stream...</span>
@@ -2617,16 +2723,27 @@ footer a { color: var(--red); text-decoration: none; }
     // ── MODE SWITCHING (Clip vs Full) ────────────────────────
     function switchMode(mode) {
       currentMode = mode;
-      document.getElementById('tab-clip-btn').classList.toggle('active', mode === 'clip');
-      document.getElementById('tab-clip-btn').setAttribute('aria-selected', mode === 'clip');
-      document.getElementById('tab-full-btn').classList.toggle('active', mode === 'full');
-      document.getElementById('tab-full-btn').setAttribute('aria-selected', mode === 'full');
+      const tabsBar = document.getElementById("tabs-bar-container");
+      if (tabsBar) tabsBar.setAttribute("data-active", mode);
 
-      document.getElementById('clip-controls-group').style.display = mode === 'clip' ? 'block' : 'none';
-      document.getElementById('clip-quick-actions').style.display = mode === 'clip' ? 'grid' : 'none';
+      document.getElementById("tab-clip-btn").classList.toggle("active", mode === "clip");
+      document.getElementById("tab-clip-btn").setAttribute("aria-selected", mode === "clip");
+      document.getElementById("tab-full-btn").classList.toggle("active", mode === "full");
+      document.getElementById("tab-full-btn").setAttribute("aria-selected", mode === "full");
 
-      if (mode === 'clip') {
+      const clipGroup = document.getElementById("clip-controls-group");
+      const quickGroup = document.getElementById("clip-quick-actions");
+      const fullNotice = document.getElementById("full-mode-notice");
+
+      if (mode === "clip") {
+        if (clipGroup) clipGroup.style.display = "block";
+        if (quickGroup) quickGroup.style.display = "grid";
+        if (fullNotice) fullNotice.style.display = "none";
         ClipState.syncAll(true);
+      } else {
+        if (clipGroup) clipGroup.style.display = "none";
+        if (quickGroup) quickGroup.style.display = "none";
+        if (fullNotice) fullNotice.style.display = "flex";
       }
       updatePrimaryButtonText();
     }
@@ -3002,38 +3119,72 @@ footer a { color: var(--red); text-decoration: none; }
       }
     }
 
+    let procProgressInterval = null;
+    let currentProgressPercent = 0;
+
+    function setProcProgress(percent, titleText, detailsText) {
+      currentProgressPercent = Math.min(100, Math.max(0, percent));
+      const fill = document.getElementById("proc-progress-fill");
+      const badge = document.getElementById("proc-percent-badge");
+      const title = document.getElementById("proc-step-title");
+      const details = document.getElementById("proc-details-text");
+      const icon = document.getElementById("proc-status-icon");
+
+      if (fill) fill.style.width = currentProgressPercent + "%";
+      if (badge) badge.textContent = Math.round(currentProgressPercent) + "%";
+      if (titleText && title) title.textContent = titleText;
+      if (detailsText && details) details.textContent = detailsText;
+
+      if (currentProgressPercent >= 100) {
+        if (fill) fill.classList.add("complete");
+        if (badge) badge.classList.add("complete");
+        if (icon) icon.textContent = "✅";
+      } else {
+        if (fill) fill.classList.remove("complete");
+        if (badge) badge.classList.remove("complete");
+        if (icon) icon.textContent = "⏳";
+      }
+    }
+
     function pollJobStatus(jobId, isClip) {
       let isCompleted = false;
       procSeconds = 0;
       clearInterval(procTimerInterval);
+      clearInterval(procProgressInterval);
       clearInterval(pollInterval);
 
-      const timerEl = document.getElementById('proc-timer');
+      const timerEl = document.getElementById("proc-timer");
       procTimerInterval = setInterval(() => {
         procSeconds++;
         timerEl.textContent = `${procSeconds}s`;
       }, 1000);
 
-      const statusTitle = document.getElementById('proc-step-title');
-      const detailsText = document.getElementById('proc-details-text');
+      // Smooth percentage simulation up to 94% while server processes
+      let targetProgress = 15;
+      setProcProgress(10, isClip ? "Cutting Clip Segment..." : "Downloading Video Stream...", "Connecting to YouTube stream...");
 
-      statusTitle.textContent = isClip ? 'Cutting Clip Segment...' : 'Downloading Video Stream...';
-      detailsText.textContent = 'Extracting stream section directly (zero-transcode)...';
+      procProgressInterval = setInterval(() => {
+        if (isCompleted) return;
+        if (currentProgressPercent < targetProgress) {
+          setProcProgress(currentProgressPercent + 1.2);
+        } else if (currentProgressPercent < 94) {
+          setProcProgress(currentProgressPercent + 0.4);
+        }
+      }, 120);
 
       const MAX_WAIT_SECONDS = 180;
       let elapsed = 0;
 
-      // Smart Polling: Wait 2.2s before first poll, then check every 1.8s
-      // Avoids Cloudflare WAF bot-challenge rate limits completely!
       const checkStatus = async () => {
         if (isCompleted) return;
         elapsed += 2;
         if (elapsed >= MAX_WAIT_SECONDS) {
           clearInterval(pollInterval);
           clearInterval(procTimerInterval);
+          clearInterval(procProgressInterval);
           hideProcessingBox();
           resetPrimaryButton();
-          showToast('Job timed out. Please retry.', true);
+          showToast("Job timed out. Please retry.", true);
           return;
         }
 
@@ -3043,40 +3194,54 @@ footer a { color: var(--red); text-decoration: none; }
 
           const job = await statusResp.json();
 
-          if (job.status === 'queued') {
-            detailsText.textContent = 'Task queued — preparing worker...';
-          } else if (job.status === 'downloading') {
-            detailsText.textContent = isClip
-              ? `Trimming segment ${formatSeconds(ClipState.startSec)} → ${formatSeconds(ClipState.endSec)}...`
-              : 'Downloading full video stream from YouTube...';
-          } else if (job.status === 'done') {
+          if (job.status === "queued") {
+            targetProgress = 25;
+            setProcProgress(currentProgressPercent, null, "Task queued in worker...");
+          } else if (job.status === "downloading") {
+            targetProgress = Math.max(targetProgress, 65);
+            setProcProgress(
+              currentProgressPercent,
+              isClip ? "Trimming Segment..." : "Streaming from YouTube...",
+              isClip ? `Processing ${formatSeconds(ClipState.startSec)} → ${formatSeconds(ClipState.endSec)}` : "Downloading full stream..."
+            );
+          } else if (job.status === "processing") {
+            targetProgress = 88;
+            setProcProgress(currentProgressPercent, "Cutting & Lossless Muxing...", "Encoding lossless segment with FFmpeg...");
+          } else if (job.status === "done") {
             if (isCompleted) return;
             isCompleted = true;
             clearInterval(pollInterval);
             clearInterval(procTimerInterval);
+            clearInterval(procProgressInterval);
+
+            // Animate smoothly to 100%
+            setProcProgress(100, "Clip Ready!", "Download starting automatically...");
             const fileUrl = `${API}/download-file/${jobId}`;
-            const fileName = job.filename || (isClip ? 'ytcuttr_clip.mp4' : 'ytcuttr_video.mp4');
+            const fileName = job.filename || (isClip ? "ytcuttr_clip.mp4" : "ytcuttr_video.mp4");
 
-            statusTitle.textContent = '✅ Download Ready!';
-            detailsText.innerHTML = `Downloading automatically...<br><a href="${fileUrl}" download="${fileName}" style="display:inline-block;margin-top:8px;color:#38bdf8;text-decoration:underline;font-weight:600;">Click here if download didn't start</a>`;
+            const detailsText = document.getElementById("proc-details-text");
+            if (detailsText) {
+              detailsText.innerHTML = `✅ 100% Complete &mdash; <a href="${fileUrl}" download="${fileName}" style="color:#2563eb;text-decoration:underline;font-weight:700;">Click to re-download</a>`;
+            }
 
-            // Trigger direct non-popup download
+            // Trigger direct download at 100%
             triggerDirectDownload(fileUrl, fileName);
-            showToast('✅ Download started!');
+            showToast("✅ Download started at 100%!");
 
             setTimeout(() => {
               hideProcessingBox();
               resetPrimaryButton();
-            }, 3500);
+            }, 4500);
 
-          } else if (job.status === 'error') {
+          } else if (job.status === "error") {
             clearInterval(pollInterval);
             clearInterval(procTimerInterval);
+            clearInterval(procProgressInterval);
             hideProcessingBox();
             resetPrimaryButton();
-            let msg = job.error || 'Processing error on server. Please try again.';
-            if (msg.includes('403') || msg.includes('Forbidden')) {
-              msg = 'YouTube stream temporarily restricted. Please retry or choose another quality.';
+            let msg = job.error || "Processing error on server. Please try again.";
+            if (msg.includes("403") || msg.includes("Forbidden")) {
+              msg = "YouTube stream temporarily restricted. Please retry or choose another quality.";
             }
             showToast(msg, true);
           }
@@ -3089,20 +3254,22 @@ footer a { color: var(--red); text-decoration: none; }
         if (isCompleted) return;
         checkStatus();
         pollInterval = setInterval(checkStatus, 1800);
-      }, 2200);
+      }, 1600);
     }
 
     function showProcessingBox(title) {
-      const box = document.getElementById('processing-card');
-      box.classList.add('visible');
-      document.getElementById('proc-step-title').textContent = title;
-      document.getElementById('proc-timer').textContent = '0s';
+      const box = document.getElementById("processing-card");
+      box.classList.add("visible");
+      const timerEl = document.getElementById("proc-timer");
+      if (timerEl) timerEl.textContent = "0s";
+      setProcProgress(5, title, "Connecting to server...");
     }
 
     function hideProcessingBox() {
-      document.getElementById('processing-card').classList.remove('visible');
+      document.getElementById("processing-card").classList.remove("visible");
       clearInterval(pollInterval);
       clearInterval(procTimerInterval);
+      clearInterval(procProgressInterval);
     }
 
     function resetPrimaryButton() {
