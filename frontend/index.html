@@ -689,9 +689,14 @@
       border: 1px solid #1e293b;
     }
 
+    .video-viewport-wrapper iframe,
+    #player-frame,
     .player-iframe {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
       border: none;
       display: block;
     }
@@ -1748,7 +1753,7 @@ footer a { color: var(--red); text-decoration: none; }
           <!-- LEFT COLUMN: PREVIEW PLAYER -->
           <div class="player-col">
             <div class="video-viewport-wrapper" id="player-viewport">
-              <div id="player-frame"></div>
+              <div id="player-frame" class="player-iframe"></div>
               <img id="player-fallback-thumb" class="video-fallback-thumb" src="" alt="Video thumbnail">
             </div>
 
@@ -2358,6 +2363,11 @@ footer a { color: var(--red); text-decoration: none; }
 
         this.startSeconds = sec;
         this.syncAll(syncInputField);
+        if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+          try {
+            ytPlayer.seekTo(sec, true);
+          } catch(e) {}
+        }
       },
 
       setEnd(sec, syncInputField = true) {
@@ -2948,11 +2958,37 @@ footer a { color: var(--red); text-decoration: none; }
       }
     }
 
+    let clipLoopTimer = null;
+    function startClipBoundaryMonitoring() {
+      if (clipLoopTimer) clearInterval(clipLoopTimer);
+      clipLoopTimer = setInterval(() => {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+        try {
+          if (typeof ytPlayer.getPlayerState === 'function' && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+            const curTime = ytPlayer.getCurrentTime() || 0;
+            if (curTime >= ClipState.endSeconds) {
+              ytPlayer.pauseVideo();
+              ytPlayer.seekTo(ClipState.startSeconds, true);
+            }
+          }
+        } catch(e) {}
+      }, 250);
+    }
+
     function createPlayer(videoId) {
       try {
+        const startSec = Math.floor(ClipState.startSeconds || 0);
         if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-          ytPlayer.loadVideoById(videoId);
+          try {
+            ytPlayer.loadVideoById({
+              videoId: videoId,
+              startSeconds: startSec
+            });
+          } catch(e) {
+            ytPlayer.loadVideoById(videoId, startSec);
+          }
           startDurationPolling();
+          startClipBoundaryMonitoring();
           return;
         }
 
@@ -2961,18 +2997,32 @@ footer a { color: var(--red); text-decoration: none; }
           playerVars: {
             playsinline: 1,
             rel: 0,
-            modestbranding: 1
+            modestbranding: 1,
+            start: startSec
           },
           events: {
             onReady: (event) => {
               isPlayerReady = true;
               const thumb = document.getElementById('player-fallback-thumb');
               if (thumb) thumb.classList.remove('visible');
+              const s = Math.floor(ClipState.startSeconds || 0);
+              if (s > 0) {
+                try { ytPlayer.seekTo(s, true); } catch(e){}
+              }
               trySyncDurationFromPlayer();
               startDurationPolling();
+              startClipBoundaryMonitoring();
             },
             onStateChange: (event) => {
               trySyncDurationFromPlayer();
+              if (event.data === YT.PlayerState.PLAYING) {
+                try {
+                  const curTime = ytPlayer.getCurrentTime() || 0;
+                  if (curTime < ClipState.startSeconds - 0.5 || curTime >= ClipState.endSeconds) {
+                    ytPlayer.seekTo(ClipState.startSeconds, true);
+                  }
+                } catch(e) {}
+              }
             },
             onError: () => {
               const thumb = document.getElementById('player-fallback-thumb');
