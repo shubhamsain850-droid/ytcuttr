@@ -618,6 +618,141 @@
       display: block;
     }
 
+    /* ── ROBUST TIMELINE SCRUBBER (Touch & Pointer Safe) ── */
+    .timeline-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px 12px;
+      margin-bottom: 20px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .timeline-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-clip-len {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--purple-border);
+      background: var(--purple-subtle);
+      color: var(--purple);
+      white-space: nowrap;
+    }
+
+    /* Track Container & Dragging Surface */
+    .timeline-scrubber {
+      position: relative;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      touch-action: none;
+      cursor: pointer;
+    }
+
+    .timeline-rail {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      background: #cbd5e1;
+      border-radius: 6px;
+    }
+
+    .timeline-segment {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      background: var(--red);
+      border-radius: 6px;
+      pointer-events: none;
+      box-shadow: 0 0 12px rgba(230, 48, 48, 0.45);
+      left: 0%;
+      width: 25%;
+    }
+
+    /* Draggable Thumbs */
+    .timeline-handle {
+      position: absolute;
+      top: 50%;
+      width: 28px;
+      height: 28px;
+      margin-top: -14px;
+      margin-left: -14px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3.5px solid var(--red);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+      cursor: grab;
+      touch-action: none;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      left: 0%;
+    }
+
+    /* Extended touch target (48px) for mobile fingers */
+    .timeline-handle::after {
+      content: '';
+      position: absolute;
+      top: -10px;
+      bottom: -10px;
+      left: -10px;
+      right: -10px;
+    }
+
+    .timeline-handle:hover,
+    .timeline-handle:focus-visible {
+      transform: scale(1.18);
+      box-shadow: 0 3px 14px rgba(230, 48, 48, 0.5);
+      outline: none;
+    }
+
+    .timeline-handle.dragging {
+      cursor: grabbing;
+      transform: scale(1.25);
+      border-color: #b91c1c;
+      box-shadow: 0 4px 18px rgba(185, 28, 28, 0.55);
+      z-index: 25;
+    }
+
+    .timeline-handle .handle-center-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--red);
+      pointer-events: none;
+    }
+
+    .timeline-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
     /* Timestamp Controls Grid */
     .timestamps-grid {
       display: grid;
@@ -1387,6 +1522,36 @@
             <iframe id="yt-player-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
 
+          <!-- INTERACTIVE DUAL-HANDLE TIMELINE SLIDER -->
+          <div class="timeline-card">
+            <div class="timeline-header">
+              <span class="timeline-title">
+                <span>🎚️</span>
+                <span>Timeline Slider (Drag Handles to Select Range)</span>
+              </span>
+              <span class="timeline-clip-len" id="timeline-clip-badge">Slice: 00:00:30</span>
+            </div>
+
+            <!-- Touch & Pointer Draggable Scrubber -->
+            <div class="timeline-scrubber" id="timeline-scrubber" aria-label="Audio Timeline Scrubber">
+              <div class="timeline-rail" id="timeline-rail">
+                <div class="timeline-segment" id="timeline-segment"></div>
+                <div class="timeline-handle" id="handle-start" role="slider" tabindex="0" aria-label="Start Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div class="handle-center-dot"></div>
+                </div>
+                <div class="timeline-handle" id="handle-end" role="slider" tabindex="0" aria-label="End Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30">
+                  <div class="handle-center-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-ticks">
+              <span id="timeline-tick-start">00:00:00</span>
+              <span id="timeline-tick-mid">--:--:--</span>
+              <span id="timeline-tick-end">--:--:--</span>
+            </div>
+          </div>
+
           <!-- DUAL TIMESTAMP INPUTS -->
           <div class="timestamps-grid">
 
@@ -1642,7 +1807,11 @@
     let activeVideoData = null;
     let currentMode = 'cut'; // 'cut' | 'full'
     let isProcessing = false;
-    let videoDurationSec = 0;
+    let videoDurationSec = 180;
+    let currentStartSec = 0;
+    let currentEndSec = 30;
+    let scrubberInitialized = false;
+    let activePointerDrag = null;
 
     // Helper: Extract 11-char Video ID
     function extractVideoId(url) {
@@ -1672,6 +1841,181 @@
         String(m).padStart(2, '0'),
         String(s).padStart(2, '0')
       ].join(':');
+    }
+
+    // ── ROBUST TIMELINE SCRUBBER SLIDER ──
+    function initTimelineScrubber() {
+      const scrubber = document.getElementById('timeline-scrubber');
+      const rail = document.getElementById('timeline-rail');
+      const handleStart = document.getElementById('handle-start');
+      const handleEnd = document.getElementById('handle-end');
+
+      if (!scrubber || !rail || !handleStart || !handleEnd) return;
+
+      updateTimelineHandles(currentStartSec, currentEndSec, videoDurationSec);
+
+      if (scrubberInitialized) return;
+      scrubberInitialized = true;
+
+      function getSecFromPointerX(clientX) {
+        const rect = rail.getBoundingClientRect();
+        if (!rect.width) return 0;
+        const clampedX = Math.max(0, Math.min(clientX - rect.left, rect.width));
+        const pct = clampedX / rect.width;
+        const total = videoDurationSec > 0 ? videoDurationSec : 180;
+        return Math.round(pct * total);
+      }
+
+      function startDrag(target, e) {
+        e.preventDefault();
+        e.stopPropagation();
+        activePointerDrag = target;
+        const el = target === 'start' ? handleStart : handleEnd;
+        el.classList.add('dragging');
+        try {
+          el.setPointerCapture(e.pointerId);
+        } catch(err) {}
+      }
+
+      function onPointerMove(e) {
+        if (!activePointerDrag) return;
+        const targetSec = getSecFromPointerX(e.clientX);
+        if (activePointerDrag === 'start') {
+          setStartSeconds(targetSec);
+        } else if (activePointerDrag === 'end') {
+          setEndSeconds(targetSec);
+        }
+      }
+
+      function onPointerEnd(e) {
+        if (!activePointerDrag) return;
+        const el = activePointerDrag === 'start' ? handleStart : handleEnd;
+        el.classList.remove('dragging');
+        try {
+          if (e.pointerId !== undefined) el.releasePointerCapture(e.pointerId);
+        } catch(err) {}
+        activePointerDrag = null;
+      }
+
+      // Handle Start Dragging
+      handleStart.addEventListener('pointerdown', (e) => startDrag('start', e));
+      handleStart.addEventListener('pointermove', onPointerMove);
+      handleStart.addEventListener('pointerup', onPointerEnd);
+      handleStart.addEventListener('pointercancel', onPointerEnd);
+
+      // Handle End Dragging
+      handleEnd.addEventListener('pointerdown', (e) => startDrag('end', e));
+      handleEnd.addEventListener('pointermove', onPointerMove);
+      handleEnd.addEventListener('pointerup', onPointerEnd);
+      handleEnd.addEventListener('pointercancel', onPointerEnd);
+
+      // Window fallback
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerEnd);
+      window.addEventListener('pointercancel', onPointerEnd);
+
+      // Rail click to jump closest handle
+      rail.addEventListener('pointerdown', (e) => {
+        if (e.target === handleStart || e.target === handleEnd) return;
+        const targetSec = getSecFromPointerX(e.clientX);
+        const distStart = Math.abs(targetSec - currentStartSec);
+        const distEnd = Math.abs(targetSec - currentEndSec);
+
+        if (distStart <= distEnd) {
+          setStartSeconds(targetSec);
+          startDrag('start', e);
+        } else {
+          setEndSeconds(targetSec);
+          startDrag('end', e);
+        }
+      });
+
+      // Keyboard Controls
+      handleStart.addEventListener('keydown', (e) => {
+        const step = e.shiftKey ? 5 : 1;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+          setStartSeconds(currentStartSec - step);
+          e.preventDefault();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+          setStartSeconds(currentStartSec + step);
+          e.preventDefault();
+        }
+      });
+
+      handleEnd.addEventListener('keydown', (e) => {
+        const step = e.shiftKey ? 5 : 1;
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+          setEndSeconds(currentEndSec - step);
+          e.preventDefault();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+          setEndSeconds(currentEndSec + step);
+          e.preventDefault();
+        }
+      });
+    }
+
+    function setStartSeconds(sec) {
+      const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
+      sec = Math.max(0, Math.min(sec, maxTotal - 1));
+      if (sec >= currentEndSec) {
+        currentEndSec = Math.min(maxTotal, sec + 5);
+        document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+      }
+      currentStartSec = sec;
+      document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
+      updateTimelineHandles(currentStartSec, currentEndSec, maxTotal);
+    }
+
+    function setEndSeconds(sec) {
+      const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
+      sec = Math.max(1, Math.min(sec, maxTotal));
+      if (sec <= currentStartSec) {
+        currentStartSec = Math.max(0, sec - 5);
+        document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
+      }
+      currentEndSec = sec;
+      document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+      updateTimelineHandles(currentStartSec, currentEndSec, maxTotal);
+    }
+
+    function updateTimelineHandles(startSec, endSec, totalDuration) {
+      const dur = Math.max(1, totalDuration || 180);
+      const startPct = Math.min(100, Math.max(0, (startSec / dur) * 100));
+      const endPct = Math.min(100, Math.max(0, (endSec / dur) * 100));
+
+      const hStart = document.getElementById('handle-start');
+      const hEnd = document.getElementById('handle-end');
+      const seg = document.getElementById('timeline-segment');
+      const clipBadge = document.getElementById('timeline-clip-badge');
+      const durBadge = document.getElementById('clip-duration-badge');
+
+      if (hStart) {
+        hStart.style.left = startPct + '%';
+        hStart.setAttribute('aria-valuenow', startSec);
+      }
+      if (hEnd) {
+        hEnd.style.left = endPct + '%';
+        hEnd.setAttribute('aria-valuenow', endSec);
+      }
+      if (seg) {
+        seg.style.left = startPct + '%';
+        seg.style.width = Math.max(0, endPct - startPct) + '%';
+      }
+
+      const diff = Math.max(0, endSec - startSec);
+      const diffFormatted = formatSecondsToHms(diff);
+      if (clipBadge) clipBadge.textContent = `Slice: ${diffFormatted}`;
+      if (durBadge) durBadge.textContent = diffFormatted;
+    }
+
+    function updateTimelineTicks(totalDuration) {
+      const tStart = document.getElementById('timeline-tick-start');
+      const tMid = document.getElementById('timeline-tick-mid');
+      const tEnd = document.getElementById('timeline-tick-end');
+
+      if (tStart) tStart.textContent = '00:00:00';
+      if (tMid) tMid.textContent = formatSecondsToHms(Math.round(totalDuration / 2));
+      if (tEnd) tEnd.textContent = formatSecondsToHms(totalDuration);
     }
 
     function handleInput() {
@@ -1714,6 +2058,7 @@
         tabFull.setAttribute('aria-selected', 'false');
         panelCut.classList.add('active');
         panelFull.classList.remove('active');
+        updateTimelineHandles(currentStartSec, currentEndSec, videoDurationSec);
       } else {
         tabFull.classList.add('active');
         tabFull.setAttribute('aria-selected', 'true');
@@ -1786,10 +2131,13 @@
               activeVideoData.durationSec = apiData.duration;
               const durBadge = document.getElementById('video-duration-tag');
               if (durBadge) durBadge.textContent = formatSecondsToHms(videoDurationSec);
-              // Default end time to 30s or duration
-              const endSec = Math.min(30, videoDurationSec);
-              document.getElementById('end-time-input').value = formatSecondsToHms(endSec);
-              validateAndRecalc();
+              updateTimelineTicks(videoDurationSec);
+              
+              currentStartSec = 0;
+              currentEndSec = Math.min(30, videoDurationSec);
+              document.getElementById('start-time-input').value = '00:00:00';
+              document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+              updateTimelineHandles(currentStartSec, currentEndSec, videoDurationSec);
             }
           }
         })
@@ -1812,10 +2160,14 @@
       const iframe = document.getElementById('yt-player-frame');
       iframe.src = `https://www.youtube-nocookie.com/embed/${data.videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0`;
 
-      // Reset timestamps
+      // Reset timestamps & slider
+      initTimelineScrubber();
+      updateTimelineTicks(data.durationSec || 180);
+      currentStartSec = 0;
+      currentEndSec = Math.min(30, data.durationSec || 180);
       document.getElementById('start-time-input').value = '00:00:00';
-      document.getElementById('end-time-input').value = '00:00:30';
-      validateAndRecalc();
+      document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+      updateTimelineHandles(currentStartSec, currentEndSec, data.durationSec || 180);
 
       // Scroll to workspace on mobile
       if (window.innerWidth < 768) {
@@ -1826,17 +2178,21 @@
     function validateAndRecalc() {
       const startIn = document.getElementById('start-time-input');
       const endIn = document.getElementById('end-time-input');
+      const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
 
       let s = parseHmsToSeconds(startIn.value);
       let e = parseHmsToSeconds(endIn.value);
 
+      s = Math.max(0, s);
       if (e <= s) {
         e = s + 5;
         endIn.value = formatSecondsToHms(e);
       }
 
-      const diff = e - s;
-      document.getElementById('clip-duration-badge').textContent = formatSecondsToHms(diff);
+      currentStartSec = s;
+      currentEndSec = e;
+
+      updateTimelineHandles(currentStartSec, currentEndSec, maxTotal);
     }
 
     function nudgeTime(which, deltaSeconds) {
@@ -1857,6 +2213,11 @@
         validateAndRecalc();
       }
     }
+
+    // Initialize timeline scrubber listeners on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      initTimelineScrubber();
+    });
 
     // ── OPTION 1: EXECUTE CUT & DOWNLOAD ──
     async function executeCutDownload() {
@@ -2058,3 +2419,4 @@
   </script>
 </body>
 </html>
+
