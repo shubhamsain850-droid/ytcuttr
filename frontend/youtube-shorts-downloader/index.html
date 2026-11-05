@@ -871,10 +871,41 @@
     }
 
     .dl-btn.btn-loading {
+      position: relative;
+      overflow: hidden;
       background: #0f172a !important;
       color: #f8fafc !important;
       box-shadow: none !important;
       transform: none !important;
+    }
+
+    .dl-btn.btn-loading::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: var(--progress, 0%);
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.5), rgba(220, 38, 38, 0.85));
+      transition: width 0.25s ease-out;
+      z-index: 0;
+    }
+
+    .dl-btn.btn-loading > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-pct-val {
+      font-family: var(--mono);
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+
+    @media (max-width: 480px) {
+      .btn-pct-label {
+        display: none;
+      }
     }
 
     .dl-btn.btn-done {
@@ -1619,6 +1650,12 @@
       });
     }
 
+    function updateShortBtnProgress(btnEl, pct, label) {
+      pct = Math.min(100, Math.max(0, Math.round(pct)));
+      btnEl.style.setProperty('--progress', `${pct}%`);
+      btnEl.innerHTML = `<span class="btn-spinner"></span> <span class="btn-pct-label">${label}</span> <span class="btn-pct-val">${pct}%</span>`;
+    }
+
     // In-Button Loading & Automatic Download
     async function triggerShortDownload(qualityKey, btnEl) {
       if (isDownloading || !activeVideoData) return;
@@ -1635,7 +1672,31 @@
       // 2. Button state: Loading
       btnEl.disabled = true;
       btnEl.className = 'dl-btn btn-loading';
-      btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Preparing...</span>`;
+
+      // Dynamic percentage progress ticker
+      let currentProgress = 15;
+      let currentStatus = 'preparing';
+      updateShortBtnProgress(btnEl, currentProgress, 'Preparing');
+
+      const progressTimer = setInterval(() => {
+        if (currentStatus === 'downloading') {
+          if (currentProgress < 70) {
+            currentProgress += (currentProgress < 45 ? 4 : 2);
+            updateShortBtnProgress(btnEl, currentProgress, 'Processing');
+          }
+        } else if (currentStatus === 'processing') {
+          if (currentProgress < 70) currentProgress = 70;
+          if (currentProgress < 94) {
+            currentProgress += (currentProgress < 85 ? 3 : 1);
+            updateShortBtnProgress(btnEl, currentProgress, 'Converting');
+          }
+        } else {
+          if (currentProgress < 32) {
+            currentProgress += 3;
+            updateShortBtnProgress(btnEl, currentProgress, 'Preparing');
+          }
+        }
+      }, 250);
 
       try {
         // 3. Call Backend Download Endpoint
@@ -1669,13 +1730,17 @@
           const job = await statResp.json();
 
           if (job.status === 'downloading') {
-            btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Processing...</span>`;
+            currentStatus = 'downloading';
+          } else if (job.status === 'processing') {
+            currentStatus = 'processing';
           } else if (job.status === 'done') {
             completed = true;
+            clearInterval(progressTimer);
+            btnEl.style.setProperty('--progress', '100%');
 
             // 5. Button State: Ready!
             btnEl.className = 'dl-btn btn-done';
-            btnEl.innerHTML = `<span>✅ Ready!</span>`;
+            btnEl.innerHTML = `<span>✅ Ready! 100%</span>`;
 
             // 6. Direct automatic trigger
             const fileUrl = `${API}/download-file/${job_id}`;
@@ -1694,6 +1759,7 @@
 
             // Reset after 3 seconds
             setTimeout(() => {
+              btnEl.style.removeProperty('--progress');
               btnEl.className = 'dl-btn';
               btnEl.disabled = false;
               btnEl.innerHTML = `<span>⬇️</span> <span>Download</span>`;
@@ -1711,6 +1777,8 @@
         }
 
       } catch (err) {
+        clearInterval(progressTimer);
+        btnEl.style.removeProperty('--progress');
         btnEl.className = 'dl-btn btn-error';
         btnEl.innerHTML = `<span>⚠️ Retry</span>`;
         setTimeout(() => {
