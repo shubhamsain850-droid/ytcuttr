@@ -509,17 +509,25 @@
     @media (max-width: 768px) {
       .nav-inner {
         padding: 10px 14px;
+        width: 100%;
+        box-sizing: border-box;
       }
       .logo {
         font-size: 19px;
       }
+      .nav-links {
+        gap: 6px;
+      }
+      .nav-links .nav-btn.active {
+        display: none !important; /* Hide duplicate active pill on mobile to prevent navbar overflow */
+      }
       .nav-btn {
-        padding: 5px 10px;
-        font-size: 12px;
+        padding: 6px 12px;
+        font-size: 12.5px;
         gap: 4px;
       }
       .hero {
-        padding: 18px 14px 10px;
+        padding: 16px 12px 10px;
       }
       .hero-badge {
         font-size: 11px;
@@ -527,26 +535,32 @@
         margin-bottom: 8px;
       }
       .hero h1 {
-        font-size: 23px;
+        font-size: 22px;
         line-height: 1.22;
         margin-bottom: 6px;
       }
       .hero-lead {
         font-size: 13px;
         line-height: 1.45;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
       }
       .hero-pills {
         display: none;
       }
       .workspace-wrap {
-        padding: 4px 10px 40px;
+        padding: 0 12px 36px;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
       }
       .tool-card {
-        border-radius: 12px;
+        border-radius: 14px;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
       }
       .url-section {
-        padding: 12px;
+        padding: 14px 12px;
       }
       .url-input-container {
         flex-direction: column;
@@ -558,7 +572,7 @@
       .url-input {
         height: 48px;
         font-size: 14px;
-        padding: 0 40px 0 42px;
+        padding: 0 38px 0 40px;
       }
       .fetch-btn {
         width: 100%;
@@ -581,52 +595,76 @@
       }
       .shorts-workspace {
         padding: 16px 12px;
+        width: 100%;
+        box-sizing: border-box;
       }
       .shorts-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 18px;
+        width: 100%;
+        margin: 0 auto;
+      }
+      .preview-col {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: 0 auto;
       }
       .phone-mockup {
-        width: 210px;
-        max-width: 65vw;
-        border-radius: 18px;
+        width: 220px;
+        max-width: 68vw;
+        aspect-ratio: 9 / 16;
+        margin: 0 auto;
+        display: block;
+        border-radius: 20px;
         box-shadow: 0 10px 24px -6px rgba(15, 23, 42, 0.22), 0 0 0 4px #1e293b;
       }
       .shorts-title-box {
-        max-width: 100%;
-        margin-top: 10px;
+        max-width: 260px;
+        margin: 10px auto 0;
+        text-align: center;
       }
       .shorts-video-title {
-        font-size: 13.5px;
+        font-size: 13px;
+        text-align: center;
+      }
+      .options-header {
+        width: 100%;
+        box-sizing: border-box;
       }
       .options-header h2 {
         font-size: 16px;
       }
+      .options-header span {
+        display: none !important; /* Prevent header overflow on mobile */
+      }
       .res-row {
-        padding: 10px 12px;
-        gap: 8px;
-        border-radius: 8px;
+        padding: 12px 14px;
+        gap: 10px;
+        border-radius: 10px;
+        width: 100%;
+        box-sizing: border-box;
       }
       .res-icon {
         font-size: 18px;
       }
       .res-label {
-        font-size: 13.5px;
+        font-size: 14px;
+        gap: 6px;
       }
       .badge-tag {
-        font-size: 9.5px;
-        padding: 1px 5px;
-      }
-      .res-desc {
-        font-size: 11px;
-        max-width: 130px;
+        font-size: 10px;
+        padding: 2px 6px;
       }
       .dl-btn {
         height: 38px;
-        min-width: 105px;
-        padding: 0 10px;
-        font-size: 12px;
-        border-radius: 6px;
+        min-width: 90px;
+        padding: 0 14px;
+        font-size: 13px;
+        border-radius: 8px;
         gap: 5px;
       }
     }
@@ -1561,12 +1599,9 @@
         row.innerHTML = `
           <div class="res-left">
             <span class="res-icon">${tier.icon}</span>
-            <div class="res-meta">
-              <div class="res-label">
-                <span>${tier.label}</span>
-                <span class="${badgeClass}">${tier.tag}</span>
-              </div>
-              <div class="res-desc">${tier.desc}</div>
+            <div class="res-label">
+              <span>${tier.label}</span>
+              <span class="${badgeClass}">${tier.tag}</span>
             </div>
           </div>
           <button
@@ -1577,7 +1612,7 @@
             onclick="triggerShortDownload('${tier.key}', this)"
           >
             <span>⬇️</span>
-            <span>Download ${tier.tag}</span>
+            <span>Download</span>
           </button>
         `;
         container.appendChild(row);
@@ -1589,7 +1624,6 @@
       if (isDownloading || !activeVideoData) return;
 
       isDownloading = true;
-      const originalHtml = btnEl.innerHTML;
 
       // 1. Lock all other rows
       document.querySelectorAll('.res-row').forEach(row => {
@@ -1601,7 +1635,7 @@
       // 2. Button state: Loading
       btnEl.disabled = true;
       btnEl.className = 'dl-btn btn-loading';
-      btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Preparing ${qualityKey.toUpperCase()}...</span>`;
+      btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Preparing...</span>`;
 
       try {
         // 3. Call Backend Download Endpoint
@@ -1635,13 +1669,13 @@
           const job = await statResp.json();
 
           if (job.status === 'downloading') {
-            btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Processing ${qualityKey}...</span>`;
+            btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Processing...</span>`;
           } else if (job.status === 'done') {
             completed = true;
 
             // 5. Button State: Ready!
             btnEl.className = 'dl-btn btn-done';
-            btnEl.innerHTML = `<span>✅ Downloading!</span>`;
+            btnEl.innerHTML = `<span>✅ Ready!</span>`;
 
             // 6. Direct automatic trigger
             const fileUrl = `${API}/download-file/${job_id}`;
@@ -1662,7 +1696,7 @@
             setTimeout(() => {
               btnEl.className = 'dl-btn';
               btnEl.disabled = false;
-              btnEl.innerHTML = originalHtml;
+              btnEl.innerHTML = `<span>⬇️</span> <span>Download</span>`;
               document.querySelectorAll('.res-row').forEach(r => r.classList.remove('dimmed'));
               isDownloading = false;
             }, 3000);
@@ -1678,11 +1712,11 @@
 
       } catch (err) {
         btnEl.className = 'dl-btn btn-error';
-        btnEl.innerHTML = `<span>⚠️ Failed - Retry</span>`;
+        btnEl.innerHTML = `<span>⚠️ Retry</span>`;
         setTimeout(() => {
           btnEl.className = 'dl-btn';
           btnEl.disabled = false;
-          btnEl.innerHTML = originalHtml;
+          btnEl.innerHTML = `<span>⬇️</span> <span>Download</span>`;
           document.querySelectorAll('.res-row').forEach(r => r.classList.remove('dimmed'));
           isDownloading = false;
         }, 3500);
