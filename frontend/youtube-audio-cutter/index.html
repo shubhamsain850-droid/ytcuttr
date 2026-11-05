@@ -894,6 +894,199 @@
       font-size: 13px;
     }
 
+    /* ── AUDIO QUALITIES LIST (Highest to Lowest) ── */
+    .audio-qualities-section {
+      margin-top: 18px;
+    }
+
+    .qualities-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .qualities-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qualities-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      white-space: nowrap;
+    }
+
+    .quality-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quality-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      gap: 12px;
+    }
+
+    .quality-row:hover {
+      background: var(--white);
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quality-row.featured {
+      background: #fffdfb;
+      border-color: #fed7aa;
+    }
+
+    .q-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .q-icon {
+      font-size: 18px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .q-meta {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .q-label {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+    .badge-tag.ultra { background: #dcfce7; color: #15803d; }
+    .badge-tag.hq { background: #dbeafe; color: #1d4ed8; }
+    .badge-tag.standard { background: #f1f5f9; color: #334155; }
+    .badge-tag.sd { background: #f8fafc; color: #64748b; border: 1px solid var(--border); }
+    .badge-tag.audio { background: #f3e8ff; color: #7e22ce; }
+
+    .q-desc {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dl-btn {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 8px;
+      border: none;
+      background: var(--red);
+      color: var(--white);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px var(--red-glow);
+      transition: var(--transition);
+      flex-shrink: 0;
+      min-width: 130px;
+    }
+
+    .dl-btn:hover:not(:disabled) {
+      background: var(--red-hover);
+      transform: translateY(-1px);
+    }
+
+    .dl-btn:disabled {
+      cursor: wait;
+    }
+
+    .dl-btn.btn-loading {
+      background: #0f172a !important;
+      color: #f8fafc !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+
+    .dl-btn.btn-done {
+      background: var(--success) !important;
+      color: var(--white) !important;
+      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3) !important;
+    }
+
+    .quality-row.dimmed {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    /* Fallback direct download link box */
+    .download-success-banner {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-bdr);
+      border-radius: var(--radius-sm);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .download-success-banner.visible { display: flex; }
+    .download-success-text {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--success);
+    }
+    .download-direct-link {
+      background: var(--success);
+      color: var(--white) !important;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
     /* ── FULL AUDIO PANEL (OPTION 2) ── */
     .full-audio-card {
       background: var(--white);
@@ -1365,6 +1558,49 @@
         align-items: flex-start;
         gap: 8px;
       }
+      .qualities-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+      .qualities-badge {
+        display: none !important;
+      }
+      .quality-row {
+        padding: 10px 12px;
+        gap: 8px;
+        border-radius: 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .q-left {
+        gap: 8px;
+        min-width: 0;
+      }
+      .q-icon {
+        font-size: 16px;
+      }
+      .q-label {
+        font-size: 13.5px;
+        gap: 4px;
+      }
+      .badge-tag {
+        font-size: 9.5px;
+        padding: 1px 5px;
+      }
+      .q-desc {
+        font-size: 11px;
+      }
+      .dl-btn {
+        height: 38px;
+        min-width: 96px;
+        padding: 0 10px;
+        font-size: 12.5px;
+        border-radius: 8px;
+        gap: 4px;
+        flex-shrink: 0;
+      }
       .steps-grid, .features-grid {
         grid-template-columns: 1fr;
         gap: 14px;
@@ -1627,11 +1863,94 @@
             </div>
           </div>
 
-          <!-- PRIMARY ACTION: CUT & DOWNLOAD -->
-          <button type="button" class="primary-action-btn" id="cut-action-btn" onclick="executeCutDownload()">
-            <span>✂️</span>
-            <span id="cut-btn-text">Cut &amp; Download Audio</span>
-          </button>
+          <!-- AUDIO QUALITIES DOWNLOAD LIST -->
+          <div class="audio-qualities-section">
+            <div class="qualities-header">
+              <span class="qualities-title">
+                <span>🎵</span>
+                <span>Select Quality to Download Audio Clip</span>
+              </span>
+              <span class="qualities-badge">Trimmed to timestamps</span>
+            </div>
+
+            <div class="quality-list" id="clip-quality-list">
+              <!-- 320k -->
+              <div class="quality-row featured" id="qrow-clip-320k">
+                <div class="q-left">
+                  <span class="q-icon">🟢</span>
+                  <div class="q-meta">
+                    <div class="q-label">320 kbps (Ultra HQ) <span class="badge-tag ultra">320K MP3</span></div>
+                    <div class="q-desc">Studio Master Audio • Highest MP3 Bitrate</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '320k', this)">
+                  <span>⬇️</span> <span>Download 320k</span>
+                </button>
+              </div>
+
+              <!-- 256k -->
+              <div class="quality-row" id="qrow-clip-256k">
+                <div class="q-left">
+                  <span class="q-icon">🔵</span>
+                  <div class="q-meta">
+                    <div class="q-label">256 kbps (High Quality) <span class="badge-tag hq">256K MP3</span></div>
+                    <div class="q-desc">Crystal Clear Sound • Premium Fidelity</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '256k', this)">
+                  <span>⬇️</span> <span>Download 256k</span>
+                </button>
+              </div>
+
+              <!-- 192k -->
+              <div class="quality-row" id="qrow-clip-192k">
+                <div class="q-left">
+                  <span class="q-icon">⚪</span>
+                  <div class="q-meta">
+                    <div class="q-label">192 kbps (Standard) <span class="badge-tag standard">192K MP3</span></div>
+                    <div class="q-desc">Optimal Balance • Quality &amp; Size</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '192k', this)">
+                  <span>⬇️</span> <span>Download 192k</span>
+                </button>
+              </div>
+
+              <!-- 128k -->
+              <div class="quality-row" id="qrow-clip-128k">
+                <div class="q-left">
+                  <span class="q-icon">⚪</span>
+                  <div class="q-meta">
+                    <div class="q-label">128 kbps (Saver) <span class="badge-tag sd">128K MP3</span></div>
+                    <div class="q-desc">Lightweight File • Fastest Download</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '128k', this)">
+                  <span>⬇️</span> <span>Download 128k</span>
+                </button>
+              </div>
+
+              <!-- m4a -->
+              <div class="quality-row" id="qrow-clip-m4a">
+                <div class="q-left">
+                  <span class="q-icon">🎵</span>
+                  <div class="q-meta">
+                    <div class="q-label">Original M4A (Lossless) <span class="badge-tag audio">M4A AAC</span></div>
+                    <div class="q-desc">Native YouTube AAC Stream • Lossless</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('clip', 'm4a', this)">
+                  <span>⬇️</span> <span>Download M4A</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Direct link fallback banner -->
+            <div class="download-success-banner" id="clip-success-banner">
+              <span class="download-success-text" id="clip-success-text">✅ Clip ready! Download started.</span>
+              <a href="#" id="clip-direct-link" class="download-direct-link" download target="_blank">⬇️ Click to Save Audio</a>
+            </div>
+          </div>
 
         </div>
 
@@ -1655,11 +1974,94 @@
             </div>
           </div>
 
-          <!-- PRIMARY ACTION: FULL DOWNLOAD -->
-          <button type="button" class="primary-action-btn" id="full-action-btn" onclick="executeFullDownload()">
-            <span>⬇️</span>
-            <span id="full-btn-text">Download Full Audio Track</span>
-          </button>
+          <!-- AUDIO QUALITIES DOWNLOAD LIST FOR FULL TRACK -->
+          <div class="audio-qualities-section" style="margin-top: 0;">
+            <div class="qualities-header">
+              <span class="qualities-title">
+                <span>🎵</span>
+                <span>Select Quality to Download Full Track</span>
+              </span>
+              <span class="qualities-badge">Full Video Length</span>
+            </div>
+
+            <div class="quality-list" id="full-quality-list">
+              <!-- 320k -->
+              <div class="quality-row featured" id="qrow-full-320k">
+                <div class="q-left">
+                  <span class="q-icon">🟢</span>
+                  <div class="q-meta">
+                    <div class="q-label">320 kbps (Ultra HQ) <span class="badge-tag ultra">320K MP3</span></div>
+                    <div class="q-desc">Full Length • Highest MP3 Bitrate</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('full', '320k', this)">
+                  <span>⬇️</span> <span>Download 320k</span>
+                </button>
+              </div>
+
+              <!-- 256k -->
+              <div class="quality-row" id="qrow-full-256k">
+                <div class="q-left">
+                  <span class="q-icon">🔵</span>
+                  <div class="q-meta">
+                    <div class="q-label">256 kbps (High Quality) <span class="badge-tag hq">256K MP3</span></div>
+                    <div class="q-desc">Full Length • Premium Sound</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('full', '256k', this)">
+                  <span>⬇️</span> <span>Download 256k</span>
+                </button>
+              </div>
+
+              <!-- 192k -->
+              <div class="quality-row" id="qrow-full-192k">
+                <div class="q-left">
+                  <span class="q-icon">⚪</span>
+                  <div class="q-meta">
+                    <div class="q-label">192 kbps (Standard) <span class="badge-tag standard">192K MP3</span></div>
+                    <div class="q-desc">Full Length • Standard Quality</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('full', '192k', this)">
+                  <span>⬇️</span> <span>Download 192k</span>
+                </button>
+              </div>
+
+              <!-- 128k -->
+              <div class="quality-row" id="qrow-full-128k">
+                <div class="q-left">
+                  <span class="q-icon">⚪</span>
+                  <div class="q-meta">
+                    <div class="q-label">128 kbps (Saver) <span class="badge-tag sd">128K MP3</span></div>
+                    <div class="q-desc">Full Length • Lightweight Size</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('full', '128k', this)">
+                  <span>⬇️</span> <span>Download 128k</span>
+                </button>
+              </div>
+
+              <!-- m4a -->
+              <div class="quality-row" id="qrow-full-m4a">
+                <div class="q-left">
+                  <span class="q-icon">🎵</span>
+                  <div class="q-meta">
+                    <div class="q-label">Original M4A (Lossless) <span class="badge-tag audio">M4A AAC</span></div>
+                    <div class="q-desc">Full Length • Native Original AAC</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" onclick="downloadAudio('full', 'm4a', this)">
+                  <span>⬇️</span> <span>Download M4A</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Direct link fallback banner -->
+            <div class="download-success-banner" id="full-success-banner">
+              <span class="download-success-text" id="full-success-text">✅ Audio ready! Download started.</span>
+              <a href="#" id="full-direct-link" class="download-direct-link" download target="_blank">⬇️ Click to Save Audio</a>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -2219,44 +2621,70 @@
       initTimelineScrubber();
     });
 
-    // ── OPTION 1: EXECUTE CUT & DOWNLOAD ──
-    async function executeCutDownload() {
-      if (isProcessing || !activeVideoData) return;
-
-      const startHms = document.getElementById('start-time-input').value.trim();
-      const endHms = document.getElementById('end-time-input').value.trim();
-
-      const sSec = parseHmsToSeconds(startHms);
-      const eSec = parseHmsToSeconds(endHms);
-
-      if (eSec <= sSec) {
-        showStatus('End time must be greater than start time.', 'error');
+    // ── UNIFIED & ROBUST AUDIO DOWNLOADER (CLIP & FULL) ──
+    async function downloadAudio(mode, qualityKey, btnEl) {
+      if (isProcessing || !activeVideoData) {
+        if (!activeVideoData) {
+          showStatus('Please paste and fetch a YouTube link first.', 'error');
+        }
         return;
+      }
+
+      const isClip = (mode === 'clip');
+      let startHms = '00:00:00';
+      let endHms = '00:00:30';
+
+      if (isClip) {
+        startHms = document.getElementById('start-time-input').value.trim();
+        endHms = document.getElementById('end-time-input').value.trim();
+
+        const sSec = parseHmsToSeconds(startHms);
+        const eSec = parseHmsToSeconds(endHms);
+
+        if (eSec <= sSec) {
+          showStatus('End time must be greater than start time.', 'error');
+          return;
+        }
       }
 
       isProcessing = true;
       hideStatus();
 
-      const btn = document.getElementById('cut-action-btn');
-      const originalText = document.getElementById('cut-btn-text').textContent;
-      btn.classList.add('btn-processing');
-      btn.disabled = true;
-      btn.innerHTML = `<span class="btn-spinner"></span> <span>Preparing Audio Cut...</span>`;
+      const originalBtnHtml = btnEl.innerHTML;
+      btnEl.disabled = true;
+      btnEl.className = 'dl-btn btn-loading';
+      btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Preparing...</span>`;
+
+      // Dim other rows in active container
+      const containerId = isClip ? 'clip-quality-list' : 'full-quality-list';
+      document.querySelectorAll(`#${containerId} .quality-row`).forEach(r => {
+        if (!r.contains(btnEl)) r.classList.add('dimmed');
+      });
+
+      const bannerId = isClip ? 'clip-success-banner' : 'full-success-banner';
+      const banner = document.getElementById(bannerId);
+      if (banner) banner.classList.remove('visible');
 
       try {
-        const resp = await fetch(`${API}/clip`, {
+        const endpoint = isClip ? `${API}/clip` : `${API}/download`;
+        const payload = isClip ? {
+          url: activeVideoData.url,
+          start: startHms,
+          end: endHms,
+          quality: qualityKey
+        } : {
+          url: activeVideoData.url,
+          quality: qualityKey
+        };
+
+        const resp = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: activeVideoData.url,
-            start: startHms,
-            end: endHms,
-            quality: 'audio'
-          })
+          body: JSON.stringify(payload)
         });
 
         if (!resp.ok) {
-          throw new Error('Failed to start audio cutting. Please try again.');
+          throw new Error('Server busy. Please try again.');
         }
 
         const { job_id } = await resp.json();
@@ -2268,7 +2696,7 @@
 
         while (attempts < maxAttempts && !completed) {
           attempts++;
-          await new Promise(r => setTimeout(r, 1000));
+          await new Promise(r => setTimeout(r, 1200));
 
           const statResp = await fetch(`${API}/status/${job_id}`);
           if (!statResp.ok) continue;
@@ -2276,138 +2704,79 @@
           const job = await statResp.json();
 
           if (job.status === 'downloading') {
-            btn.innerHTML = `<span class="btn-spinner"></span> <span>Downloading Audio Stream...</span>`;
+            btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Downloading...</span>`;
           } else if (job.status === 'processing') {
-            btn.innerHTML = `<span class="btn-spinner"></span> <span>Trimming Audio to Timestamps...</span>`;
+            btnEl.innerHTML = `<span class="btn-spinner"></span> <span>Converting...</span>`;
           } else if (job.status === 'done') {
             completed = true;
 
-            btn.className = 'primary-action-btn btn-done';
-            btn.innerHTML = `<span>✅</span> <span>Audio Ready! Downloading...</span>`;
+            btnEl.className = 'dl-btn btn-done';
+            btnEl.innerHTML = `<span>✅ Ready!</span>`;
 
             // Trigger file download
             const fileUrl = `${API}/download-file/${job_id}`;
-            const fileName = job.filename || `ytcuttr_audio_${startHms.replace(/:/g, '-')}_${endHms.replace(/:/g, '-')}.m4a`;
+            const ext = (qualityKey === 'm4a') ? 'm4a' : 'mp3';
+            const fileName = job.filename || (isClip 
+              ? `ytcuttr_clip_${startHms.replace(/:/g, '-')}_${endHms.replace(/:/g, '-')}.${ext}`
+              : `ytcuttr_audio_${qualityKey}.${ext}`);
 
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = fileUrl;
-            a.setAttribute('download', fileName);
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { document.body.removeChild(a); }, 500);
+            // Direct trigger
+            triggerDirectDownload(fileUrl, fileName);
 
-            // Reset button
+            // Display persistent fallback banner
+            if (banner) {
+              const textEl = document.getElementById(isClip ? 'clip-success-text' : 'full-success-text');
+              const linkEl = document.getElementById(isClip ? 'clip-direct-link' : 'full-direct-link');
+              if (textEl) textEl.textContent = `✅ ${qualityKey.toUpperCase()} ready! Download starting...`;
+              if (linkEl) {
+                linkEl.href = fileUrl;
+                linkEl.setAttribute('download', fileName);
+              }
+              banner.classList.add('visible');
+            }
+
+            // Reset after 4 seconds
             setTimeout(() => {
-              btn.className = 'primary-action-btn';
-              btn.disabled = false;
-              btn.innerHTML = `<span>✂️</span> <span>Cut &amp; Download Audio</span>`;
+              btnEl.className = 'dl-btn';
+              btnEl.disabled = false;
+              btnEl.innerHTML = originalBtnHtml;
+              document.querySelectorAll(`#${containerId} .quality-row`).forEach(r => r.classList.remove('dimmed'));
               isProcessing = false;
-            }, 3500);
+            }, 4000);
             return;
           } else if (job.status === 'error') {
-            throw new Error(job.error || 'Audio cutting failed on the server.');
+            throw new Error(job.error || 'Server error occurred during processing.');
           }
         }
 
         if (!completed) {
-          throw new Error('Audio processing timed out. Please try a shorter segment.');
+          throw new Error('Download timed out. Please try again.');
         }
 
       } catch (err) {
         showStatus(err.message || 'Error occurred while processing audio.', 'error');
-        btn.className = 'primary-action-btn';
-        btn.disabled = false;
-        btn.innerHTML = `<span>✂️</span> <span>Cut &amp; Download Audio</span>`;
+        btnEl.className = 'dl-btn';
+        btnEl.disabled = false;
+        btnEl.innerHTML = originalBtnHtml;
+        document.querySelectorAll(`#${containerId} .quality-row`).forEach(r => r.classList.remove('dimmed'));
         isProcessing = false;
       }
     }
 
-    // ── OPTION 2: EXECUTE FULL DOWNLOAD ──
-    async function executeFullDownload() {
-      if (isProcessing || !activeVideoData) return;
-
-      isProcessing = true;
-      hideStatus();
-
-      const btn = document.getElementById('full-action-btn');
-      btn.classList.add('btn-processing');
-      btn.disabled = true;
-      btn.innerHTML = `<span class="btn-spinner"></span> <span>Extracting Full Audio Track...</span>`;
-
+    function triggerDirectDownload(fileUrl, fileName) {
       try {
-        const resp = await fetch(`${API}/download`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: activeVideoData.url,
-            quality: 'audio'
-          })
-        });
-
-        if (!resp.ok) {
-          throw new Error('Failed to start full audio download. Please try again.');
-        }
-
-        const { job_id } = await resp.json();
-
-        // Poll status
-        let attempts = 0;
-        const maxAttempts = 180;
-        let completed = false;
-
-        while (attempts < maxAttempts && !completed) {
-          attempts++;
-          await new Promise(r => setTimeout(r, 1000));
-
-          const statResp = await fetch(`${API}/status/${job_id}`);
-          if (!statResp.ok) continue;
-
-          const job = await statResp.json();
-
-          if (job.status === 'downloading') {
-            btn.innerHTML = `<span class="btn-spinner"></span> <span>Downloading Full Audio Stream...</span>`;
-          } else if (job.status === 'done') {
-            completed = true;
-
-            btn.className = 'primary-action-btn btn-done';
-            btn.innerHTML = `<span>✅</span> <span>Audio Ready! Downloading...</span>`;
-
-            // Trigger file download
-            const fileUrl = `${API}/download-file/${job_id}`;
-            const fileName = job.filename || `ytcuttr_full_audio.m4a`;
-
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = fileUrl;
-            a.setAttribute('download', fileName);
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { document.body.removeChild(a); }, 500);
-
-            // Reset button
-            setTimeout(() => {
-              btn.className = 'primary-action-btn';
-              btn.disabled = false;
-              btn.innerHTML = `<span>⬇️</span> <span>Download Full Audio Track</span>`;
-              isProcessing = false;
-            }, 3500);
-            return;
-          } else if (job.status === 'error') {
-            throw new Error(job.error || 'Full audio download failed on the server.');
-          }
-        }
-
-        if (!completed) {
-          throw new Error('Audio download timed out.');
-        }
-
-      } catch (err) {
-        showStatus(err.message || 'Error occurred while downloading full audio.', 'error');
-        btn.className = 'primary-action-btn';
-        btn.disabled = false;
-        btn.innerHTML = `<span>⬇️</span> <span>Download Full Audio Track</span>`;
-        isProcessing = false;
+        const a = document.createElement('a');
+        a.href = fileUrl;
+        if (fileName) a.setAttribute('download', fileName);
+        a.setAttribute('target', '_blank');
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (a.parentNode) a.parentNode.removeChild(a);
+        }, 1000);
+      } catch(e) {
+        window.location.assign(fileUrl);
       }
     }
 
