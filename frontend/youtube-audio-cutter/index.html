@@ -2628,11 +2628,22 @@
 
     // ── UNIFIED & ROBUST AUDIO DOWNLOADER (CLIP & FULL) ──
     async function downloadAudio(mode, qualityKey, btnEl) {
-      if (isProcessing || !activeVideoData) {
-        if (!activeVideoData) {
+      if (isProcessing) return;
+
+      if (!activeVideoData || !activeVideoData.url) {
+        const inputVal = document.getElementById('audio-url-input').value.trim();
+        const vid = extractVideoId(inputVal);
+        if (vid) {
+          activeVideoData = {
+            url: `https://www.youtube.com/watch?v=${vid}`,
+            videoId: vid,
+            title: 'YouTube Audio Track',
+            durationSec: videoDurationSec || 180
+          };
+        } else {
           showStatus('Please paste and fetch a YouTube link first.', 'error');
+          return;
         }
-        return;
       }
 
       const isClip = (mode === 'clip');

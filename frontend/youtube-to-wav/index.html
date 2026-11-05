@@ -1727,6 +1727,13 @@
       '320k': { label: 'MP3', ext: 'mp3' }
     };
 
+    // Helper: Extract 11-character YouTube Video ID
+    function extractVideoId(url) {
+      if (!url) return null;
+      const m = url.match(/(?:shorts\/|v=|youtu\.be\/|\/embed\/|\/v\/|live\/)([A-Za-z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
     function handleInput() {
       const input = document.getElementById('wav-url-input');
       const clearBtn = document.getElementById('url-clear-btn');
@@ -1793,10 +1800,17 @@
     // Fetch Video Information
     async function handleFetch() {
       const input = document.getElementById('wav-url-input');
-      const url = input.value.trim();
+      const rawUrl = input.value.trim();
 
-      if (!url) {
+      if (!rawUrl) {
         showStatus('Please paste a YouTube link first.');
+        input.focus();
+        return;
+      }
+
+      const videoId = extractVideoId(rawUrl);
+      if (!videoId) {
+        showStatus('Please enter a valid YouTube video, shorts, or music link.');
         input.focus();
         return;
       }
@@ -1806,40 +1820,92 @@
       fetchBtn.disabled = true;
       fetchBtn.innerHTML = `<span class="btn-spinner"></span> <span>Analyzing...</span>`;
 
+      // Standardize YouTube URL
+      const standardUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+      // Initialize activeVideoData immediately so download can NEVER fail due to missing fields
+      activeVideoData = {
+        url: standardUrl,
+        videoId: videoId,
+        title: 'YouTube Audio Track',
+        channel: 'YouTube Creator',
+        duration: 180,
+        thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+      };
+      totalDurationSec = 180;
+
+      // Populate Video Card immediately
+      document.getElementById('video-thumb').src = activeVideoData.thumbnail;
+      document.getElementById('video-title').textContent = activeVideoData.title;
+      document.getElementById('video-channel').textContent = activeVideoData.channel;
+      document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
+
+      // Initialize Trimmer Slider with default 0-30s
+      initTrimmerSlider(totalDurationSec, false);
+
+      // Show Workspace immediately
+      document.getElementById('wav-workspace').classList.add('active');
+
+      // Update button text for current mode
+      switchActionTab(currentMode);
+
+      // Scroll to workspace on mobile
+      document.getElementById('wav-workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // 1. Fast Client-side oEmbed for Instant Title & Channel Name
+      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+        .then(r => r.ok ? r.json() : null)
+        .then(meta => {
+          if (meta) {
+            if (meta.title) {
+              activeVideoData.title = meta.title;
+              document.getElementById('video-title').textContent = meta.title;
+            }
+            if (meta.author_name) {
+              activeVideoData.channel = meta.author_name;
+              document.getElementById('video-channel').textContent = meta.author_name;
+            }
+          }
+        })
+        .catch(() => {});
+
+      // 2. Query Backend via POST /info for exact duration & warm backend cache
       try {
-        const resp = await fetch(`${API}/info?url=${encodeURIComponent(url)}`);
-        if (!resp.ok) {
-          const err = await resp.json().catch(() => ({}));
-          throw new Error(err.detail || 'Could not fetch video information. Please verify the URL.');
+        const resp = await fetch(`${API}/info`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: standardUrl })
+        });
+
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data) {
+            if (data.title) {
+              activeVideoData.title = data.title;
+              document.getElementById('video-title').textContent = data.title;
+            }
+            if (data.channel) {
+              activeVideoData.channel = data.channel;
+              document.getElementById('video-channel').textContent = data.channel;
+            }
+            if (data.thumbnail) {
+              activeVideoData.thumbnail = data.thumbnail;
+              document.getElementById('video-thumb').src = data.thumbnail;
+            }
+            if (data.duration && data.duration > 0) {
+              totalDurationSec = data.duration;
+              activeVideoData.duration = data.duration;
+              document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
+              initTrimmerSlider(totalDurationSec, true);
+            }
+            if (data.view_count) {
+              const vEl = document.getElementById('video-views');
+              if (vEl) vEl.textContent = `${Number(data.view_count).toLocaleString()} views`;
+            }
+          }
         }
-
-        const data = await resp.json();
-        activeVideoData = data;
-        totalDurationSec = Math.max(1, data.duration || 60);
-
-        // Populate Video Card
-        document.getElementById('video-thumb').src = data.thumbnail || '';
-        document.getElementById('video-title').textContent = data.title || 'YouTube Audio Track';
-        document.getElementById('video-channel').textContent = data.channel || 'YouTube Creator';
-        document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
-        if (data.view_count) {
-          document.getElementById('video-views').textContent = `${Number(data.view_count).toLocaleString()} views`;
-        }
-
-        // Initialize Trimmer Slider
-        initTrimmerSlider(totalDurationSec);
-
-        // Show Workspace
-        document.getElementById('wav-workspace').classList.add('active');
-
-        // Update button text for current mode
-        switchActionTab(currentMode);
-
-        // Scroll to workspace on mobile
-        document.getElementById('wav-workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
       } catch (err) {
-        showStatus(err.message || 'Failed to fetch video. Please try again.');
+        console.warn('Backend /info non-critical warning:', err);
       } finally {
         fetchBtn.disabled = false;
         fetchBtn.innerHTML = `<span>Get Audio</span> <span>&gt;</span>`;
@@ -1847,14 +1913,20 @@
     }
 
     // Slider Setup & Sync
-    function initTrimmerSlider(maxSec) {
+    function initTrimmerSlider(maxSec, preserveCurrent = false) {
       const rangeStart = document.getElementById('range-start');
       const rangeEnd = document.getElementById('range-end');
 
       rangeStart.max = maxSec;
       rangeEnd.max = maxSec;
-      rangeStart.value = 0;
-      rangeEnd.value = Math.min(30, maxSec);
+
+      if (!preserveCurrent) {
+        rangeStart.value = 0;
+        rangeEnd.value = Math.min(30, maxSec);
+      } else {
+        if (parseInt(rangeStart.value, 10) >= maxSec) rangeStart.value = 0;
+        if (parseInt(rangeEnd.value, 10) > maxSec) rangeEnd.value = maxSec;
+      }
 
       updateSliderVisuals();
       syncInputsFromSlider();
@@ -1941,11 +2013,25 @@
 
     // Direct Download Handler (for all formats)
     async function downloadFormat(formatKey, btnEl) {
-      if (isProcessing || !activeVideoData) {
-        if (!activeVideoData) {
+      if (isProcessing) return;
+
+      // Defensive fallback: Ensure activeVideoData and valid url exist
+      if (!activeVideoData || !activeVideoData.url) {
+        const inputUrl = document.getElementById('wav-url-input').value.trim();
+        const videoId = extractVideoId(inputUrl);
+        if (videoId) {
+          activeVideoData = {
+            url: `https://www.youtube.com/watch?v=${videoId}`,
+            videoId: videoId,
+            title: 'YouTube Audio Track',
+            channel: 'YouTube Creator',
+            duration: totalDurationSec || 180,
+            thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+          };
+        } else {
           showStatus('Please paste and analyze a YouTube link first.');
+          return;
         }
-        return;
       }
 
       const isCut = (currentMode === 'cut');
@@ -1983,14 +2069,15 @@
       if (banner) banner.classList.remove('visible');
 
       try {
+        const targetUrl = activeVideoData.url;
         const endpoint = isCut ? `${API}/clip` : `${API}/download`;
         const payload = isCut ? {
-          url: activeVideoData.url,
+          url: targetUrl,
           start: startHms,
           end: endHms,
           quality: formatKey
         } : {
-          url: activeVideoData.url,
+          url: targetUrl,
           quality: formatKey
         };
 
@@ -2040,9 +2127,16 @@
 
             // Display mobile fallback banner
             if (banner) {
+              const bannerText = document.getElementById('success-banner-text');
+              if (bannerText) {
+                const label = FORMAT_INFO[formatKey] ? FORMAT_INFO[formatKey].label : formatKey.toUpperCase();
+                bannerText.textContent = `✅ ${label} ready! Tap button below to save:`;
+              }
               const directLink = document.getElementById('success-direct-link');
-              directLink.href = fileUrl;
-              directLink.setAttribute('download', fileName);
+              if (directLink) {
+                directLink.href = fileUrl;
+                directLink.setAttribute('download', fileName);
+              }
               banner.classList.add('visible');
             }
 
