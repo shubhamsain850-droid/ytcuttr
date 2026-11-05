@@ -1932,96 +1932,103 @@
       fetchBtn.disabled = true;
       fetchBtn.innerHTML = `<span class="btn-spinner"></span> <span>Analyzing...</span>`;
 
-      // Standardize YouTube URL
-      const standardUrl = `https://www.youtube.com/watch?v=${videoId}`;
-
-      // Initialize activeVideoData immediately so download can NEVER fail due to missing fields
-      activeVideoData = {
-        url: standardUrl,
-        videoId: videoId,
-        title: 'YouTube Audio Track',
-        channel: 'YouTube Creator',
-        duration: 180,
-        thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-      };
-      totalDurationSec = 180;
-
-      // Immediately load 16:9 video preview player right in front of user
-      const iframe = document.getElementById('wav-player-frame');
-      if (iframe) {
-        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0`;
-      }
-
-      // Populate Video Meta Bar immediately
-      document.getElementById('video-title').textContent = activeVideoData.title;
-      document.getElementById('video-channel').textContent = activeVideoData.channel;
-      document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
-
-      // Initialize Trimmer Slider with default 0-30s
-      initTrimmerSlider(totalDurationSec, false);
-
-      // Show Workspace immediately
-      document.getElementById('wav-workspace').classList.add('active');
-
-      // Update button text for current mode
-      switchActionTab(currentMode);
-
-      // Scroll to workspace on mobile
-      document.getElementById('wav-workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-      // 1. Fast Client-side oEmbed for Instant Title & Channel Name
-      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
-        .then(r => r.ok ? r.json() : null)
-        .then(meta => {
-          if (meta) {
-            if (meta.title) {
-              activeVideoData.title = meta.title;
-              document.getElementById('video-title').textContent = meta.title;
-            }
-            if (meta.author_name) {
-              activeVideoData.channel = meta.author_name;
-              document.getElementById('video-channel').textContent = meta.author_name;
-            }
-          }
-        })
-        .catch(() => {});
-
-      // 2. Query Backend via POST /info for exact duration & warm backend cache
       try {
-        const resp = await fetch(`${API}/info`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: standardUrl })
-        });
+        // Standardize YouTube URL
+        const standardUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-        if (resp.ok) {
-          const data = await resp.json();
-          if (data) {
-            if (data.title) {
-              activeVideoData.title = data.title;
-              document.getElementById('video-title').textContent = data.title;
+        // Initialize activeVideoData immediately so download can NEVER fail due to missing fields
+        activeVideoData = {
+          url: standardUrl,
+          videoId: videoId,
+          title: 'YouTube Audio Track',
+          channel: 'YouTube Creator',
+          duration: 180,
+          thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+        };
+        totalDurationSec = 180;
+
+        // Immediately load 16:9 video preview player right in front of user
+        const iframe = document.getElementById('wav-player-frame');
+        if (iframe) {
+          iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0`;
+        }
+
+        // Populate Video Meta Bar immediately
+        document.getElementById('video-title').textContent = activeVideoData.title;
+        document.getElementById('video-channel').textContent = activeVideoData.channel;
+        document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
+
+        // Initialize Trimmer Slider with default 0-30s
+        initTrimmerSlider(totalDurationSec, false);
+
+        // Show Workspace immediately
+        document.getElementById('wav-workspace').classList.add('active');
+
+        // Update button text for current mode
+        switchActionTab(currentMode);
+
+        // Scroll to workspace on mobile
+        document.getElementById('wav-workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // 1. Fast Client-side oEmbed for Instant Title & Channel Name
+        fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+          .then(r => r.ok ? r.json() : null)
+          .then(meta => {
+            if (meta) {
+              if (meta.title) {
+                activeVideoData.title = meta.title;
+                document.getElementById('video-title').textContent = meta.title;
+              }
+              if (meta.author_name) {
+                activeVideoData.channel = meta.author_name;
+                document.getElementById('video-channel').textContent = meta.author_name;
+              }
             }
-            if (data.channel) {
-              activeVideoData.channel = data.channel;
-              document.getElementById('video-channel').textContent = data.channel;
+          })
+          .catch(() => {});
+
+        // 2. Query Backend via POST /info for exact duration & warm backend cache
+        try {
+          const resp = await fetch(`${API}/info`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: standardUrl })
+          });
+
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data) {
+              if (data.title) {
+                activeVideoData.title = data.title;
+                document.getElementById('video-title').textContent = data.title;
+              }
+              if (data.channel) {
+                activeVideoData.channel = data.channel;
+                document.getElementById('video-channel').textContent = data.channel;
+              }
+              if (data.thumbnail) {
+                activeVideoData.thumbnail = data.thumbnail;
+              }
+              if (data.duration && data.duration > 0) {
+                totalDurationSec = data.duration;
+                activeVideoData.duration = data.duration;
+                document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
+                initTrimmerSlider(totalDurationSec, true);
+              }
+              if (data.view_count) {
+                const vEl = document.getElementById('video-views');
+                if (vEl) vEl.textContent = `${Number(data.view_count).toLocaleString()} views`;
+              }
             }
-            if (data.thumbnail) {
-              activeVideoData.thumbnail = data.thumbnail;
-            }
-            if (data.duration && data.duration > 0) {
-              totalDurationSec = data.duration;
-              activeVideoData.duration = data.duration;
-              document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
-              initTrimmerSlider(totalDurationSec, true);
-            }
-            if (data.view_count) {
-              const vEl = document.getElementById('video-views');
-              if (vEl) vEl.textContent = `${Number(data.view_count).toLocaleString()} views`;
-            }
+          } else if (resp.status === 400 || resp.status === 404) {
+            showStatus('This video appears to be unavailable, private, or age-restricted on YouTube.', 'error');
           }
+        } catch (backendErr) {
+          console.warn('Backend /info non-critical warning:', backendErr);
         }
       } catch (err) {
-        console.warn('Backend /info non-critical warning:', err);
+        console.error('Fetch error:', err);
+        showStatus('Error analyzing video. Please check the URL.');
       } finally {
         fetchBtn.disabled = false;
         fetchBtn.innerHTML = `<span>Get Audio</span> <span>&gt;</span>`;
@@ -2046,10 +2053,7 @@
 
       updateSliderVisuals();
       syncInputsFromSlider();
-
-      if (handle === 'start') {
-        seekPlayerTo(parseInt(rangeStart.value, 10));
-      }
+      seekPlayerTo(parseInt(rangeStart.value, 10));
     }
 
     function onSliderChange(handle) {
@@ -2430,10 +2434,11 @@
       const h = Math.floor(sec / 3600);
       const m = Math.floor((sec % 3600) / 60);
       const s = sec % 60;
-      if (h > 0) {
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-      }
-      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      return [
+        String(h).padStart(2, '0'),
+        String(m).padStart(2, '0'),
+        String(s).padStart(2, '0')
+      ].join(':');
     }
 
     function parseHmsToSeconds(hmsStr) {
