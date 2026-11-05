@@ -505,25 +505,129 @@
       align-items: start;
     }
 
+    /* ── MOBILE OPTIMIZATIONS ── */
     @media (max-width: 768px) {
-      .shorts-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
+      .nav-inner {
+        padding: 10px 14px;
       }
-      .url-section {
-        padding: 16px 14px;
+      .logo {
+        font-size: 19px;
       }
-      .url-input-container {
-        flex-direction: column;
+      .nav-btn {
+        padding: 5px 10px;
+        font-size: 12px;
+        gap: 4px;
       }
-      .fetch-btn {
-        width: 100%;
+      .hero {
+        padding: 18px 14px 10px;
       }
-      .shorts-workspace {
-        padding: 18px 14px;
+      .hero-badge {
+        font-size: 11px;
+        padding: 3px 9px;
+        margin-bottom: 8px;
+      }
+      .hero h1 {
+        font-size: 23px;
+        line-height: 1.22;
+        margin-bottom: 6px;
+      }
+      .hero-lead {
+        font-size: 13px;
+        line-height: 1.45;
+        margin-bottom: 10px;
       }
       .hero-pills {
         display: none;
+      }
+      .workspace-wrap {
+        padding: 4px 10px 40px;
+      }
+      .tool-card {
+        border-radius: 12px;
+      }
+      .url-section {
+        padding: 12px;
+      }
+      .url-input-container {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .url-input-wrapper {
+        width: 100%;
+      }
+      .url-input {
+        height: 48px;
+        font-size: 14px;
+        padding: 0 40px 0 42px;
+      }
+      .fetch-btn {
+        width: 100%;
+        height: 48px;
+        font-size: 14.5px;
+        border-radius: 8px;
+      }
+      .empty-state {
+        padding: 36px 16px;
+      }
+      .empty-icon {
+        font-size: 36px;
+        margin-bottom: 8px;
+      }
+      .empty-title {
+        font-size: 18px;
+      }
+      .empty-desc {
+        font-size: 13px;
+      }
+      .shorts-workspace {
+        padding: 16px 12px;
+      }
+      .shorts-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .phone-mockup {
+        width: 210px;
+        max-width: 65vw;
+        border-radius: 18px;
+        box-shadow: 0 10px 24px -6px rgba(15, 23, 42, 0.22), 0 0 0 4px #1e293b;
+      }
+      .shorts-title-box {
+        max-width: 100%;
+        margin-top: 10px;
+      }
+      .shorts-video-title {
+        font-size: 13.5px;
+      }
+      .options-header h2 {
+        font-size: 16px;
+      }
+      .res-row {
+        padding: 10px 12px;
+        gap: 8px;
+        border-radius: 8px;
+      }
+      .res-icon {
+        font-size: 18px;
+      }
+      .res-label {
+        font-size: 13.5px;
+      }
+      .badge-tag {
+        font-size: 9.5px;
+        padding: 1px 5px;
+      }
+      .res-desc {
+        font-size: 11px;
+        max-width: 130px;
+      }
+      .dl-btn {
+        height: 38px;
+        min-width: 105px;
+        padding: 0 10px;
+        font-size: 12px;
+        border-radius: 6px;
+        gap: 5px;
       }
     }
 
@@ -1281,11 +1385,6 @@
       const val = document.getElementById('shorts-url-input').value.trim();
       const clearBtn = document.getElementById('url-clear-btn');
       clearBtn.classList.toggle('visible', val.length > 0);
-
-      // Auto-trigger if valid Shorts URL is pasted
-      if (val.length > 20 && extractVideoId(val) && !activeVideoData) {
-        handleFetch();
-      }
     }
 
     function clearUrl() {
@@ -1308,7 +1407,7 @@
       document.getElementById('status-badge').className = 'status-badge';
     }
 
-    // Fetch Short Metadata & Formats
+    // Fetch Short Metadata & Formats (Instant Zero-Delay UI)
     async function handleFetch() {
       const input = document.getElementById('shorts-url-input');
       const rawUrl = input.value.trim();
@@ -1319,35 +1418,51 @@
         return;
       }
 
-      const fetchBtn = document.getElementById('fetch-btn');
-      fetchBtn.disabled = true;
-      fetchBtn.innerHTML = '<span class="btn-spinner"></span> <span>Fetching...</span>';
-      showStatus('Connecting to YouTube and finding HD formats...', 'info');
+      hideStatus();
 
-      try {
-        const resp = await fetch(`${API}/info`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: rawUrl })
-        });
+      // INSTANT RENDER (0 Delay! User sees 9:16 player & download buttons immediately)
+      activeVideoData = {
+        url: rawUrl,
+        videoId: videoId,
+        title: 'YouTube Short',
+        resolutions: ["1080p", "720p", "480p", "360p", "Audio only"]
+      };
 
-        if (!resp.ok) {
-          const err = await resp.json().catch(() => ({}));
-          throw new Error(err.detail || 'Could not fetch Short details. Please verify the URL.');
-        }
+      // 1. Instantly display 9:16 vertical player & resolution options
+      renderShort(activeVideoData);
 
-        const data = await resp.json();
-        activeVideoData = { ...data, url: rawUrl, videoId };
+      // 2. Fetch exact video title via YouTube oEmbed (~100ms superfast)
+      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+        .then(r => r.ok ? r.json() : null)
+        .then(meta => {
+          if (meta && meta.title) {
+            activeVideoData.title = meta.title;
+            const tEl = document.getElementById('shorts-title');
+            if (tEl) tEl.textContent = meta.title;
+          }
+        })
+        .catch(() => {});
 
-        // Render UI
-        renderShort(activeVideoData);
-        hideStatus();
-      } catch (err) {
-        showStatus(err.message || 'Failed to connect. Please try again.', 'error');
-      } finally {
-        fetchBtn.disabled = false;
-        fetchBtn.innerHTML = '<span>Get Short</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
-      }
+      // 3. Background server warmup and format validation
+      fetch(`${API}/info`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: rawUrl })
+      }).then(r => r.ok ? r.json() : null)
+        .then(apiData => {
+          if (apiData) {
+            if (apiData.title) {
+              activeVideoData.title = apiData.title;
+              const tEl = document.getElementById('shorts-title');
+              if (tEl) tEl.textContent = apiData.title;
+            }
+            if (Array.isArray(apiData.resolutions) && apiData.resolutions.length > 0) {
+              activeVideoData.resolutions = apiData.resolutions;
+              buildResolutionsTable(apiData.resolutions);
+            }
+          }
+        })
+        .catch(() => {});
     }
 
     // Render Loaded Short + 9:16 Preview + Resolution Table
