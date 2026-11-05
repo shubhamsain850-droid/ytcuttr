@@ -124,6 +124,8 @@ QUALITY_MAP = {
     "256k":  "ba[ext=m4a]/ba/b/best",
     "192k":  "ba[ext=m4a]/ba/b/best",
     "128k":  "ba[ext=m4a]/ba/b/best",
+    "wav":   "ba[ext=m4a]/ba/b/best",
+    "flac":  "ba[ext=m4a]/ba/b/best",
     "m4a":   "ba[ext=m4a]/ba/b/best",
     "audio": "ba[ext=m4a]/ba/b/best",
 }
@@ -132,6 +134,10 @@ def clean_quality_key(quality: str) -> str:
     if not quality:
         return "720p"
     q = quality.strip().lower()
+    if "wav" in q:
+        return "wav"
+    if "flac" in q:
+        return "flac"
     for k in ["320k", "256k", "192k", "128k"]:
         if k in q:
             return k
@@ -315,9 +321,11 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
     q_key = clean_quality_key(quality)
-    is_audio = q_key in ["320k", "256k", "192k", "128k", "m4a", "audio"]
+    is_wav = (q_key == "wav")
+    is_flac = (q_key == "flac")
     is_mp3 = q_key in ["320k", "256k", "192k", "128k"]
-    ext = "mp3" if is_mp3 else ("m4a" if is_audio else "mp4")
+    is_audio = is_wav or is_flac or is_mp3 or (q_key in ["m4a", "audio"])
+    ext = "wav" if is_wav else ("flac" if is_flac else ("mp3" if is_mp3 else ("m4a" if is_audio else "mp4")))
 
     merge_fmt_args = [] if is_audio else ["--merge-output-format", "mp4"]
     fallback_fmt = "ba[ext=m4a]/ba/b/best" if is_audio else "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best"
@@ -383,7 +391,30 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         # Step 2: Local cut via FFmpeg
         if raw_path.exists() and raw_path.stat().st_size > 0:
             jobs[job_id]["status"] = "processing"
-            if is_mp3:
+            if is_wav:
+                cmd_cut = [
+                    "ffmpeg", "-y",
+                    "-ss", start_hms,
+                    "-to", end_hms,
+                    "-i", str(raw_path),
+                    "-vn",
+                    "-c:a", "pcm_s16le",
+                    "-ar", "44100",
+                    str(out_path),
+                ]
+                subprocess.run(cmd_cut, capture_output=True, text=True, timeout=30)
+            elif is_flac:
+                cmd_cut = [
+                    "ffmpeg", "-y",
+                    "-ss", start_hms,
+                    "-to", end_hms,
+                    "-i", str(raw_path),
+                    "-vn",
+                    "-c:a", "flac",
+                    str(out_path),
+                ]
+                subprocess.run(cmd_cut, capture_output=True, text=True, timeout=30)
+            elif is_mp3:
                 cmd_cut = [
                     "ffmpeg", "-y",
                     "-ss", start_hms,
@@ -463,9 +494,11 @@ def _run_download(job_id: str, url: str, quality: str):
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
     q_key = clean_quality_key(quality)
-    is_audio = q_key in ["320k", "256k", "192k", "128k", "m4a", "audio"]
+    is_wav = (q_key == "wav")
+    is_flac = (q_key == "flac")
     is_mp3 = q_key in ["320k", "256k", "192k", "128k"]
-    ext = "mp3" if is_mp3 else ("m4a" if is_audio else "mp4")
+    is_audio = is_wav or is_flac or is_mp3 or (q_key in ["m4a", "audio"])
+    ext = "wav" if is_wav else ("flac" if is_flac else ("mp3" if is_mp3 else ("m4a" if is_audio else "mp4")))
 
     out_path = out_dir / f"video.{ext}"
     raw_path = out_dir / f"raw.{'m4a' if is_audio else 'mp4'}"
@@ -532,7 +565,26 @@ def _run_download(job_id: str, url: str, quality: str):
         # If audio, convert/extract cleanly with FFmpeg
         if is_audio and raw_path.exists() and raw_path.stat().st_size > 0:
             jobs[job_id]["status"] = "processing"
-            if is_mp3:
+            if is_wav:
+                cmd_conv = [
+                    "ffmpeg", "-y",
+                    "-i", str(raw_path),
+                    "-vn",
+                    "-c:a", "pcm_s16le",
+                    "-ar", "44100",
+                    str(out_path),
+                ]
+                subprocess.run(cmd_conv, capture_output=True, text=True, timeout=60)
+            elif is_flac:
+                cmd_conv = [
+                    "ffmpeg", "-y",
+                    "-i", str(raw_path),
+                    "-vn",
+                    "-c:a", "flac",
+                    str(out_path),
+                ]
+                subprocess.run(cmd_conv, capture_output=True, text=True, timeout=60)
+            elif is_mp3:
                 cmd_conv = [
                     "ffmpeg", "-y",
                     "-i", str(raw_path),
@@ -575,6 +627,7 @@ def _run_download(job_id: str, url: str, quality: str):
         else:
             jobs[job_id]["status"] = "error"
             jobs[job_id]["error"] = r.stderr[-400:] if (r and r.stderr) else "Download failed"
+            jobs[job_id]["time_taken"] = elapsed
             jobs[job_id]["time_taken"] = elapsed
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
