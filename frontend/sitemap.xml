@@ -13,6 +13,12 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://ytcuttr.com/youtube-audio-cutter/</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://ytcuttr.com/about</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>monthly</changefreq>

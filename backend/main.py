@@ -306,6 +306,8 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     out_dir.mkdir(exist_ok=True)
     q_key = clean_quality_key(quality)
     ext = "m4a" if q_key == "audio" else "mp4"
+    merge_fmt_args = [] if ext == "m4a" else ["--merge-output-format", ext]
+    fallback_fmt = "ba[ext=m4a]/ba/best" if q_key == "audio" else "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best"
     out_path = out_dir / f"clip.{ext}"
     raw_path = out_dir / f"raw.{ext}"
     fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
@@ -325,7 +327,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 "-N", "8",
                 "--concurrent-fragments", "8",
                 "-f", fmt,
-                "--merge-output-format", ext,
+                *merge_fmt_args,
                 "-o", str(raw_path),
             ], use_cookies=True)
             r_dl = subprocess.run(cmd_dl_cached, capture_output=True, text=True, timeout=80)
@@ -336,7 +338,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 "-N", "8",
                 "--concurrent-fragments", "8",
                 "-f", fmt,
-                "--merge-output-format", ext,
+                *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
             ], use_cookies=True)
@@ -347,8 +349,8 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             cmd_dl_best = build_ytdlp_cmd([
                 "-N", "8",
                 "--concurrent-fragments", "8",
-                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
-                "--merge-output-format", ext,
+                "-f", fallback_fmt,
+                *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
             ], use_cookies=True)
@@ -359,8 +361,8 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             cmd_dl_anon = build_ytdlp_cmd([
                 "-N", "8",
                 "--concurrent-fragments", "8",
-                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
-                "--merge-output-format", ext,
+                "-f", fallback_fmt,
+                *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
             ], use_cookies=False)
@@ -412,6 +414,8 @@ def _run_download(job_id: str, url: str, quality: str):
     out_dir.mkdir(exist_ok=True)
     q_key = clean_quality_key(quality)
     ext = "m4a" if q_key == "audio" else "mp4"
+    merge_fmt_args = [] if ext == "m4a" else ["--merge-output-format", ext]
+    fallback_fmt = "ba[ext=m4a]/ba/best" if q_key == "audio" else "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best"
     out_path = out_dir / f"video.{ext}"
     fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
 
@@ -429,7 +433,7 @@ def _run_download(job_id: str, url: str, quality: str):
                 "-N", "8",
                 "--concurrent-fragments", "8",
                 "-f", fmt,
-                "--merge-output-format", ext,
+                *merge_fmt_args,
                 "-o", str(out_path),
             ], use_cookies=True)
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=240)
@@ -440,7 +444,7 @@ def _run_download(job_id: str, url: str, quality: str):
                 "-N", "8",
                 "--concurrent-fragments", "8",
                 "-f", fmt,
-                "--merge-output-format", ext,
+                *merge_fmt_args,
                 "-o", str(out_path),
                 url,
             ], use_cookies=True)
@@ -451,8 +455,8 @@ def _run_download(job_id: str, url: str, quality: str):
             fallback_cmd = build_ytdlp_cmd([
                 "-N", "8",
                 "--concurrent-fragments", "8",
-                "-f", "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best",
-                "--merge-output-format", ext,
+                "-f", fallback_fmt,
+                *merge_fmt_args,
                 "-o", str(out_path),
                 url,
             ], use_cookies=True)
