@@ -2804,7 +2804,7 @@ footer a { color: var(--red); text-decoration: none; }
           title: 'YouTube Video',
           duration: 0,
           thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-          resolutions: ['720p', '480p', '360p', 'Audio only']
+          resolutions: ['1080p', '720p', '480p', '360p', 'Audio only']
         };
         displayLoadedVideo();
       }
@@ -2834,15 +2834,36 @@ footer a { color: var(--red); text-decoration: none; }
           }
 
           const data = await resp.json();
+
+          // Ensure complete resolutions list (Never collapse to only 360p)
+          const rawRes = (data.resolutions && data.resolutions.length > 0) ? data.resolutions : [];
+          const standardTiers = ['1080p', '720p', '480p', '360p', 'Audio only'];
+          const combinedRes = [...rawRes];
+          standardTiers.forEach(tier => {
+            const prefix = tier.split(' ')[0].toLowerCase();
+            if (!combinedRes.some(r => r.toLowerCase().startsWith(prefix))) {
+              combinedRes.push(tier);
+            }
+          });
+          const TIER_ORDER = ["2160p", "1440p", "1080p", "720p", "480p", "360p", "audio"];
+          combinedRes.sort((a, b) => {
+            const getRank = (str) => {
+              const s = str.toLowerCase();
+              for (let i = 0; i < TIER_ORDER.length; i++) {
+                if (s.includes(TIER_ORDER[i])) return i;
+              }
+              return 99;
+            };
+            return getRank(a) - getRank(b);
+          });
+
           currentVideoData = {
             id: videoId,
             url: rawUrl,
             title: data.title || 'YouTube Video',
             duration: Number(data.duration) || 0,
             thumbnail: data.thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-            resolutions: (data.resolutions && data.resolutions.length > 0)
-              ? data.resolutions
-              : ['1080p', '720p', '480p', '360p', 'Audio only']
+            resolutions: combinedRes
           };
 
           // Successfully retrieved info

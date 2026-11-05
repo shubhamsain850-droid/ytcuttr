@@ -273,8 +273,11 @@ async def get_video_info(req: InfoRequest):
                     elif eff >= 144:  found_tiers.add("144p")
 
             res_labels = [t for t in ORDER if t in found_tiers]
-            if not res_labels:
-                res_labels = ["1080p", "720p", "480p", "360p"]
+            defaults = ["1080p", "720p", "480p", "360p"]
+            for d in defaults:
+                if not any(d in r for r in res_labels):
+                    res_labels.append(d)
+            res_labels.sort(key=lambda x: ORDER.index(x) if x in ORDER else 99)
             res_labels.append("Audio only")
 
             duration = int(data.get("duration") or 0)
