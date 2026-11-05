@@ -618,6 +618,78 @@
       display: block;
     }
 
+    /* Preview Action Bar */
+    .preview-action-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn-preview-clip {
+      flex: 1;
+      height: 42px;
+      background: var(--red-subtle);
+      border: 1.5px solid var(--red-border);
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--red);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-preview-clip:hover {
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 0 2px 8px var(--red-glow);
+    }
+
+    .btn-preview-clip.playing {
+      background: #16a34a !important;
+      color: #fff !important;
+      border-color: #15803d !important;
+      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3) !important;
+    }
+
+    .btn-stop-clip {
+      height: 42px;
+      padding: 0 16px;
+      background: #fee2e2;
+      border: 1.5px solid #fca5a5;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #b91c1c;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-stop-clip:hover {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    @media (max-width: 480px) {
+      .btn-preview-clip {
+        font-size: 12.5px;
+        height: 38px;
+        padding: 0 8px;
+      }
+      .btn-stop-clip {
+        height: 38px;
+        padding: 0 10px;
+        font-size: 12px;
+      }
+    }
+
     /* ── ROBUST TIMELINE SCRUBBER (Touch & Pointer Safe) ── */
     .timeline-card {
       background: var(--bg);
@@ -1793,6 +1865,17 @@
             <iframe id="yt-player-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
 
+          <!-- PREVIEW ACTION BAR (PLAYS FROM SELECTED START POINT) -->
+          <div class="preview-action-bar">
+            <button type="button" class="btn-preview-clip" id="audio-preview-btn" onclick="previewSelectedAudio()" title="Listen to audio starting from the selected start timestamp">
+              <span class="preview-icon">▶️</span>
+              <span id="audio-preview-text">Preview from Start Time (<span id="audio-preview-start-display">00:00:00</span>)</span>
+            </button>
+            <button type="button" class="btn-stop-clip" id="audio-stop-btn" onclick="stopSelectedAudioPreview()" style="display: none;" title="Stop audio preview">
+              <span>⏹️ Stop</span>
+            </button>
+          </div>
+
           <!-- INTERACTIVE DUAL-HANDLE TIMELINE SLIDER -->
           <div class="timeline-card">
             <div class="timeline-header">
@@ -2444,6 +2527,9 @@
       const diffFormatted = formatSecondsToHms(diff);
       if (clipBadge) clipBadge.textContent = `Slice: ${diffFormatted}`;
       if (durBadge) durBadge.textContent = diffFormatted;
+
+      const prevDisp = document.getElementById('audio-preview-start-display');
+      if (prevDisp) prevDisp.textContent = formatSecondsToHms(startSec);
     }
 
     function updateTimelineTicks(totalDuration) {
@@ -2484,6 +2570,9 @@
 
     function switchMode(mode) {
       currentMode = mode;
+      if (mode !== 'cut' && typeof stopSelectedAudioPreview === 'function') {
+        stopSelectedAudioPreview();
+      }
       const tabCut = document.getElementById('tab-cut');
       const tabFull = document.getElementById('tab-full');
       const panelCut = document.getElementById('panel-cut');
@@ -2656,6 +2745,80 @@
     document.addEventListener('DOMContentLoaded', () => {
       initTimelineScrubber();
     });
+
+    let audioPreviewTimer = null;
+
+    function previewSelectedAudio() {
+      if (!activeVideoData || !activeVideoData.videoId) {
+        showStatus('Please paste and analyze a YouTube link first.', 'error');
+        return;
+      }
+      const startSec = currentStartSec;
+      const endSec = currentEndSec;
+      const iframe = document.getElementById('yt-player-frame');
+      if (!iframe) return;
+
+      const btn = document.getElementById('audio-preview-btn');
+      const stopBtn = document.getElementById('audio-stop-btn');
+      const txt = document.getElementById('audio-preview-text');
+
+      if (btn) btn.classList.add('playing');
+      if (stopBtn) stopBtn.style.display = 'inline-flex';
+      if (txt) txt.textContent = `▶️ Playing from ${formatSecondsToHms(startSec)}...`;
+
+      const targetSrc = `https://www.youtube-nocookie.com/embed/${activeVideoData.videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0&start=${startSec}&autoplay=1`;
+
+      if (!iframe.src || !iframe.src.includes(activeVideoData.videoId)) {
+        iframe.src = targetSrc;
+      } else {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'seekTo',
+            args: [startSec, true]
+          }), '*');
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'playVideo',
+            args: []
+          }), '*');
+        } catch (e) {
+          iframe.src = targetSrc;
+        }
+      }
+
+      // Automatically stop when end of clip is reached
+      if (audioPreviewTimer) clearTimeout(audioPreviewTimer);
+      const durMs = Math.max(1, (endSec - startSec)) * 1000;
+      audioPreviewTimer = setTimeout(() => {
+        stopSelectedAudioPreview();
+      }, durMs);
+    }
+
+    function stopSelectedAudioPreview() {
+      if (audioPreviewTimer) {
+        clearTimeout(audioPreviewTimer);
+        audioPreviewTimer = null;
+      }
+      const iframe = document.getElementById('yt-player-frame');
+      if (iframe && iframe.contentWindow) {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'pauseVideo',
+            args: []
+          }), '*');
+        } catch (e) {}
+      }
+      const btn = document.getElementById('audio-preview-btn');
+      const stopBtn = document.getElementById('audio-stop-btn');
+      const txt = document.getElementById('audio-preview-text');
+      if (btn) btn.classList.remove('playing');
+      if (stopBtn) stopBtn.style.display = 'none';
+      if (txt) {
+        txt.innerHTML = `Preview from Start Time (<span id="audio-preview-start-display">${formatSecondsToHms(currentStartSec)}</span>)`;
+      }
+    }
 
     function updateAudioBtnProgress(btnEl, pct, label) {
       pct = Math.min(100, Math.max(0, Math.round(pct)));

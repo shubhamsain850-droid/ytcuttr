@@ -703,6 +703,84 @@
       border: 1px solid var(--indigo-border);
     }
 
+    /* Preview Player & Controls */
+    .wav-preview-box {
+      margin-bottom: 14px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000000;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      max-height: 280px;
+      width: 100%;
+    }
+
+    .wav-preview-box iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .preview-action-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .btn-preview-clip {
+      flex: 1;
+      height: 42px;
+      background: var(--indigo-subtle);
+      border: 1.5px solid var(--indigo-border);
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--indigo);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-preview-clip:hover {
+      background: var(--indigo);
+      color: var(--white);
+      box-shadow: 0 2px 8px var(--indigo-glow);
+    }
+
+    .btn-preview-clip.playing {
+      background: #16a34a !important;
+      color: #fff !important;
+      border-color: #15803d !important;
+      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3) !important;
+    }
+
+    .btn-stop-clip {
+      height: 42px;
+      padding: 0 16px;
+      background: #fee2e2;
+      border: 1.5px solid #fca5a5;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #b91c1c;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-stop-clip:hover {
+      background: #dc2626;
+      color: #fff;
+    }
+
     /* Full Audio Note */
     .full-info-card {
       background: #fafbff;
@@ -1443,6 +1521,23 @@
         <!-- OPTION 1 CONTENT: PRECISION TRIMMER SLIDER -->
         <div class="action-panel active" id="panel-cut">
           <div class="trimmer-box">
+
+            <!-- INTERACTIVE PREVIEW PLAYER (Lazy Loaded / On Demand) -->
+            <div class="wav-preview-box" id="wav-preview-box" style="display: none;">
+              <iframe id="wav-player-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+
+            <!-- PREVIEW ACTION BAR (PLAYS FROM SELECTED START POINT) -->
+            <div class="preview-action-bar">
+              <button type="button" class="btn-preview-clip" id="wav-preview-btn" onclick="previewAudioClip()" title="Listen to audio starting from the selected start timestamp">
+                <span class="preview-icon">▶️</span>
+                <span id="wav-preview-text">Preview from Start Time (<span id="wav-preview-start-display">00:00:00</span>)</span>
+              </button>
+              <button type="button" class="btn-stop-clip" id="wav-stop-btn" onclick="stopAudioClipPreview()" style="display: none;" title="Stop audio preview">
+                <span>⏹️ Stop</span>
+              </button>
+            </div>
+
             <!-- DUAL THUMB INTERACTIVE SLIDER -->
             <div class="slider-container" id="slider-wrap">
               <div class="slider-track"></div>
@@ -1798,6 +1893,10 @@
       currentMode = mode;
       const isCut = (mode === 'cut');
 
+      if (!isCut && typeof stopAudioClipPreview === 'function') {
+        stopAudioClipPreview();
+      }
+
       document.getElementById('tab-cut').classList.toggle('active', isCut);
       document.getElementById('tab-cut').setAttribute('aria-selected', isCut ? 'true' : 'false');
       document.getElementById('tab-full').classList.toggle('active', !isCut);
@@ -2004,6 +2103,89 @@
       const rangeText = document.getElementById('summary-range-text');
       if (rangeText) {
         rangeText.textContent = `${formatSecondsToHms(sVal)} ➔ ${formatSecondsToHms(eVal)}`;
+      }
+
+      const prevDisp = document.getElementById('wav-preview-start-display');
+      if (prevDisp) {
+        prevDisp.textContent = formatSecondsToHms(sVal);
+      }
+    }
+
+    let wavPreviewTimer = null;
+
+    function previewAudioClip() {
+      if (!activeVideoData || !activeVideoData.videoId) {
+        showStatus('Please paste and analyze a YouTube link first.');
+        return;
+      }
+
+      const sVal = parseInt(document.getElementById('range-start').value, 10) || 0;
+      const eVal = parseInt(document.getElementById('range-end').value, 10) || 30;
+
+      const previewBox = document.getElementById('wav-preview-box');
+      const iframe = document.getElementById('wav-player-frame');
+      const previewBtn = document.getElementById('wav-preview-btn');
+      const stopBtn = document.getElementById('wav-stop-btn');
+      const previewText = document.getElementById('wav-preview-text');
+
+      if (previewBox) previewBox.style.display = 'block';
+      if (stopBtn) stopBtn.style.display = 'inline-flex';
+      if (previewBtn) previewBtn.classList.add('playing');
+      if (previewText) {
+        previewText.textContent = `▶️ Playing from ${formatSecondsToHms(sVal)}...`;
+      }
+
+      const targetSrc = `https://www.youtube-nocookie.com/embed/${activeVideoData.videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0&start=${sVal}&autoplay=1`;
+
+      if (!iframe.src || !iframe.src.includes(activeVideoData.videoId)) {
+        iframe.src = targetSrc;
+      } else {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'seekTo',
+            args: [sVal, true]
+          }), '*');
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'playVideo',
+            args: []
+          }), '*');
+        } catch (e) {
+          iframe.src = targetSrc;
+        }
+      }
+
+      if (wavPreviewTimer) clearTimeout(wavPreviewTimer);
+      const clipDurationMs = Math.max(1, (eVal - sVal)) * 1000;
+      wavPreviewTimer = setTimeout(() => {
+        stopAudioClipPreview();
+      }, clipDurationMs);
+    }
+
+    function stopAudioClipPreview() {
+      if (wavPreviewTimer) {
+        clearTimeout(wavPreviewTimer);
+        wavPreviewTimer = null;
+      }
+      const iframe = document.getElementById('wav-player-frame');
+      if (iframe && iframe.contentWindow) {
+        try {
+          iframe.contentWindow.postMessage(JSON.stringify({
+            event: 'command',
+            func: 'pauseVideo',
+            args: []
+          }), '*');
+        } catch (e) {}
+      }
+      const previewBtn = document.getElementById('wav-preview-btn');
+      const stopBtn = document.getElementById('wav-stop-btn');
+      const previewText = document.getElementById('wav-preview-text');
+      if (previewBtn) previewBtn.classList.remove('playing');
+      if (stopBtn) stopBtn.style.display = 'none';
+      if (previewText) {
+        const sVal = parseInt(document.getElementById('range-start')?.value || 0, 10);
+        previewText.innerHTML = `Preview from Start Time (<span id="wav-preview-start-display">${formatSecondsToHms(sVal)}</span>)`;
       }
     }
 
