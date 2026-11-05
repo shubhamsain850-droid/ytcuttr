@@ -428,34 +428,38 @@
       display: block;
     }
 
-    /* Video Header Card */
-    .video-header-card {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px 14px;
+    /* 16:9 Video Preview Player Window (Immediate on Fetch) */
+    .preview-player-box {
+      margin-bottom: 12px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #000000;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      max-height: 380px;
+      width: 100%;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .preview-player-box iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Video Meta Bar */
+    .video-meta-bar {
+      padding: 10px 14px;
       background: var(--subtle);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      margin-bottom: 20px;
-    }
-
-    .video-thumb {
-      width: 80px;
-      height: 48px;
-      object-fit: cover;
-      border-radius: 6px;
-      flex-shrink: 0;
-      background: #000;
-    }
-
-    .video-info-meta {
-      min-width: 0;
-      flex: 1;
+      margin-bottom: 18px;
     }
 
     .video-info-title {
-      font-size: 14.5px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--text);
       white-space: nowrap;
@@ -703,39 +707,20 @@
       border: 1px solid var(--indigo-border);
     }
 
-    /* Preview Player & Controls */
-    .wav-preview-box {
-      margin-bottom: 14px;
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: #000000;
-      position: relative;
-      aspect-ratio: 16 / 9;
-      max-height: 280px;
-      width: 100%;
-    }
-
-    .wav-preview-box iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
-    .preview-action-bar {
+    /* Slice Quick Play Bar */
+    .slice-play-bar {
       display: flex;
       gap: 8px;
       margin-bottom: 14px;
     }
 
-    .btn-preview-clip {
+    .btn-play-slice {
       flex: 1;
-      height: 42px;
+      height: 40px;
       background: var(--indigo-subtle);
       border: 1.5px solid var(--indigo-border);
       border-radius: 8px;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--indigo);
       cursor: pointer;
@@ -746,26 +731,26 @@
       transition: var(--transition);
     }
 
-    .btn-preview-clip:hover {
+    .btn-play-slice:hover {
       background: var(--indigo);
       color: var(--white);
       box-shadow: 0 2px 8px var(--indigo-glow);
     }
 
-    .btn-preview-clip.playing {
+    .btn-play-slice.playing {
       background: #16a34a !important;
       color: #fff !important;
       border-color: #15803d !important;
       box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3) !important;
     }
 
-    .btn-stop-clip {
-      height: 42px;
+    .btn-pause-slice {
+      height: 40px;
       padding: 0 16px;
       background: #fee2e2;
       border: 1.5px solid #fca5a5;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       color: #b91c1c;
       cursor: pointer;
@@ -776,7 +761,7 @@
       transition: var(--transition);
     }
 
-    .btn-stop-clip:hover {
+    .btn-pause-slice:hover {
       background: #dc2626;
       color: #fff;
     }
@@ -1491,18 +1476,20 @@
       <!-- ACTIVE WORKSPACE -->
       <section class="wav-workspace" id="wav-workspace" aria-label="Audio Trimmer and Format Exporter">
 
-        <!-- VIDEO HEADER CARD -->
-        <div class="video-header-card">
-          <img src="" alt="Video thumbnail" class="video-thumb" id="video-thumb" />
-          <div class="video-info-meta">
-            <div class="video-info-title" id="video-title">YouTube Audio Track</div>
-            <div class="video-info-sub">
-              <span id="video-channel">Channel</span>
-              <span>•</span>
-              <span class="duration-badge" id="video-duration">00:00</span>
-              <span>•</span>
-              <span id="video-views" style="font-size: 11.5px; color: var(--muted);"></span>
-            </div>
+        <!-- 16:9 VIDEO PREVIEW WINDOW (SHOWN IMMEDIATELY ON FETCH) -->
+        <div class="preview-player-box" id="preview-player-box">
+          <iframe id="wav-player-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
+        <!-- VIDEO META BAR -->
+        <div class="video-meta-bar">
+          <div class="video-info-title" id="video-title">YouTube Audio Track</div>
+          <div class="video-info-sub">
+            <span id="video-channel">Channel</span>
+            <span>•</span>
+            <span class="duration-badge" id="video-duration">00:00</span>
+            <span>•</span>
+            <span id="video-views" style="font-size: 11.5px; color: var(--muted);"></span>
           </div>
         </div>
 
@@ -1522,19 +1509,14 @@
         <div class="action-panel active" id="panel-cut">
           <div class="trimmer-box">
 
-            <!-- INTERACTIVE PREVIEW PLAYER (Lazy Loaded / On Demand) -->
-            <div class="wav-preview-box" id="wav-preview-box" style="display: none;">
-              <iframe id="wav-player-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
-
-            <!-- PREVIEW ACTION BAR (PLAYS FROM SELECTED START POINT) -->
-            <div class="preview-action-bar">
-              <button type="button" class="btn-preview-clip" id="wav-preview-btn" onclick="previewAudioClip()" title="Listen to audio starting from the selected start timestamp">
-                <span class="preview-icon">▶️</span>
-                <span id="wav-preview-text">Preview from Start Time (<span id="wav-preview-start-display">00:00:00</span>)</span>
+            <!-- SLICE PLAY BAR -->
+            <div class="slice-play-bar">
+              <button type="button" class="btn-play-slice" id="btn-play-slice" onclick="playFromSelectedStart()" title="Play video from selected start timestamp">
+                <span>▶️</span>
+                <span>Play from Start (<strong id="slice-start-disp">00:00:00</strong>)</span>
               </button>
-              <button type="button" class="btn-stop-clip" id="wav-stop-btn" onclick="stopAudioClipPreview()" style="display: none;" title="Stop audio preview">
-                <span>⏹️ Stop</span>
+              <button type="button" class="btn-pause-slice" id="btn-pause-slice" onclick="pausePlayer()" style="display: none;" title="Pause playback">
+                <span>⏸️ Pause</span>
               </button>
             </div>
 
@@ -1893,8 +1875,8 @@
       currentMode = mode;
       const isCut = (mode === 'cut');
 
-      if (!isCut && typeof stopAudioClipPreview === 'function') {
-        stopAudioClipPreview();
+      if (!isCut && typeof pausePlayer === 'function') {
+        pausePlayer();
       }
 
       document.getElementById('tab-cut').classList.toggle('active', isCut);
@@ -1964,8 +1946,13 @@
       };
       totalDurationSec = 180;
 
-      // Populate Video Card immediately
-      document.getElementById('video-thumb').src = activeVideoData.thumbnail;
+      // Immediately load 16:9 video preview player right in front of user
+      const iframe = document.getElementById('wav-player-frame');
+      if (iframe) {
+        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0`;
+      }
+
+      // Populate Video Meta Bar immediately
       document.getElementById('video-title').textContent = activeVideoData.title;
       document.getElementById('video-channel').textContent = activeVideoData.channel;
       document.getElementById('video-duration').textContent = formatSecondsToHms(totalDurationSec);
@@ -2020,7 +2007,6 @@
             }
             if (data.thumbnail) {
               activeVideoData.thumbnail = data.thumbnail;
-              document.getElementById('video-thumb').src = data.thumbnail;
             }
             if (data.duration && data.duration > 0) {
               totalDurationSec = data.duration;
@@ -2060,6 +2046,10 @@
 
       updateSliderVisuals();
       syncInputsFromSlider();
+
+      if (handle === 'start') {
+        seekPlayerTo(parseInt(rangeStart.value, 10));
+      }
     }
 
     function onSliderChange(handle) {
@@ -2074,6 +2064,11 @@
 
       updateSliderVisuals();
       syncInputsFromSlider();
+
+      // Immediately seek 16:9 video player to the selected starting point
+      if (handle === 'start') {
+        seekPlayerTo(parseInt(document.getElementById('range-start').value, 10));
+      }
     }
 
     function updateSliderVisuals() {
@@ -2105,35 +2100,39 @@
         rangeText.textContent = `${formatSecondsToHms(sVal)} ➔ ${formatSecondsToHms(eVal)}`;
       }
 
-      const prevDisp = document.getElementById('wav-preview-start-display');
-      if (prevDisp) {
-        prevDisp.textContent = formatSecondsToHms(sVal);
+      const sliceDisp = document.getElementById('slice-start-disp');
+      if (sliceDisp) {
+        sliceDisp.textContent = formatSecondsToHms(sVal);
       }
     }
 
-    let wavPreviewTimer = null;
+    function seekPlayerTo(seconds) {
+      const iframe = document.getElementById('wav-player-frame');
+      if (!iframe || !iframe.contentWindow) return;
+      try {
+        iframe.contentWindow.postMessage(JSON.stringify({
+          event: 'command',
+          func: 'seekTo',
+          args: [seconds, true]
+        }), '*');
+      } catch (e) {}
+    }
 
-    function previewAudioClip() {
-      if (!activeVideoData || !activeVideoData.videoId) {
-        showStatus('Please paste and analyze a YouTube link first.');
-        return;
-      }
+    let slicePlayTimer = null;
+
+    function playFromSelectedStart() {
+      if (!activeVideoData || !activeVideoData.videoId) return;
 
       const sVal = parseInt(document.getElementById('range-start').value, 10) || 0;
       const eVal = parseInt(document.getElementById('range-end').value, 10) || 30;
-
-      const previewBox = document.getElementById('wav-preview-box');
       const iframe = document.getElementById('wav-player-frame');
-      const previewBtn = document.getElementById('wav-preview-btn');
-      const stopBtn = document.getElementById('wav-stop-btn');
-      const previewText = document.getElementById('wav-preview-text');
+      if (!iframe) return;
 
-      if (previewBox) previewBox.style.display = 'block';
-      if (stopBtn) stopBtn.style.display = 'inline-flex';
-      if (previewBtn) previewBtn.classList.add('playing');
-      if (previewText) {
-        previewText.textContent = `▶️ Playing from ${formatSecondsToHms(sVal)}...`;
-      }
+      const playBtn = document.getElementById('btn-play-slice');
+      const pauseBtn = document.getElementById('btn-pause-slice');
+
+      if (playBtn) playBtn.classList.add('playing');
+      if (pauseBtn) pauseBtn.style.display = 'inline-flex';
 
       const targetSrc = `https://www.youtube-nocookie.com/embed/${activeVideoData.videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0&start=${sVal}&autoplay=1`;
 
@@ -2156,17 +2155,18 @@
         }
       }
 
-      if (wavPreviewTimer) clearTimeout(wavPreviewTimer);
+      // Auto pause at end timestamp
+      if (slicePlayTimer) clearTimeout(slicePlayTimer);
       const clipDurationMs = Math.max(1, (eVal - sVal)) * 1000;
-      wavPreviewTimer = setTimeout(() => {
-        stopAudioClipPreview();
+      slicePlayTimer = setTimeout(() => {
+        pausePlayer();
       }, clipDurationMs);
     }
 
-    function stopAudioClipPreview() {
-      if (wavPreviewTimer) {
-        clearTimeout(wavPreviewTimer);
-        wavPreviewTimer = null;
+    function pausePlayer() {
+      if (slicePlayTimer) {
+        clearTimeout(slicePlayTimer);
+        slicePlayTimer = null;
       }
       const iframe = document.getElementById('wav-player-frame');
       if (iframe && iframe.contentWindow) {
@@ -2178,15 +2178,10 @@
           }), '*');
         } catch (e) {}
       }
-      const previewBtn = document.getElementById('wav-preview-btn');
-      const stopBtn = document.getElementById('wav-stop-btn');
-      const previewText = document.getElementById('wav-preview-text');
-      if (previewBtn) previewBtn.classList.remove('playing');
-      if (stopBtn) stopBtn.style.display = 'none';
-      if (previewText) {
-        const sVal = parseInt(document.getElementById('range-start')?.value || 0, 10);
-        previewText.innerHTML = `Preview from Start Time (<span id="wav-preview-start-display">${formatSecondsToHms(sVal)}</span>)`;
-      }
+      const playBtn = document.getElementById('btn-play-slice');
+      const pauseBtn = document.getElementById('btn-pause-slice');
+      if (playBtn) playBtn.classList.remove('playing');
+      if (pauseBtn) pauseBtn.style.display = 'none';
     }
 
     function onTimeInputChange(handle) {
@@ -2211,6 +2206,10 @@
 
       updateSliderVisuals();
       syncInputsFromSlider();
+
+      if (handle === 'start') {
+        seekPlayerTo(parseInt(rangeStart.value, 10));
+      }
     }
 
     function nudgeTime(handle, delta) {
