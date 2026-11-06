@@ -239,20 +239,36 @@
       color: var(--text-soft);
       border: 1px solid var(--border);
       background: var(--white);
-      transition: var(--transition);
+      transition: all 0.16s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: nowrap;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
     }
 
     .nav-btn:hover {
       background: var(--subtle);
       color: var(--text);
       border-color: var(--border-focus);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-btn:active {
+      transform: scale(0.93) translateY(0);
+      background: #f1f5f9;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
     }
 
     .nav-btn.active {
       background: var(--red-subtle);
       color: var(--red);
       border-color: var(--red-border);
+    }
+
+    .nav-btn.active:active {
+      background: #fee2e2;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
     }
 
     /* ── HERO SECTION ── */
@@ -424,6 +440,15 @@
     .fetch-btn:hover {
       background: var(--red-hover);
       transform: translateY(-1px);
+    }
+
+    .fetch-btn:active,
+    .btn-action:active,
+    .btn-preview-clip:active,
+    .btn-stop-clip:active,
+    .tab-item:active {
+      transform: scale(0.96) translateY(0);
+      transition: transform 0.08s ease;
     }
 
     /* ── STATUS MESSAGE ── */
@@ -1747,7 +1772,7 @@
         </a>
         <a href="/youtube-to-wav" class="nav-btn" aria-label="Switch to YouTube to WAV">
           <span>🎚️</span>
-          <span>WAV</span>
+          <span>WAV &amp; FLAC</span>
         </a>
       </div>
     </div>

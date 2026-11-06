@@ -233,22 +233,39 @@
       border-radius: var(--radius-pill);
       font-size: 13px;
       font-weight: 600;
-      transition: var(--transition);
+      transition: all 0.16s cubic-bezier(0.4, 0, 0.2, 1);
       border: 1px solid var(--border);
       background: var(--white);
       color: var(--text-soft);
+      white-space: nowrap;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
     }
 
     .nav-btn:hover {
       border-color: var(--border-focus);
       color: var(--text);
       background: var(--subtle);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-btn:active {
+      transform: scale(0.93) translateY(0);
+      background: #f1f5f9;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
     }
 
     .nav-btn.active {
       background: var(--red-subtle);
       border-color: var(--red-border);
       color: var(--red);
+    }
+
+    .nav-btn.active:active {
+      background: #fee2e2;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
     }
 
     /* ── HERO SECTION ── */
@@ -421,6 +438,12 @@
       background: var(--red-hover);
       transform: translateY(-1px);
       box-shadow: 0 4px 14px var(--red-glow);
+    }
+
+    .fetch-btn:active:not(:disabled),
+    .dl-btn:active:not(:disabled) {
+      transform: scale(0.96) translateY(0);
+      transition: transform 0.08s ease;
     }
 
     .fetch-btn:disabled {

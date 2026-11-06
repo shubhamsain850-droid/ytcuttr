@@ -36,8 +36,9 @@ nav {
 }
 .logo { font-family: var(--display); font-size: 22px; font-weight: 800; color: var(--text); text-decoration: none; }
 .logo span { color: var(--red); }
-.nav-back { font-size: 13px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+.nav-back { font-size: 13px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: all 0.15s ease; }
 .nav-back:hover { color: var(--red); }
+.nav-back:active { transform: scale(0.96); opacity: 0.8; }
 
 .container { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
 
