@@ -29,10 +29,12 @@ INFO_CACHE_TTL = 3600  # 1 hour cache
 MAX_CONCURRENT_JOBS = 5
 MAX_QUEUE_CAP = 30
 MAX_PER_IP = 5
+COOLDOWN_DURATION = 600  # 10 minutes temporary block on excessive concurrent requests
 QUEUE_LOCK = threading.Lock()
 ACTIVE_JOBS: set[str] = set()
 WAITING_QUEUE: list[str] = []
 IP_ACTIVE_JOBS: dict[str, set[str]] = {}
+IP_COOLDOWNS: dict[str, float] = {}
 
 def get_client_ip(req: Request) -> str:
     xff = req.headers.get("x-forwarded-for")
@@ -45,6 +47,35 @@ def _cleanup_ip_job(job_id: str):
         job_set.discard(job_id)
         if not job_set:
             del IP_ACTIVE_JOBS[ip]
+
+def check_ip_rate_limit(client_ip: str):
+    """
+    Enforces per-IP anti-bot & rate-limit rules:
+    - If IP is under 10-minute cooldown, block until cooldown expires.
+    - If IP attempts > 5 concurrent jobs (> MAX_PER_IP), block IP for 10 minutes (600s).
+    - Jobs from the same IP at different times (or after existing jobs finish) are allowed.
+    """
+    now = time.time()
+    # 1. Check if IP is in temporary cooldown (10 minutes)
+    if client_ip in IP_COOLDOWNS:
+        ban_until = IP_COOLDOWNS[client_ip]
+        if now < ban_until:
+            rem_min = max(1, int(ban_until - now + 59) // 60)
+            raise HTTPException(
+                status_code=429,
+                detail=f"Too many concurrent requests detected from this IP. Your access is temporarily restricted for {rem_min} minute(s). Please try again later."
+            )
+        else:
+            del IP_COOLDOWNS[client_ip]
+
+    # 2. Check active concurrent jobs for this IP
+    ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
+    if len(ip_jobs) >= MAX_PER_IP:
+        IP_COOLDOWNS[client_ip] = now + COOLDOWN_DURATION
+        raise HTTPException(
+            status_code=429,
+            detail="Too many concurrent requests detected from this IP (more than 5). Your access is paused for 10 minutes. Please try again after 10 minutes."
+        )
 
 # Dynamic Cookie Resolver
 def get_cookies_file() -> tuple[str | None, str]:
@@ -706,11 +737,16 @@ def _queue_worker(job_id: str, run_func, *args):
 @app.get("/queue")
 async def get_queue_info():
     with QUEUE_LOCK:
+        now = time.time()
+        for ip, ban_until in list(IP_COOLDOWNS.items()):
+            if now >= ban_until:
+                del IP_COOLDOWNS[ip]
         return {
             "active_jobs": len(ACTIVE_JOBS),
             "waiting_jobs": len(WAITING_QUEUE),
             "max_concurrent": MAX_CONCURRENT_JOBS,
             "max_queue_cap": MAX_QUEUE_CAP,
+            "restricted_ips": len(IP_COOLDOWNS),
             "status": "healthy"
         }
 
@@ -731,15 +767,13 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
     client_ip = get_client_ip(request)
 
     with QUEUE_LOCK:
-        ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
-        if len(ip_jobs) >= MAX_PER_IP:
-            raise HTTPException(429, detail="You already have 5 active conversion jobs in progress at the same time. Please wait for one to finish.")
+        check_ip_rate_limit(client_ip)
 
         if len(WAITING_QUEUE) >= MAX_QUEUE_CAP:
             raise HTTPException(429, detail="Server is currently at maximum capacity. Please wait a minute and try again.")
 
         job_id = str(uuid.uuid4())
-        ip_jobs.add(job_id)
+        IP_ACTIVE_JOBS[client_ip].add(job_id)
 
         if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
             ACTIVE_JOBS.add(job_id)
@@ -770,15 +804,13 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
     client_ip = get_client_ip(request)
 
     with QUEUE_LOCK:
-        ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
-        if len(ip_jobs) >= MAX_PER_IP:
-            raise HTTPException(429, detail="You already have 5 active conversion jobs in progress at the same time. Please wait for one to finish.")
+        check_ip_rate_limit(client_ip)
 
         if len(WAITING_QUEUE) >= MAX_QUEUE_CAP:
             raise HTTPException(429, detail="Server is currently at maximum capacity. Please wait a minute and try again.")
 
         job_id = str(uuid.uuid4())
-        ip_jobs.add(job_id)
+        IP_ACTIVE_JOBS[client_ip].add(job_id)
 
         if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
             ACTIVE_JOBS.add(job_id)

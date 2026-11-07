@@ -2949,7 +2949,8 @@
         });
 
         if (!resp.ok) {
-          throw new Error('Server busy. Please try again.');
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Server busy. Please try again.');
         }
 
         const { job_id } = await resp.json();

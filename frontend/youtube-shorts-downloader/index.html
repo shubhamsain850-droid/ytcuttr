@@ -1743,7 +1743,8 @@
         });
 
         if (!dlResp.ok) {
-          throw new Error('Download failed to queue. Please try again.');
+          const errData = await dlResp.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Download failed to queue. Please try again.');
         }
 
         const { job_id } = await dlResp.json();
