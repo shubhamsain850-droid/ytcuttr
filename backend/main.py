@@ -54,9 +54,20 @@ def check_ip_rate_limit(client_ip: str):
     - If IP is under 10-minute cooldown, block until cooldown expires.
     - If IP attempts > 5 concurrent jobs (> MAX_PER_IP), block IP for 10 minutes (600s).
     - Jobs from the same IP at different times (or after existing jobs finish) are allowed.
+    - NO USER IS EVER PERMANENTLY BLOCKED: Cooldown strictly auto-expires after 10 minutes.
     """
+    if not client_ip or client_ip == "unknown":
+        return
+
     now = time.time()
-    # 1. Check if IP is in temporary cooldown (10 minutes)
+
+    # 1. Global sweep: auto-expire and clear any cooldowns older than 10 minutes
+    for ip, until in list(IP_COOLDOWNS.items()):
+        if now >= until:
+            del IP_COOLDOWNS[ip]
+            IP_ACTIVE_JOBS.pop(ip, None)
+
+    # 2. Check if this client IP is currently under temporary cooldown
     if client_ip in IP_COOLDOWNS:
         ban_until = IP_COOLDOWNS[client_ip]
         if now < ban_until:
@@ -67,9 +78,18 @@ def check_ip_rate_limit(client_ip: str):
             )
         else:
             del IP_COOLDOWNS[client_ip]
+            IP_ACTIVE_JOBS.pop(client_ip, None)
 
-    # 2. Check active concurrent jobs for this IP
+    # 3. Active-check prune: discard any ghost/completed/errored jobs for this IP
     ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
+    active_now = set()
+    for jid in ip_jobs:
+        if (jid in ACTIVE_JOBS or jid in WAITING_QUEUE) and jobs.get(jid, {}).get("status") not in ["done", "error"]:
+            active_now.add(jid)
+    IP_ACTIVE_JOBS[client_ip] = active_now
+    ip_jobs = active_now
+
+    # 4. Check active concurrent jobs for this IP
     if len(ip_jobs) >= MAX_PER_IP:
         IP_COOLDOWNS[client_ip] = now + COOLDOWN_DURATION
         raise HTTPException(
@@ -695,6 +715,7 @@ def _queue_worker(job_id: str, run_func, *args):
     while True:
         with QUEUE_LOCK:
             if job_id not in jobs:
+                _cleanup_ip_job(job_id)
                 return
 
             # Timeout after 10 minutes of waiting
