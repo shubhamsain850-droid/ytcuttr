@@ -1762,7 +1762,11 @@
 
           const job = await statResp.json();
 
-          if (job.status === 'downloading') {
+          if (job.status === 'waiting') {
+            currentStatus = 'waiting';
+            const pos = job.queue_position || 1;
+            updateShortBtnProgress(btnEl, 10, `Queue #${pos}`);
+          } else if (job.status === 'downloading') {
             currentStatus = 'downloading';
           } else if (job.status === 'processing') {
             currentStatus = 'processing';

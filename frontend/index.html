@@ -3352,7 +3352,11 @@ footer a { color: var(--red); text-decoration: none; }
 
           const job = await statusResp.json();
 
-          if (job.status === "queued") {
+          if (job.status === "waiting") {
+            const pos = job.queue_position || 1;
+            targetProgress = 12;
+            setProcProgress(12, `In Queue (#${pos})`, `Server busy with 5 active tasks. You are #${pos} in line...`);
+          } else if (job.status === "queued") {
             targetProgress = 25;
             setProcProgress(currentProgressPercent, null, "Task queued in worker...");
           } else if (job.status === "downloading") {

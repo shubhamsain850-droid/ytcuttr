@@ -1,8 +1,8 @@
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel
-import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio, time
+import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio, time, threading
 from pathlib import Path
 from urllib.parse import quote
 
@@ -24,6 +24,27 @@ CACHE_DIR.mkdir(exist_ok=True)
 jobs: dict = {}
 INFO_CACHE: dict = {}
 INFO_CACHE_TTL = 3600  # 1 hour cache
+
+# Concurrency & Smart Queue Manager (Max 5 concurrent conversions)
+MAX_CONCURRENT_JOBS = 5
+MAX_QUEUE_CAP = 30
+MAX_PER_IP = 2
+QUEUE_LOCK = threading.Lock()
+ACTIVE_JOBS: set[str] = set()
+WAITING_QUEUE: list[str] = []
+IP_ACTIVE_JOBS: dict[str, set[str]] = {}
+
+def get_client_ip(req: Request) -> str:
+    xff = req.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    return req.client.host if req.client else "unknown"
+
+def _cleanup_ip_job(job_id: str):
+    for ip, job_set in list(IP_ACTIVE_JOBS.items()):
+        job_set.discard(job_id)
+        if not job_set:
+            del IP_ACTIVE_JOBS[ip]
 
 # Dynamic Cookie Resolver
 def get_cookies_file() -> tuple[str | None, str]:
@@ -637,8 +658,65 @@ def _run_download(job_id: str, url: str, quality: str):
         jobs[job_id]["error"] = str(e)
 
 
+def _queue_worker(job_id: str, run_func, *args):
+    """FIFO Queue Worker: waits until an active slot (< 5) is available and this job is at the head."""
+    wait_start = time.time()
+    while True:
+        with QUEUE_LOCK:
+            if job_id not in jobs:
+                return
+
+            # Timeout after 10 minutes of waiting
+            if time.time() - wait_start > 600:
+                if job_id in WAITING_QUEUE:
+                    WAITING_QUEUE.remove(job_id)
+                jobs[job_id]["status"] = "error"
+                jobs[job_id]["error"] = "Queue wait timeout. Please try again."
+                _cleanup_ip_job(job_id)
+                return
+
+            if job_id in ACTIVE_JOBS:
+                break
+
+            if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS and WAITING_QUEUE and WAITING_QUEUE[0] == job_id:
+                WAITING_QUEUE.pop(0)
+                ACTIVE_JOBS.add(job_id)
+                jobs[job_id]["status"] = "queued"
+                jobs[job_id]["queue_position"] = 0
+                for idx, q_id in enumerate(WAITING_QUEUE):
+                    if q_id in jobs:
+                        jobs[q_id]["queue_position"] = idx + 1
+                break
+            elif job_id in WAITING_QUEUE:
+                jobs[job_id]["queue_position"] = WAITING_QUEUE.index(job_id) + 1
+
+        time.sleep(0.5)
+
+    try:
+        run_func(job_id, *args)
+    finally:
+        with QUEUE_LOCK:
+            ACTIVE_JOBS.discard(job_id)
+            _cleanup_ip_job(job_id)
+            for idx, q_id in enumerate(WAITING_QUEUE):
+                if q_id in jobs:
+                    jobs[q_id]["queue_position"] = idx + 1
+
+
+@app.get("/queue")
+async def get_queue_info():
+    with QUEUE_LOCK:
+        return {
+            "active_jobs": len(ACTIVE_JOBS),
+            "waiting_jobs": len(WAITING_QUEUE),
+            "max_concurrent": MAX_CONCURRENT_JOBS,
+            "max_queue_cap": MAX_QUEUE_CAP,
+            "status": "healthy"
+        }
+
+
 @app.post("/clip")
-async def create_clip(req: ClipRequest, bg: BackgroundTasks):
+async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
     try:
         start_sec = parse_time(req.start)
         end_sec   = parse_time(req.end)
@@ -650,18 +728,80 @@ async def create_clip(req: ClipRequest, bg: BackgroundTasks):
     if (end_sec - start_sec) > 600:
         raise HTTPException(400, detail="Max clip length is 10 minutes.")
 
-    job_id = str(uuid.uuid4())
-    jobs[job_id] = {"status": "queued"}
-    bg.add_task(_run_clip, job_id, req.url, to_hms(start_sec), to_hms(end_sec), req.quality)
-    return {"job_id": job_id}
+    client_ip = get_client_ip(request)
+
+    with QUEUE_LOCK:
+        ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
+        if len(ip_jobs) >= MAX_PER_IP:
+            raise HTTPException(429, detail="You already have 2 active conversion jobs in progress. Please wait for them to finish.")
+
+        if len(WAITING_QUEUE) >= MAX_QUEUE_CAP:
+            raise HTTPException(429, detail="Server is currently at maximum capacity. Please wait a minute and try again.")
+
+        job_id = str(uuid.uuid4())
+        ip_jobs.add(job_id)
+
+        if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
+            ACTIVE_JOBS.add(job_id)
+            jobs[job_id] = {
+                "status": "queued",
+                "queue_position": 0,
+                "created_at": time.time(),
+                "client_ip": client_ip,
+                "max_concurrent": MAX_CONCURRENT_JOBS
+            }
+        else:
+            WAITING_QUEUE.append(job_id)
+            pos = len(WAITING_QUEUE)
+            jobs[job_id] = {
+                "status": "waiting",
+                "queue_position": pos,
+                "created_at": time.time(),
+                "client_ip": client_ip,
+                "max_concurrent": MAX_CONCURRENT_JOBS
+            }
+
+    bg.add_task(_queue_worker, job_id, _run_clip, req.url, to_hms(start_sec), to_hms(end_sec), req.quality)
+    return {"job_id": job_id, "status": jobs[job_id]["status"], "queue_position": jobs[job_id]["queue_position"]}
 
 
 @app.post("/download")
-async def download_video(req: DownloadRequest, bg: BackgroundTasks):
-    job_id = str(uuid.uuid4())
-    jobs[job_id] = {"status": "queued"}
-    bg.add_task(_run_download, job_id, req.url, req.quality)
-    return {"job_id": job_id}
+async def download_video(req: DownloadRequest, request: Request, bg: BackgroundTasks):
+    client_ip = get_client_ip(request)
+
+    with QUEUE_LOCK:
+        ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
+        if len(ip_jobs) >= MAX_PER_IP:
+            raise HTTPException(429, detail="You already have 2 active conversion jobs in progress. Please wait for them to finish.")
+
+        if len(WAITING_QUEUE) >= MAX_QUEUE_CAP:
+            raise HTTPException(429, detail="Server is currently at maximum capacity. Please wait a minute and try again.")
+
+        job_id = str(uuid.uuid4())
+        ip_jobs.add(job_id)
+
+        if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
+            ACTIVE_JOBS.add(job_id)
+            jobs[job_id] = {
+                "status": "queued",
+                "queue_position": 0,
+                "created_at": time.time(),
+                "client_ip": client_ip,
+                "max_concurrent": MAX_CONCURRENT_JOBS
+            }
+        else:
+            WAITING_QUEUE.append(job_id)
+            pos = len(WAITING_QUEUE)
+            jobs[job_id] = {
+                "status": "waiting",
+                "queue_position": pos,
+                "created_at": time.time(),
+                "client_ip": client_ip,
+                "max_concurrent": MAX_CONCURRENT_JOBS
+            }
+
+    bg.add_task(_queue_worker, job_id, _run_download, req.url, req.quality)
+    return {"job_id": job_id, "status": jobs[job_id]["status"], "queue_position": jobs[job_id]["queue_position"]}
 
 
 @app.get("/status/{job_id}")
@@ -669,12 +809,22 @@ async def get_status(job_id: str):
     job = jobs.get(job_id)
     if not job:
         raise HTTPException(404, detail="Job not found")
-    return job
+    with QUEUE_LOCK:
+        job_copy = dict(job)
+        job_copy["active_jobs"] = len(ACTIVE_JOBS)
+        job_copy["waiting_count"] = len(WAITING_QUEUE)
+        job_copy["max_concurrent"] = MAX_CONCURRENT_JOBS
+    return job_copy
 
 
 async def delayed_cleanup(job_id: str, delay: int = 300):
     await asyncio.sleep(delay)
     shutil.rmtree(CLIPS_DIR / job_id, ignore_errors=True)
+    with QUEUE_LOCK:
+        _cleanup_ip_job(job_id)
+        if job_id in WAITING_QUEUE:
+            WAITING_QUEUE.remove(job_id)
+        ACTIVE_JOBS.discard(job_id)
     jobs.pop(job_id, None)
 
 
