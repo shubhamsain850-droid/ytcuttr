@@ -28,7 +28,7 @@ INFO_CACHE_TTL = 3600  # 1 hour cache
 # Concurrency & Smart Queue Manager (Max 5 concurrent conversions)
 MAX_CONCURRENT_JOBS = 5
 MAX_QUEUE_CAP = 30
-MAX_PER_IP = 2
+MAX_PER_IP = 5
 QUEUE_LOCK = threading.Lock()
 ACTIVE_JOBS: set[str] = set()
 WAITING_QUEUE: list[str] = []
@@ -733,7 +733,7 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
     with QUEUE_LOCK:
         ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
         if len(ip_jobs) >= MAX_PER_IP:
-            raise HTTPException(429, detail="You already have 2 active conversion jobs in progress. Please wait for them to finish.")
+            raise HTTPException(429, detail="You already have 5 active conversion jobs in progress at the same time. Please wait for one to finish.")
 
         if len(WAITING_QUEUE) >= MAX_QUEUE_CAP:
             raise HTTPException(429, detail="Server is currently at maximum capacity. Please wait a minute and try again.")
@@ -772,7 +772,7 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
     with QUEUE_LOCK:
         ip_jobs = IP_ACTIVE_JOBS.setdefault(client_ip, set())
         if len(ip_jobs) >= MAX_PER_IP:
-            raise HTTPException(429, detail="You already have 2 active conversion jobs in progress. Please wait for them to finish.")
+            raise HTTPException(429, detail="You already have 5 active conversion jobs in progress at the same time. Please wait for one to finish.")
 
         if len(WAITING_QUEUE) >= MAX_QUEUE_CAP:
             raise HTTPException(429, detail="Server is currently at maximum capacity. Please wait a minute and try again.")
