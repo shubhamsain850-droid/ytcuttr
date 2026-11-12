@@ -1708,6 +1708,61 @@ footer a { color: var(--red); text-decoration: none; }
 }
 .trust-badge span { color: var(--success); }
 
+/* ── ADSTERRA RESPONSIVE BANNER STYLING ── */
+.ad-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 26px auto;
+  text-align: center;
+  width: 100%;
+  clear: both;
+}
+.ad-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #94a3b8);
+  margin-bottom: 6px;
+  user-select: none;
+}
+.ad-frame-728 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 728px;
+  min-height: 90px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.ad-frame-300 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  min-height: 250px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+@media (max-width: 740px) {
+  .ad-wrapper { margin: 16px auto; }
+  .ad-frame-728-inner {
+    transform: scale(0.48);
+    transform-origin: top center;
+    margin-bottom: -46px;
+  }
+}
+@media (min-width: 480px) and (max-width: 740px) {
+  .ad-frame-728-inner {
+    transform: scale(0.65);
+    transform-origin: top center;
+    margin-bottom: -31px;
+  }
+}
 
 </style>
 </head>
@@ -1754,6 +1809,25 @@ footer a { color: var(--red); text-decoration: none; }
       <span>⏱️ Precise Timeline Trimming</span>
     </div>
   </header>
+
+  <!-- TOP AD BANNER (728x90) -->
+  <div class="ad-wrapper ad-wrapper-top">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-frame-728">
+      <div class="ad-frame-728-inner">
+        <script>
+          atOptions = {
+            'key' : 'b62a06f523dae80ff5f9af3320b0e090',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bauval.org/22/b62a06f523dae80ff5f9af3320b0e090"></script>
+      </div>
+    </div>
+  </div>
 
   <!-- WORKSPACE TOOL CONTAINER -->
   <main class="workspace-wrap" id="cutter-tool">
@@ -2020,6 +2094,23 @@ footer a { color: var(--red); text-decoration: none; }
         <div class="trust-badge"><span>✅</span> 4K &amp; Audio Only</div>
         <div class="trust-badge"><span>✅</span> High-Precision Cuts</div>
         <div class="trust-badge"><span>✅</span> 100% Free Forever</div>
+      </div>
+    </div>
+
+    <!-- MIDDLE AD BANNER (300x250 SQUARE) -->
+    <div class="ad-wrapper ad-wrapper-middle">
+      <span class="ad-label">Advertisement</span>
+      <div class="ad-frame-300">
+        <script>
+          atOptions = {
+            'key' : 'fab6d918cf32219eadc0ed6d39b3006d',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bauval.org/22/fab6d918cf32219eadc0ed6d39b3006d"></script>
       </div>
     </div>
   </main>
@@ -2344,7 +2435,24 @@ footer a { color: var(--red); text-decoration: none; }
   </div>
 </section>
 
-<!-- FOOTER -->
+  <!-- BOTTOM AD BANNER (728x90) -->
+  <div class="ad-wrapper ad-wrapper-bottom">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-frame-728">
+      <div class="ad-frame-728-inner">
+        <script>
+          atOptions = {
+            'key' : 'b62a06f523dae80ff5f9af3320b0e090',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bauval.org/22/b62a06f523dae80ff5f9af3320b0e090"></script>
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer>
