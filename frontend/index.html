@@ -352,65 +352,37 @@
     /* ── HERO SECTION ── */
     .hero {
       text-align: center;
-      padding: 44px 20px 24px;
+      padding: 20px 20px 8px;
       max-width: 860px;
       margin: 0 auto;
     }
 
     .hero h1 {
       font-family: var(--display);
-      font-size: clamp(28px, 4.8vw, 48px);
+      font-size: clamp(24px, 3.8vw, 36px);
       font-weight: 800;
       letter-spacing: -0.03em;
-      line-height: 1.15;
+      line-height: 1.2;
       color: var(--text);
     }
 
     .hero h1 span {
       color: var(--red);
-      display: inline-block;
+      display: inline;
     }
 
     .hero-lead {
-      margin-top: 14px;
+      margin-top: 6px;
       color: var(--text-soft);
-      font-size: clamp(15px, 2.2vw, 17px);
-      max-width: 620px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
-
-    .hero-subtitle {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 13.5px;
-      max-width: 540px;
+      font-size: clamp(14px, 1.8vw, 15px);
+      max-width: 640px;
       margin-left: auto;
       margin-right: auto;
       line-height: 1.5;
     }
 
-    .hero-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .hero-pills span {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      padding: 6px 14px;
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text-soft);
-      box-shadow: var(--shadow-sm);
+    .hero-subtitle, .hero-pills {
+      display: none;
     }
 
     /* ── WORKSPACE TOOL CONTAINER ── */
@@ -662,8 +634,7 @@
 
     /* ── EMPTY STATE ── */
     .empty-state {
-      padding: 56px 24px;
-      text-align: center;
+      display: none;
     }
     .empty-state.hidden { display: none; }
 
@@ -1820,17 +1791,28 @@ footer a { color: var(--red); text-decoration: none; }
 
   <!-- HERO -->
   <header class="hero">
-    <h1>YouTube Clip Cutter<br><span>Cut &amp; Download Any Part Free</span></h1>
-    <p class="hero-lead">Paste a YouTube URL, select your start and end timestamp, and download your clip in seconds. 100% Free &amp; no watermark.</p>
-    <p class="hero-subtitle">Select any start &amp; end timestamp &rarr; Download only that segment.<br>Works on long videos, 8-hour live recordings &amp; YouTube Shorts.</p>
-    <div class="hero-pills" aria-label="Key Capabilities">
-      <span>✅ Regular Videos</span>
-      <span>⚡ YouTube Shorts</span>
-      <span>🔗 youtu.be links</span>
-      <span>🎧 Audio Only (M4A)</span>
-      <span>⏱️ Precise Timeline Trimming</span>
-    </div>
+    <h1>YouTube Clip Cutter <span>&amp; Downloader</span></h1>
+    <p class="hero-lead">Paste any YouTube video or Shorts link, select start &amp; end timestamps, and download your clip free in seconds.</p>
   </header>
+
+  <!-- TOP AD BANNER (728x90) -->
+  <div class="ad-wrapper ad-wrapper-top" style="margin: 8px auto 16px;">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-frame-728">
+      <div class="ad-frame-728-inner">
+        <script>
+          atOptions = {
+            'key' : 'b62a06f523dae80ff5f9af3320b0e090',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bauval.org/22/b62a06f523dae80ff5f9af3320b0e090"></script>
+      </div>
+    </div>
+  </div>
 
   <!-- WORKSPACE TOOL CONTAINER -->
   <main class="workspace-wrap" id="cutter-tool">
@@ -1894,12 +1876,8 @@ footer a { color: var(--red); text-decoration: none; }
         </div>
       </section>
 
-      <!-- EMPTY STATE (Before Video Loaded) -->
-      <div class="empty-state" id="empty-state">
-        <div class="empty-icon" aria-hidden="true">🎬</div>
-        <h2 class="empty-title">Ready to Cut Any Video</h2>
-        <p class="empty-desc">Paste any YouTube video or Shorts link in the box above to load the interactive preview player and timestamp cutter.</p>
-      </div>
+      <!-- EMPTY STATE (Zero Bloat Placeholder) -->
+      <div class="empty-state hidden" id="empty-state" style="display:none;"></div>
 
       <!-- ACTIVE STUDIO WORKSPACE (After Video Loaded) -->
       <div class="studio-workspace" id="studio-workspace">

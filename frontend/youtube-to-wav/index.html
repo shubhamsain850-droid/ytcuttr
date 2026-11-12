@@ -256,63 +256,35 @@
     /* ── HERO SECTION ── */
     .hero {
       text-align: center;
-      padding: 38px 18px 20px;
+      padding: 20px 20px 8px;
       max-width: 820px;
       margin: 0 auto;
     }
 
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 14px;
-      border-radius: var(--radius-pill);
-      background: var(--indigo-subtle);
-      color: var(--indigo);
-      border: 1px solid var(--indigo-border);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      margin-bottom: 12px;
+    .hero-badge, .hero-pills {
+      display: none;
     }
 
     .hero h1 {
-      font-size: clamp(26px, 4.2vw, 38px);
+      font-size: clamp(24px, 3.8vw, 36px);
       font-weight: 800;
       line-height: 1.2;
       letter-spacing: -0.6px;
       color: var(--text);
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
 
     .hero h1 span {
       color: var(--indigo);
+      display: inline;
     }
 
     .hero-lead {
-      font-size: clamp(14px, 1.8vw, 16px);
+      font-size: clamp(14px, 1.8vw, 15px);
       color: var(--muted);
       line-height: 1.5;
       max-width: 620px;
-      margin: 0 auto 16px;
-    }
-
-    .hero-pills {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .hero-pills span {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      padding: 4px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-soft);
-      box-shadow: var(--shadow-sm);
+      margin: 0 auto 8px;
     }
 
     /* ── MAIN TOOL CONTAINER ── */
@@ -1501,17 +1473,28 @@
 
   <!-- HERO SECTION -->
   <header class="hero">
-    <div class="hero-badge">🎵 Free YouTube Audio Converter &amp; Trimmer</div>
-    <h1>YouTube to WAV, FLAC &amp; MP3<br><span>Cut Audio or Download Full Track</span></h1>
-    <p class="hero-lead">Convert any YouTube video to studio WAV, lossless FLAC, native M4A, or 320kbps MP3. Download the full audio track or cut specific parts with timestamp precision.</p>
-    <div class="hero-pills" aria-label="Key Highlights">
-      <span>🎚️ Studio WAV &amp; FLAC</span>
-      <span>✂️ Exact Timestamp Trimmer</span>
-      <span>🎵 320k MP3 &amp; Native M4A</span>
-      <span>📱 Mobile &amp; Desktop Ready</span>
-      <span>⚡ 100% Ad-Free Cloud Speed</span>
-    </div>
+    <h1>YouTube to WAV, FLAC <span>&amp; 320k MP3</span></h1>
+    <p class="hero-lead">Convert any YouTube video to studio WAV, lossless FLAC, or MP3 with precision timestamp trimming.</p>
   </header>
+
+  <!-- TOP AD BANNER (728x90) -->
+  <div class="ad-wrapper ad-wrapper-top" style="margin: 8px auto 16px;">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-frame-728">
+      <div class="ad-frame-728-inner">
+        <script>
+          atOptions = {
+            'key' : 'b62a06f523dae80ff5f9af3320b0e090',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bauval.org/22/b62a06f523dae80ff5f9af3320b0e090"></script>
+      </div>
+    </div>
+  </div>
 
   <!-- MAIN TOOL WORKSPACE -->
   <main class="workspace-wrap">

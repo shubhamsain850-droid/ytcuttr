@@ -274,65 +274,39 @@
     /* ── HERO SECTION ── */
     .hero {
       text-align: center;
-      padding: 36px 20px 20px;
+      padding: 20px 20px 8px;
       max-width: 780px;
       margin: 0 auto;
     }
 
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--purple-subtle);
-      border: 1px solid var(--purple-border);
-      color: var(--purple);
-      padding: 4px 12px;
-      border-radius: var(--radius-pill);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      margin-bottom: 12px;
+    .hero-badge, .hero-pills {
+      display: none;
     }
 
     .hero h1 {
       font-family: var(--display);
-      font-size: 36px;
+      font-size: clamp(24px, 3.8vw, 36px);
       font-weight: 800;
       letter-spacing: -0.03em;
-      line-height: 1.15;
+      line-height: 1.2;
       color: var(--text);
-      margin-bottom: 12px;
+      margin-bottom: 6px;
     }
 
     .hero h1 span {
       background: linear-gradient(135deg, var(--red) 0%, #ff5252 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      display: inline;
     }
 
     .hero-lead {
-      font-size: 15.5px;
+      font-size: clamp(14px, 1.8vw, 15px);
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.5;
       max-width: 640px;
-      margin: 0 auto 16px;
+      margin: 0 auto 8px;
     }
-
-    .hero-pills {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .hero-pills span {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
-      padding: 5px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-soft);
       box-shadow: var(--shadow-sm);
     }
 
@@ -469,9 +443,7 @@
 
     /* ── EMPTY STATE ── */
     .empty-state {
-      padding: 56px 24px;
-      text-align: center;
-      color: var(--muted);
+      display: none;
     }
 
     .empty-icon {
@@ -1836,17 +1808,28 @@
 
   <!-- HERO SECTION -->
   <header class="hero">
-    <div class="hero-badge">🎵 Free YouTube Audio Cutter &amp; Trimmer</div>
-    <h1>YouTube Audio Cutter<br><span>Cut Audio or Download Full Track</span></h1>
-    <p class="hero-lead">Download the complete sound track or cut specific parts from any YouTube video with exact timestamp precision. 100% free with original studio-grade sound.</p>
-    <div class="hero-pills" aria-label="Key Capabilities">
-      <span>✂️ Exact Timestamp Trimming</span>
-      <span>🎵 Full Audio Track (M4A)</span>
-      <span>🔊 Lossless Studio Bitrate</span>
-      <span>📱 Mobile &amp; Desktop Ready</span>
-      <span>⚡ Instant Cloud Download</span>
-    </div>
+    <h1>YouTube Audio Cutter <span>&amp; Downloader</span></h1>
+    <p class="hero-lead">Paste any YouTube link below to trim audio segments with timestamp accuracy or extract full 320kbps tracks.</p>
   </header>
+
+  <!-- TOP AD BANNER (728x90) -->
+  <div class="ad-wrapper ad-wrapper-top" style="margin: 8px auto 16px;">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-frame-728">
+      <div class="ad-frame-728-inner">
+        <script>
+          atOptions = {
+            'key' : 'b62a06f523dae80ff5f9af3320b0e090',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bauval.org/22/b62a06f523dae80ff5f9af3320b0e090"></script>
+      </div>
+    </div>
+  </div>
 
   <!-- MAIN WORKSPACE -->
   <main class="workspace-wrap">
@@ -1895,18 +1878,8 @@
         </div>
       </section>
 
-      <!-- EMPTY STATE -->
-      <div class="empty-state" id="empty-state">
-        <div class="empty-icon" aria-hidden="true">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 18V5l12-2v13"></path>
-            <circle cx="6" cy="18" r="3"></circle>
-            <circle cx="18" cy="16" r="3"></circle>
-          </svg>
-        </div>
-        <h3>Ready to Cut or Extract YouTube Audio</h3>
-        <p>Paste any YouTube video, song, podcast, or live recording URL above to trim exact sound clips or download the full audio track.</p>
-      </div>
+      <!-- EMPTY STATE (Zero Bloat Placeholder) -->
+      <div class="empty-state hidden" id="empty-state" style="display:none;"></div>
 
       <!-- LOADED WORKSPACE -->
       <div class="audio-workspace" id="audio-workspace">
