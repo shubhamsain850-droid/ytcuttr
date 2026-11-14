@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>YTCuttr Blog - Guides, Tutorials &amp; Video Trimming Tips</title>
+  <meta name="description" content="Explore in-depth guides, video editing tutorials, and comparisons on cutting and downloading YouTube videos, Shorts, and live streams in high definition.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ytcuttr.com/blog/">
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #e63030;
+      --red-hover: #d02525;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-soft: #334155;
+      --muted: #64748b;
+      --sans: 'Inter', sans-serif;
+      --display: 'Plus Jakarta Sans', var(--sans);
+      --radius: 12px;
+      --radius-pill: 9999px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.08);
+    }
+    body {
+      font-family: var(--sans);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    nav {
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(8px);
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-family: var(--display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo span { color: var(--red); }
+    .btn-nav-tool {
+      background: var(--red);
+      color: var(--white);
+      padding: 7px 18px;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+      font-size: 13.5px;
+      text-decoration: none;
+    }
+    .blog-container {
+      max-width: 860px;
+      margin: 40px auto;
+      padding: 0 20px;
+      width: 100%;
+    }
+    .blog-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .blog-header h1 {
+      font-family: var(--display);
+      font-size: clamp(28px, 4vw, 38px);
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .blog-header p {
+      color: var(--text-soft);
+      font-size: 15px;
+    }
+    .posts-grid {
+      display: grid;
+      gap: 20px;
+    }
+    .post-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: all 0.15s ease;
+    }
+    .post-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+    }
+    .post-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+    .post-card h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+    .post-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+    .read-more {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--red);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    footer {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 28px 20px;
+      text-align: center;
+      margin-top: auto;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--text); text-decoration: none; margin: 0 8px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">YT<span>Cuttr</span></a>
+      <a href="/" class="btn-nav-tool">Open Video Cutter</a>
+    </div>
+  </nav>
+
+  <main class="blog-container">
+    <div class="blog-header">
+      <h1>YTCuttr Knowledge &amp; Guides</h1>
+      <p>Expert tips, comparisons, and technical guides for cutting and downloading online video content.</p>
+    </div>
+
+    <div class="posts-grid">
+      <a href="/blog/clipscutter-vs-ytcuttr/" class="post-card">
+        <span class="post-tag">Comparison</span>
+        <h2>ClipsCutter vs YTCuttr: How to Trim YouTube Videos in 1080p Without 360p Paywalls</h2>
+        <p>Why ClipsCutter caps free downloads at 360p, and how YTCuttr lets you download 1080p and 4K clips with zero watermarks and no registration.</p>
+        <span class="read-more">Read Guide &rarr;</span>
+      </a>
+
+      <a href="/blog/how-to-cut-youtube-video-by-timestamp/" class="post-card">
+        <span class="post-tag">Tutorial</span>
+        <h2>How to Cut &amp; Download a YouTube Video from a Specific Time (2026 Guide)</h2>
+        <p>The definitive step-by-step tutorial on trimming and saving exact video segments on iPhone, Android, and PC without downloading gigabytes of video.</p>
+        <span class="read-more">Read Guide &rarr;</span>
+      </a>
+
+      <a href="/blog/download-youtube-video-section-without-yt-dlp-ffmpeg/" class="post-card">
+        <span class="post-tag">Technical</span>
+        <h2>How to Download a Specific Section of a YouTube Video (Web Tool vs. yt-dlp &amp; FFmpeg)</h2>
+        <p>A deep dive comparing command-line tools like yt-dlp --download-sections and FFmpeg against instant 1-click cloud browser cutters.</p>
+        <span class="read-more">Read Guide &rarr;</span>
+      </a>
+
+      <a href="/ytcutter-alternative/" class="post-card">
+        <span class="post-tag">Tool Review</span>
+        <h2>The Best YTCutter.com Alternative in 2026: Fast, Working &amp; HD Free</h2>
+        <p>Why legacy YTCutter frequently crashes with 504 timeouts, and how YTCuttr delivers 99.9% cloud uptime for trimming YouTube videos and live streams.</p>
+        <span class="read-more">Read Guide &rarr;</span>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <div>
+      <a href="/">Home</a>
+      <a href="/youtube-live-stream-cutter">Live Stream Cutter</a>
+      <a href="/youtube-shorts-downloader">Shorts Downloader</a>
+      <a href="/youtube-audio-cutter">Audio Cutter</a>
+      <a href="/youtube-to-wav">WAV &amp; FLAC</a>
+      <a href="/about">About</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </div>
+    <p style="margin-top:12px;">&copy; 2026 YTCuttr. All rights reserved.</p>
+  </footer>
+</body>
+</html>
