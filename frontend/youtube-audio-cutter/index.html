@@ -3173,13 +3173,12 @@
         const a = document.createElement('a');
         a.href = fileUrl;
         if (fileName) a.setAttribute('download', fileName);
-        a.setAttribute('target', '_blank');
         a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
           if (a.parentNode) a.parentNode.removeChild(a);
-        }, 1000);
+        }, 1500);
       } catch(e) {
         window.location.assign(fileUrl);
       }

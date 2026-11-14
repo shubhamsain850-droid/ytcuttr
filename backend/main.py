@@ -221,7 +221,7 @@ def clean_quality_key(quality: str) -> str:
     if "audio" in q or "mp3" in q: return "320k"
     return q.split()[0]
 
-def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
+def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: str = "visionos,web_creator,web") -> list:
     cmd = [
         "yt-dlp",
         "-4",
@@ -230,8 +230,9 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True) -> list:
         "--cache-dir", str(CACHE_DIR),
         "--no-check-formats",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
-        "--extractor-args", "youtube:player_client=android,web;skip=translated_subs,comments",
     ]
+    if player_client:
+        cmd += ["--extractor-args", f"youtube:player_client={player_client};skip=translated_subs,comments"]
     if use_cookies:
         cf, source = get_cookies_file()
         if cf:
@@ -330,9 +331,12 @@ async def get_video_info(req: InfoRequest):
             return cached_data
 
     # Primary: Run yt-dlp to extract exact stream formats, duration and metadata
-    cmd = build_ytdlp_cmd(["--dump-json", req.url])
+    cmd = build_ytdlp_cmd(["--dump-json", req.url], player_client="visionos,web_creator,web")
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
+        if result.returncode != 0 or not result.stdout.strip():
+            cmd_fb = build_ytdlp_cmd(["--dump-json", req.url], player_client="", use_cookies=False)
+            result = subprocess.run(cmd_fb, capture_output=True, text=True, timeout=20)
         if result.returncode == 0 and result.stdout.strip():
             # Save raw info.json directly to disk for 0-second clip download reuse
             try:
@@ -421,10 +425,10 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 "-f", fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path),
-            ], use_cookies=True)
+            ], use_cookies=True, player_client="visionos,web_creator,web")
             r_dl = subprocess.run(cmd_dl_cached, capture_output=True, text=True, timeout=80)
 
-        # ATTEMPT 2: Native download using direct URL with requested format
+        # ATTEMPT 2: Native download using direct URL with visionos,web_creator,web
         if not raw_path.exists() or raw_path.stat().st_size == 0:
             cmd_dl_url = build_ytdlp_cmd([
                 "-N", "8",
@@ -433,10 +437,10 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
-            ], use_cookies=True)
+            ], use_cookies=True, player_client="visionos,web_creator,web")
             r_dl = subprocess.run(cmd_dl_url, capture_output=True, text=True, timeout=80)
 
-        # ATTEMPT 3: Fallback on best stream
+        # ATTEMPT 3: Fallback on best stream with visionos,web_creator,web
         if not raw_path.exists() or raw_path.stat().st_size == 0:
             cmd_dl_best = build_ytdlp_cmd([
                 "-N", "8",
@@ -445,10 +449,10 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
-            ], use_cookies=True)
+            ], use_cookies=True, player_client="visionos,web_creator,web")
             r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=80)
 
-        # ATTEMPT 4: Fallback without cookies
+        # ATTEMPT 4: Fallback with default client without cookies
         if not raw_path.exists() or raw_path.stat().st_size == 0:
             cmd_dl_anon = build_ytdlp_cmd([
                 "-N", "8",
@@ -457,8 +461,19 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
-            ], use_cookies=False)
+            ], use_cookies=False, player_client="")
             r_dl = subprocess.run(cmd_dl_anon, capture_output=True, text=True, timeout=80)
+
+        # ATTEMPT 5: Fallback on format ba/b/best
+        if not raw_path.exists() or raw_path.stat().st_size == 0:
+            cmd_dl_safe = build_ytdlp_cmd([
+                "-N", "4",
+                "-f", "ba/b/best",
+                *merge_fmt_args,
+                "-o", str(raw_path),
+                url,
+            ], use_cookies=False, player_client="visionos,web_creator,web")
+            r_dl = subprocess.run(cmd_dl_safe, capture_output=True, text=True, timeout=80)
 
         # Step 2: Local cut via FFmpeg
         if raw_path.exists() and raw_path.stat().st_size > 0:
@@ -594,10 +609,10 @@ def _run_download(job_id: str, url: str, quality: str):
                 "-f", fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
-            ], use_cookies=True)
+            ], use_cookies=True, player_client="visionos,web_creator,web")
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=240)
 
-        # Attempt 2: Direct URL
+        # Attempt 2: Direct URL with visionos,web_creator,web
         target_check = raw_path if is_audio else out_path
         if not target_check.exists() or target_check.stat().st_size == 0:
             cmd = build_ytdlp_cmd([
@@ -607,7 +622,7 @@ def _run_download(job_id: str, url: str, quality: str):
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
-            ], use_cookies=True)
+            ], use_cookies=True, player_client="visionos,web_creator,web")
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
 
         # Attempt 3: Fallback to best format with cookies
@@ -619,10 +634,10 @@ def _run_download(job_id: str, url: str, quality: str):
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
-            ], use_cookies=True)
+            ], use_cookies=True, player_client="visionos,web_creator,web")
             r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=300)
 
-        # Attempt 4: Fallback without cookies
+        # Attempt 4: Fallback with default client without cookies
         if not target_check.exists() or target_check.stat().st_size == 0:
             fallback_anon = build_ytdlp_cmd([
                 "-N", "8",
@@ -631,8 +646,19 @@ def _run_download(job_id: str, url: str, quality: str):
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
-            ], use_cookies=False)
+            ], use_cookies=False, player_client="")
             r = subprocess.run(fallback_anon, capture_output=True, text=True, timeout=300)
+
+        # Attempt 5: Fallback on format ba/b/best
+        if not target_check.exists() or target_check.stat().st_size == 0:
+            fallback_safe = build_ytdlp_cmd([
+                "-N", "4",
+                "-f", "ba/b/best",
+                *merge_fmt_args,
+                "-o", str(raw_path if is_audio else out_path),
+                url,
+            ], use_cookies=False, player_client="visionos,web_creator,web")
+            r = subprocess.run(fallback_safe, capture_output=True, text=True, timeout=300)
 
         # If audio, convert/extract cleanly with FFmpeg
         if is_audio and raw_path.exists() and raw_path.stat().st_size > 0:
