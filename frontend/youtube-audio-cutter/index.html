@@ -1924,7 +1924,7 @@
 
           <!-- LIVE PREVIEW PLAYER -->
           <div class="preview-player-box" id="preview-player-box">
-            <iframe id="yt-player-frame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div id="yt-player-frame"></div>
           </div>
 
           <!-- PREVIEW ACTION BAR (PLAYS FROM SELECTED START POINT) -->
@@ -2822,6 +2822,105 @@
         .catch(() => {});
     }
 
+        // ── YOUTUBE IFRAME PLAYER API INTEGRATION (Exact Duration & Millisecond Preview) ──
+    let ytPlayer = null;
+    let durationPollTimer = null;
+    let isPlayerReady = false;
+    let audioPreviewTimer = null;
+
+    function initYouTubePlayer(videoId) {
+      if (!window.YT || !window.YT.Player) {
+        if (!document.getElementById('yt-iframe-api-script')) {
+          const tag = document.createElement('script');
+          tag.id = 'yt-iframe-api-script';
+          tag.src = "https://www.youtube.com/iframe_api";
+          const firstScriptTag = document.getElementsByTagName('script')[0];
+          firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+        window.onYouTubeIframeAPIReady = function() {
+          createAudioPlayer(videoId);
+        };
+      } else {
+        createAudioPlayer(videoId);
+      }
+    }
+
+    function createAudioPlayer(videoId) {
+      try {
+        if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+          ytPlayer.loadVideoById({
+            videoId: videoId,
+            startSeconds: currentStartSec || 0
+          });
+          startAudioDurationPolling();
+          return;
+        }
+
+        ytPlayer = new YT.Player('yt-player-frame', {
+          videoId: videoId,
+          playerVars: {
+            playsinline: 1,
+            rel: 0,
+            modestbranding: 1,
+            start: currentStartSec || 0
+          },
+          events: {
+            onReady: function(event) {
+              isPlayerReady = true;
+              syncDurationFromPlayer();
+              startAudioDurationPolling();
+            },
+            onStateChange: function(event) {
+              syncDurationFromPlayer();
+              if (event.data === (window.YT ? YT.PlayerState.ENDED : 0)) {
+                stopSelectedAudioPreview();
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('YT Player creation error:', err);
+      }
+    }
+
+    function syncDurationFromPlayer() {
+      if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return false;
+      try {
+        const dur = Math.round(ytPlayer.getDuration() || 0);
+        if (dur > 1) {
+          if (dur !== videoDurationSec) {
+            videoDurationSec = dur;
+            if (activeVideoData) activeVideoData.durationSec = dur;
+            const durBadge = document.getElementById('video-duration-tag');
+            if (durBadge) durBadge.textContent = formatSecondsToHms(dur);
+            updateTimelineTicks(dur);
+            
+            // Adjust slider with real video duration
+            if (currentEndSec <= 30 && dur > 30) {
+              currentEndSec = Math.min(30, dur);
+              document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+            }
+            updateTimelineHandles(currentStartSec, currentEndSec, dur);
+          }
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    function startAudioDurationPolling() {
+      if (durationPollTimer) clearInterval(durationPollTimer);
+      let attempts = 0;
+      durationPollTimer = setInterval(() => {
+        attempts++;
+        const synced = syncDurationFromPlayer();
+        if (synced || attempts >= 30) {
+          clearInterval(durationPollTimer);
+          durationPollTimer = null;
+        }
+      }, 400);
+    }
+
     function renderAudioWorkspace(data) {
       document.getElementById('empty-state').style.display = 'none';
       const ws = document.getElementById('audio-workspace');
@@ -2834,9 +2933,8 @@
       // Set Title
       document.getElementById('video-title').textContent = data.title;
 
-      // Set Player Iframe
-      const iframe = document.getElementById('yt-player-frame');
-      iframe.src = `https://www.youtube-nocookie.com/embed/${data.videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0`;
+      // Mount Official YouTube Player with exact duration & seek capability
+      initYouTubePlayer(data.videoId);
 
       // Reset timestamps & slider
       initTimelineScrubber();
@@ -2882,13 +2980,13 @@
     }
 
     function useCurrentPlayerTime(which) {
-      // Seek helper or fallback to prompt
-      const input = document.getElementById(`${which}-time-input`);
-      const val = prompt(`Enter ${which === 'start' ? 'Start' : 'End'} timestamp (HH:MM:SS or seconds):`, input.value);
-      if (val) {
-        const sec = parseHmsToSeconds(val);
-        input.value = formatSecondsToHms(sec);
+      if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+        const cur = Math.floor(ytPlayer.getCurrentTime() || 0);
+        const input = document.getElementById(`${which}-time-input`);
+        input.value = formatSecondsToHms(cur);
         validateAndRecalc();
+      } else {
+        showStatus('Start playing the preview video first to capture the current timestamp.', 'info');
       }
     }
 
@@ -2897,17 +2995,13 @@
       initTimelineScrubber();
     });
 
-    let audioPreviewTimer = null;
-
     function previewSelectedAudio() {
       if (!activeVideoData || !activeVideoData.videoId) {
-        showStatus('Please paste and analyze a YouTube link first.', 'error');
+        showStatus('Please paste and fetch a YouTube link first.', 'error');
         return;
       }
       const startSec = currentStartSec;
       const endSec = currentEndSec;
-      const iframe = document.getElementById('yt-player-frame');
-      if (!iframe) return;
 
       const btn = document.getElementById('audio-preview-btn');
       const stopBtn = document.getElementById('audio-stop-btn');
@@ -2917,57 +3011,49 @@
       if (stopBtn) stopBtn.style.display = 'inline-flex';
       if (txt) txt.textContent = `▶️ Playing from ${formatSecondsToHms(startSec)}...`;
 
-      const targetSrc = `https://www.youtube-nocookie.com/embed/${activeVideoData.videoId}?enablejsapi=1&origin=${window.location.origin}&rel=0&start=${startSec}&autoplay=1`;
-
-      if (!iframe.src || !iframe.src.includes(activeVideoData.videoId)) {
-        iframe.src = targetSrc;
+      if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+        ytPlayer.seekTo(startSec, true);
+        ytPlayer.playVideo();
       } else {
-        try {
-          iframe.contentWindow.postMessage(JSON.stringify({
-            event: 'command',
-            func: 'seekTo',
-            args: [startSec, true]
-          }), '*');
-          iframe.contentWindow.postMessage(JSON.stringify({
-            event: 'command',
-            func: 'playVideo',
-            args: []
-          }), '*');
-        } catch (e) {
-          iframe.src = targetSrc;
+        const iframe = document.querySelector('#preview-player-box iframe');
+        if (iframe) {
+          iframe.src = `https://www.youtube.com/embed/${activeVideoData.videoId}?enablejsapi=1&autoplay=1&start=${startSec}&origin=${window.location.origin}`;
         }
       }
 
-      // Automatically stop when end of clip is reached
-      if (audioPreviewTimer) clearTimeout(audioPreviewTimer);
-      const durMs = Math.max(1, (endSec - startSec)) * 1000;
-      audioPreviewTimer = setTimeout(() => {
-        stopSelectedAudioPreview();
-      }, durMs);
+      // Loop / Boundary monitor
+      if (audioPreviewTimer) clearInterval(audioPreviewTimer);
+      audioPreviewTimer = setInterval(() => {
+        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+          try {
+            const cur = ytPlayer.getCurrentTime() || 0;
+            if (cur >= endSec) {
+              ytPlayer.pauseVideo();
+              ytPlayer.seekTo(startSec, true);
+              stopSelectedAudioPreview();
+            }
+          } catch (e) {}
+        }
+      }, 250);
     }
 
     function stopSelectedAudioPreview() {
       if (audioPreviewTimer) {
-        clearTimeout(audioPreviewTimer);
+        clearInterval(audioPreviewTimer);
         audioPreviewTimer = null;
-      }
-      const iframe = document.getElementById('yt-player-frame');
-      if (iframe && iframe.contentWindow) {
-        try {
-          iframe.contentWindow.postMessage(JSON.stringify({
-            event: 'command',
-            func: 'pauseVideo',
-            args: []
-          }), '*');
-        } catch (e) {}
       }
       const btn = document.getElementById('audio-preview-btn');
       const stopBtn = document.getElementById('audio-stop-btn');
       const txt = document.getElementById('audio-preview-text');
+
       if (btn) btn.classList.remove('playing');
       if (stopBtn) stopBtn.style.display = 'none';
       if (txt) {
         txt.innerHTML = `Preview from Start Time (<span id="audio-preview-start-display">${formatSecondsToHms(currentStartSec)}</span>)`;
+      }
+
+      if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        try { ytPlayer.pauseVideo(); } catch(e) {}
       }
     }
 
