@@ -1927,17 +1927,6 @@
             <div id="yt-player-frame"></div>
           </div>
 
-          <!-- PREVIEW ACTION BAR (PLAYS FROM SELECTED START POINT) -->
-          <div class="preview-action-bar">
-            <button type="button" class="btn-preview-clip" id="audio-preview-btn" onclick="previewSelectedAudio()" title="Listen to audio starting from the selected start timestamp">
-              <span class="preview-icon">▶️</span>
-              <span id="audio-preview-text">Preview from Start Time (<span id="audio-preview-start-display">00:00:00</span>)</span>
-            </button>
-            <button type="button" class="btn-stop-clip" id="audio-stop-btn" onclick="stopSelectedAudioPreview()" style="display: none;" title="Stop audio preview">
-              <span>⏹️ Stop</span>
-            </button>
-          </div>
-
           <!-- INTERACTIVE DUAL-HANDLE TIMELINE SLIDER -->
           <div class="timeline-card">
             <div class="timeline-header">
@@ -1988,8 +1977,8 @@
                   maxlength="8"
                   placeholder="00:00:00"
                   aria-label="Start time in HH:MM:SS"
-                  onchange="validateAndRecalc()"
-                  onkeyup="validateAndRecalc()"
+                  onchange="validateAndRecalc(true)"
+                  onkeyup="if(event.key==='Enter') validateAndRecalc(true); else validateAndRecalc(false);"
                 />
               </div>
               <div class="nudge-group">
@@ -2561,12 +2550,16 @@
 
       function onPointerEnd(e) {
         if (!activePointerDrag) return;
-        const el = activePointerDrag === 'start' ? handleStart : handleEnd;
+        const wasStart = (activePointerDrag === 'start');
+        const el = wasStart ? handleStart : handleEnd;
         el.classList.remove('dragging');
         try {
           if (e.pointerId !== undefined) el.releasePointerCapture(e.pointerId);
         } catch(err) {}
         activePointerDrag = null;
+        if (wasStart) {
+          autoPlayFromStart();
+        }
       }
 
       // Handle Start Dragging
@@ -2595,6 +2588,7 @@
 
         if (distStart <= distEnd) {
           setStartSeconds(targetSec);
+          autoPlayFromStart();
           startDrag('start', e);
         } else {
           setEndSeconds(targetSec);
@@ -2607,9 +2601,11 @@
         const step = e.shiftKey ? 5 : 1;
         if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
           setStartSeconds(currentStartSec - step);
+          autoPlayFromStart();
           e.preventDefault();
         } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
           setStartSeconds(currentStartSec + step);
+          autoPlayFromStart();
           e.preventDefault();
         }
       });
@@ -2811,10 +2807,10 @@
               if (durBadge) durBadge.textContent = formatSecondsToHms(videoDurationSec);
               updateTimelineTicks(videoDurationSec);
               
-              currentStartSec = 0;
-              currentEndSec = Math.min(30, videoDurationSec);
-              document.getElementById('start-time-input').value = '00:00:00';
-              document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+              if (currentStartSec === 0 && currentEndSec <= 30) {
+                currentEndSec = Math.min(30, videoDurationSec);
+                document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+              }
               updateTimelineHandles(currentStartSec, currentEndSec, videoDurationSec);
             }
           }
@@ -2872,6 +2868,9 @@
             },
             onStateChange: function(event) {
               syncDurationFromPlayer();
+              if (event.data === (window.YT ? YT.PlayerState.PLAYING : 1)) {
+                startClipBoundaryMonitoring();
+              }
               if (event.data === (window.YT ? YT.PlayerState.ENDED : 0)) {
                 stopSelectedAudioPreview();
               }
@@ -2881,6 +2880,37 @@
       } catch (err) {
         console.error('YT Player creation error:', err);
       }
+    }
+
+    let autoPlayDebounceTimer = null;
+    let clipBoundaryTimer = null;
+
+    function autoPlayFromStart() {
+      if (!ytPlayer || typeof ytPlayer.seekTo !== 'function') return;
+      if (autoPlayDebounceTimer) clearTimeout(autoPlayDebounceTimer);
+      autoPlayDebounceTimer = setTimeout(() => {
+        try {
+          ytPlayer.seekTo(currentStartSec, true);
+          ytPlayer.playVideo();
+          startClipBoundaryMonitoring();
+        } catch(e) {}
+      }, 120);
+    }
+
+    function startClipBoundaryMonitoring() {
+      if (clipBoundaryTimer) clearInterval(clipBoundaryTimer);
+      clipBoundaryTimer = setInterval(() => {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+        try {
+          if (typeof ytPlayer.getPlayerState === 'function' && ytPlayer.getPlayerState() === (window.YT ? YT.PlayerState.PLAYING : 1)) {
+            const curTime = ytPlayer.getCurrentTime() || 0;
+            if (curTime >= currentEndSec) {
+              ytPlayer.pauseVideo();
+              ytPlayer.seekTo(currentStartSec, true);
+            }
+          }
+        } catch(e) {}
+      }, 250);
     }
 
     function syncDurationFromPlayer() {
@@ -2951,7 +2981,7 @@
       }
     }
 
-    function validateAndRecalc() {
+    function validateAndRecalc(triggerPlay = false) {
       const startIn = document.getElementById('start-time-input');
       const endIn = document.getElementById('end-time-input');
       const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
@@ -2969,6 +2999,9 @@
       currentEndSec = e;
 
       updateTimelineHandles(currentStartSec, currentEndSec, maxTotal);
+      if (triggerPlay) {
+        autoPlayFromStart();
+      }
     }
 
     function nudgeTime(which, deltaSeconds) {
@@ -2976,7 +3009,7 @@
       let sec = parseHmsToSeconds(input.value);
       sec = Math.max(0, sec + deltaSeconds);
       input.value = formatSecondsToHms(sec);
-      validateAndRecalc();
+      validateAndRecalc(which === 'start');
     }
 
     function useCurrentPlayerTime(which) {
@@ -2984,7 +3017,7 @@
         const cur = Math.floor(ytPlayer.getCurrentTime() || 0);
         const input = document.getElementById(`${which}-time-input`);
         input.value = formatSecondsToHms(cur);
-        validateAndRecalc();
+        validateAndRecalc(which === 'start');
       } else {
         showStatus('Start playing the preview video first to capture the current timestamp.', 'info');
       }
@@ -2995,63 +3028,15 @@
       initTimelineScrubber();
     });
 
-    function previewSelectedAudio() {
-      if (!activeVideoData || !activeVideoData.videoId) {
-        showStatus('Please paste and fetch a YouTube link first.', 'error');
-        return;
-      }
-      const startSec = currentStartSec;
-      const endSec = currentEndSec;
-
-      const btn = document.getElementById('audio-preview-btn');
-      const stopBtn = document.getElementById('audio-stop-btn');
-      const txt = document.getElementById('audio-preview-text');
-
-      if (btn) btn.classList.add('playing');
-      if (stopBtn) stopBtn.style.display = 'inline-flex';
-      if (txt) txt.textContent = `▶️ Playing from ${formatSecondsToHms(startSec)}...`;
-
-      if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
-        ytPlayer.seekTo(startSec, true);
-        ytPlayer.playVideo();
-      } else {
-        const iframe = document.querySelector('#preview-player-box iframe');
-        if (iframe) {
-          iframe.src = `https://www.youtube.com/embed/${activeVideoData.videoId}?enablejsapi=1&autoplay=1&start=${startSec}&origin=${window.location.origin}`;
-        }
-      }
-
-      // Loop / Boundary monitor
-      if (audioPreviewTimer) clearInterval(audioPreviewTimer);
-      audioPreviewTimer = setInterval(() => {
-        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
-          try {
-            const cur = ytPlayer.getCurrentTime() || 0;
-            if (cur >= endSec) {
-              ytPlayer.pauseVideo();
-              ytPlayer.seekTo(startSec, true);
-              stopSelectedAudioPreview();
-            }
-          } catch (e) {}
-        }
-      }, 250);
+        function previewSelectedAudio() {
+      autoPlayFromStart();
     }
 
     function stopSelectedAudioPreview() {
-      if (audioPreviewTimer) {
-        clearInterval(audioPreviewTimer);
-        audioPreviewTimer = null;
+      if (clipBoundaryTimer) {
+        clearInterval(clipBoundaryTimer);
+        clipBoundaryTimer = null;
       }
-      const btn = document.getElementById('audio-preview-btn');
-      const stopBtn = document.getElementById('audio-stop-btn');
-      const txt = document.getElementById('audio-preview-text');
-
-      if (btn) btn.classList.remove('playing');
-      if (stopBtn) stopBtn.style.display = 'none';
-      if (txt) {
-        txt.innerHTML = `Preview from Start Time (<span id="audio-preview-start-display">${formatSecondsToHms(currentStartSec)}</span>)`;
-      }
-
       if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
         try { ytPlayer.pauseVideo(); } catch(e) {}
       }
