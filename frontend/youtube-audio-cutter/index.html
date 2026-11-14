@@ -597,15 +597,16 @@
 
     /* ── CUT PANEL (OPTION 1) ── */
     .preview-player-box {
-      margin-bottom: 22px;
-      border-radius: var(--radius-sm);
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 16 / 9;
+      margin: 0 auto 16px;
+      border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: #000000;
       position: relative;
-      aspect-ratio: 16 / 9;
-      max-height: 380px;
-      width: 100%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
     }
 
     .preview-player-box iframe {
@@ -883,7 +884,12 @@
       margin-bottom: 12px;
     }
 
-    .ts-input {
+    .preview-player-box {
+        max-width: 100%;
+        margin: 0 auto 12px;
+        border-radius: 8px;
+      }
+      .ts-input {
       width: 100%;
       height: 46px;
       padding: 0 12px;
@@ -1648,6 +1654,11 @@
       .ts-card {
         padding: 12px;
       }
+      .preview-player-box {
+        max-width: 100%;
+        margin: 0 auto 12px;
+        border-radius: 8px;
+      }
       .ts-input {
         height: 44px;
         font-size: 17px;
@@ -1804,8 +1815,13 @@
 
   <!-- HERO SECTION -->
   <header class="hero">
-        <h1>YouTube Audio Cutter <span>&amp; Converter</span></h1>
-    <p class="hero-lead">Cut specific audio clips with millisecond timestamps or download full tracks in Studio WAV, Lossless FLAC, 320kbps MP3, and Native M4A free.</p>
+    <h1>YouTube Audio Cutter <span>&amp; Converter</span></h1>
+    <p class="hero-lead">Download complete audio tracks or cut specific clips with exact timestamps. Export in Studio WAV, 320kbps MP3, Lossless FLAC, and Native M4A.</p>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;">✂️ Cut Specific Part</span>
+      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">🎵 Full Audio Download</span>
+      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">🎚️ Studio WAV &amp; 320k MP3</span>
+    </div>
   </header>
 
   <!-- TOP AD BANNER (728x90) -->
@@ -1898,11 +1914,11 @@
           <div class="mode-switcher" role="tablist">
             <button type="button" class="mode-tab active" id="tab-cut" role="tab" aria-selected="true" onclick="switchMode('cut')">
               <span>✂️</span>
-              <span>Option 1: Cut Audio (Timestamp)</span>
+              <span>Cut Specific Part (Timestamp)</span>
             </button>
             <button type="button" class="mode-tab" id="tab-full" role="tab" aria-selected="false" onclick="switchMode('full')">
               <span>🎵</span>
-              <span>Option 2: Full Audio Track</span>
+              <span>Full Audio Track</span>
             </button>
           </div>
         </div>
@@ -2042,101 +2058,68 @@
             </div>
 
             <div class="quality-list" id="clip-quality-list">
-              <!-- WAV Studio PCM -->
-              <div class="quality-row featured" id="qrow-clip-wav" style="border-left: 4px solid #4f46e5; background: linear-gradient(135deg, rgba(79,70,229,0.04) 0%, rgba(255,255,255,1) 100%);">
+              <!-- WAV -->
+              <div class="quality-row" id="qrow-clip-wav" style="border-left: 3px solid #4f46e5;">
                 <div class="q-left">
-                  <span class="q-icon">🎚️</span>
                   <div class="q-meta">
-                    <div class="q-label">WAV Studio Master (16-bit 44.1kHz PCM) <span class="badge-tag ultra" style="background:#4f46e5; color:#fff;">STUDIO WAV</span></div>
-                    <div class="q-desc">Uncompressed Studio Audio • Drag &amp; Drop for FL Studio, Ableton, Logic &amp; Premiere</div>
+                    <div class="q-label" style="font-weight: 700; color: #1e1b4b;">WAV <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #e0e7ff; color: #3730a3;">Studio Master</span></div>
+                    <div class="q-desc">Uncompressed 16-bit PCM • Best for FL Studio, Ableton &amp; DAWs</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background:#4f46e5;" onclick="downloadAudio('clip', 'wav', this)">
-                  <span>⬇️</span> <span>Download WAV</span>
-                </button>
-              </div>
-
-              <!-- FLAC Lossless -->
-              <div class="quality-row" id="qrow-clip-flac" style="border-left: 4px solid #059669; background: linear-gradient(135deg, rgba(5,150,105,0.03) 0%, rgba(255,255,255,1) 100%);">
-                <div class="q-left">
-                  <span class="q-icon">💎</span>
-                  <div class="q-meta">
-                    <div class="q-label">FLAC Lossless Audio <span class="badge-tag hq" style="background:#059669; color:#fff;">LOSSLESS FLAC</span></div>
-                    <div class="q-desc">Bit-Perfect Studio Fidelity • 50% Smaller File Size than WAV • Audiophile Grade</div>
-                  </div>
-                </div>
-                <button type="button" class="dl-btn" style="background:#059669;" onclick="downloadAudio('clip', 'flac', this)">
-                  <span>⬇️</span> <span>Download FLAC</span>
+                <button type="button" class="dl-btn" style="background: #4f46e5;" onclick="downloadAudio('clip', 'wav', this)">
+                  <span>Download WAV</span>
                 </button>
               </div>
 
               <!-- 320k MP3 -->
-              <div class="quality-row featured" id="qrow-clip-320k">
+              <div class="quality-row featured" id="qrow-clip-320k" style="border-left: 3px solid #16a34a;">
                 <div class="q-left">
-                  <span class="q-icon">🟢</span>
                   <div class="q-meta">
-                    <div class="q-label">320 kbps (Ultra HQ MP3) <span class="badge-tag ultra">320K MP3</span></div>
-                    <div class="q-desc">Studio Master MP3 • Highest Constant Bitrate • Best for Phones, Cars &amp; DJs</div>
+                    <div class="q-label" style="font-weight: 700; color: #14532d;">MP3 (320 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #dcfce7; color: #166534;">Ultra HQ</span></div>
+                    <div class="q-desc">Maximum MP3 quality • Universal for phones, cars &amp; DJs</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '320k', this)">
-                  <span>⬇️</span> <span>Download 320k</span>
+                <button type="button" class="dl-btn" style="background: #16a34a;" onclick="downloadAudio('clip', '320k', this)">
+                  <span>Download MP3</span>
                 </button>
               </div>
 
-              <!-- 256k MP3 -->
-              <div class="quality-row" id="qrow-clip-256k">
+              <!-- FLAC -->
+              <div class="quality-row" id="qrow-clip-flac" style="border-left: 3px solid #059669;">
                 <div class="q-left">
-                  <span class="q-icon">🔵</span>
                   <div class="q-meta">
-                    <div class="q-label">256 kbps (High Quality MP3) <span class="badge-tag hq">256K MP3</span></div>
-                    <div class="q-desc">Crystal Clear Sound • Premium Balance of Quality &amp; Size</div>
+                    <div class="q-label" style="font-weight: 700; color: #064e3b;">FLAC <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #ccfbf1; color: #115e59;">Lossless</span></div>
+                    <div class="q-desc">Bit-perfect audio quality • 50% smaller file size than WAV</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '256k', this)">
-                  <span>⬇️</span> <span>Download 256k</span>
-                </button>
-              </div>
-
-              <!-- 192k MP3 -->
-              <div class="quality-row" id="qrow-clip-192k">
-                <div class="q-left">
-                  <span class="q-icon">⚪</span>
-                  <div class="q-meta">
-                    <div class="q-label">192 kbps (Standard MP3) <span class="badge-tag standard">192K MP3</span></div>
-                    <div class="q-desc">Standard Audio • Great for Podcasts &amp; Spoken Word</div>
-                  </div>
-                </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '192k', this)">
-                  <span>⬇️</span> <span>Download 192k</span>
-                </button>
-              </div>
-
-              <!-- 128k MP3 -->
-              <div class="quality-row" id="qrow-clip-128k">
-                <div class="q-left">
-                  <span class="q-icon">⚪</span>
-                  <div class="q-meta">
-                    <div class="q-label">128 kbps (Lightweight MP3) <span class="badge-tag sd">128K MP3</span></div>
-                    <div class="q-desc">Lightweight File • Fastest Download on Slow Mobile Data</div>
-                  </div>
-                </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('clip', '128k', this)">
-                  <span>⬇️</span> <span>Download 128k</span>
+                <button type="button" class="dl-btn" style="background: #059669;" onclick="downloadAudio('clip', 'flac', this)">
+                  <span>Download FLAC</span>
                 </button>
               </div>
 
               <!-- Native M4A -->
-              <div class="quality-row" id="qrow-clip-m4a" style="border-left: 4px solid #d97706; background: linear-gradient(135deg, rgba(217,119,6,0.03) 0%, rgba(255,255,255,1) 100%);">
+              <div class="quality-row" id="qrow-clip-m4a" style="border-left: 3px solid #d97706;">
                 <div class="q-left">
-                  <span class="q-icon">⚡</span>
                   <div class="q-meta">
-                    <div class="q-label">Original M4A (YouTube Native AAC) <span class="badge-tag audio" style="background:#d97706; color:#fff;">NATIVE M4A</span></div>
-                    <div class="q-desc">Untouched Original Stream • Zero Transcoding • 1-Second Instant Cloud Cut</div>
+                    <div class="q-label" style="font-weight: 700; color: #7c2d12;">M4A (Original AAC) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #fef3c7; color: #92400e;">Fastest</span></div>
+                    <div class="q-desc">Native YouTube stream • 1-second cloud extraction, zero transcoding</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background:#d97706;" onclick="downloadAudio('clip', 'm4a', this)">
-                  <span>⬇️</span> <span>Download M4A</span>
+                <button type="button" class="dl-btn" style="background: #d97706;" onclick="downloadAudio('clip', 'm4a', this)">
+                  <span>Download M4A</span>
+                </button>
+              </div>
+
+              <!-- 128k MP3 -->
+              <div class="quality-row" id="qrow-clip-128k" style="border-left: 3px solid #64748b;">
+                <div class="q-left">
+                  <div class="q-meta">
+                    <div class="q-label" style="font-weight: 700; color: #334155;">MP3 (128 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #f1f5f9; color: #475569;">Lightweight</span></div>
+                    <div class="q-desc">Small file size • Quick download for mobile data</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" style="background: #64748b;" onclick="downloadAudio('clip', '128k', this)">
+                  <span>Download MP3</span>
                 </button>
               </div>
             </div>
@@ -2152,24 +2135,13 @@
 
         <!-- OPTION 2 PANEL: FULL AUDIO TRACK -->
         <div class="mode-panel" id="panel-full">
-          <div class="full-audio-card">
-            <div class="full-audio-icon" aria-hidden="true">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 18V5l12-2v13"></path>
-                <circle cx="6" cy="18" r="3"></circle>
-                <circle cx="18" cy="16" r="3"></circle>
-              </svg>
+          <div class="full-audio-card" style="padding: 16px 20px; margin-bottom: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-align: left;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+              <span style="font-size: 20px;">🎵</span>
+              <h3 style="font-size: 16.5px; font-weight: 700; margin: 0; color: var(--text);">Download Full Audio Track (Start to Finish)</h3>
             </div>
-            <h3>Download Complete Audio Track</h3>
-            <p>Save the entire audio track from start to finish at native high-fidelity bitrate. Perfect for full songs, podcast episodes, lectures, and background audio.</p>
-            <div class="full-features-list">
-              <span>🎵 Full Length Track</span>
-              <span>🔊 Original Bitrate (Up to 320kbps)</span>
-              <span>🚫 Zero Lossy Re-encoding</span>
-              <span>📱 Plays on Android, iPhone &amp; PC</span>
-            </div>
+            <p style="font-size: 13px; color: var(--muted); margin: 0; line-height: 1.45;">Save the entire song, podcast, or lecture without trimming. Select your format below:</p>
           </div>
-
           <!-- AUDIO QUALITIES DOWNLOAD LIST FOR FULL TRACK -->
           <div class="audio-qualities-section" style="margin-top: 0;">
             <div class="qualities-header">
@@ -2181,101 +2153,68 @@
             </div>
 
             <div class="quality-list" id="full-quality-list">
-              <!-- WAV Studio PCM -->
-              <div class="quality-row featured" id="qrow-full-wav" style="border-left: 4px solid #4f46e5; background: linear-gradient(135deg, rgba(79,70,229,0.04) 0%, rgba(255,255,255,1) 100%);">
+              <!-- WAV -->
+              <div class="quality-row" id="qrow-full-wav" style="border-left: 3px solid #4f46e5;">
                 <div class="q-left">
-                  <span class="q-icon">🎚️</span>
                   <div class="q-meta">
-                    <div class="q-label">WAV Studio Master (16-bit 44.1kHz PCM) <span class="badge-tag ultra" style="background:#4f46e5; color:#fff;">STUDIO WAV</span></div>
-                    <div class="q-desc">Full Length Track • Uncompressed Linear PCM • FL Studio &amp; Ableton Ready</div>
+                    <div class="q-label" style="font-weight: 700; color: #1e1b4b;">WAV <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #e0e7ff; color: #3730a3;">Studio Master</span></div>
+                    <div class="q-desc">Full Track • Uncompressed 16-bit PCM • FL Studio &amp; Ableton ready</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background:#4f46e5;" onclick="downloadAudio('full', 'wav', this)">
-                  <span>⬇️</span> <span>Download WAV</span>
-                </button>
-              </div>
-
-              <!-- FLAC Lossless -->
-              <div class="quality-row" id="qrow-full-flac" style="border-left: 4px solid #059669; background: linear-gradient(135deg, rgba(5,150,105,0.03) 0%, rgba(255,255,255,1) 100%);">
-                <div class="q-left">
-                  <span class="q-icon">💎</span>
-                  <div class="q-meta">
-                    <div class="q-label">FLAC Lossless Audio <span class="badge-tag hq" style="background:#059669; color:#fff;">LOSSLESS FLAC</span></div>
-                    <div class="q-desc">Full Length Track • Bit-Perfect Studio Fidelity • Half the Size of WAV</div>
-                  </div>
-                </div>
-                <button type="button" class="dl-btn" style="background:#059669;" onclick="downloadAudio('full', 'flac', this)">
-                  <span>⬇️</span> <span>Download FLAC</span>
+                <button type="button" class="dl-btn" style="background: #4f46e5;" onclick="downloadAudio('full', 'wav', this)">
+                  <span>Download WAV</span>
                 </button>
               </div>
 
               <!-- 320k MP3 -->
-              <div class="quality-row featured" id="qrow-full-320k">
+              <div class="quality-row featured" id="qrow-full-320k" style="border-left: 3px solid #16a34a;">
                 <div class="q-left">
-                  <span class="q-icon">🟢</span>
                   <div class="q-meta">
-                    <div class="q-label">320 kbps (Ultra HQ MP3) <span class="badge-tag ultra">320K MP3</span></div>
-                    <div class="q-desc">Full Length Track • Maximum MP3 Quality • Universal Compatibility</div>
+                    <div class="q-label" style="font-weight: 700; color: #14532d;">MP3 (320 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #dcfce7; color: #166534;">Ultra HQ</span></div>
+                    <div class="q-desc">Full Track • Maximum MP3 quality • Universal for phones &amp; cars</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('full', '320k', this)">
-                  <span>⬇️</span> <span>Download 320k</span>
+                <button type="button" class="dl-btn" style="background: #16a34a;" onclick="downloadAudio('full', '320k', this)">
+                  <span>Download MP3</span>
                 </button>
               </div>
 
-              <!-- 256k MP3 -->
-              <div class="quality-row" id="qrow-full-256k">
+              <!-- FLAC -->
+              <div class="quality-row" id="qrow-full-flac" style="border-left: 3px solid #059669;">
                 <div class="q-left">
-                  <span class="q-icon">🔵</span>
                   <div class="q-meta">
-                    <div class="q-label">256 kbps (High Quality MP3) <span class="badge-tag hq">256K MP3</span></div>
-                    <div class="q-desc">Full Length Track • High Fidelity Audio</div>
+                    <div class="q-label" style="font-weight: 700; color: #064e3b;">FLAC <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #ccfbf1; color: #115e59;">Lossless</span></div>
+                    <div class="q-desc">Full Track • Bit-perfect lossless studio audio • 50% size of WAV</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('full', '256k', this)">
-                  <span>⬇️</span> <span>Download 256k</span>
-                </button>
-              </div>
-
-              <!-- 192k MP3 -->
-              <div class="quality-row" id="qrow-full-192k">
-                <div class="q-left">
-                  <span class="q-icon">⚪</span>
-                  <div class="q-meta">
-                    <div class="q-label">192 kbps (Standard MP3) <span class="badge-tag standard">192K MP3</span></div>
-                    <div class="q-desc">Full Length Track • Balanced Audio File</div>
-                  </div>
-                </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('full', '192k', this)">
-                  <span>⬇️</span> <span>Download 192k</span>
-                </button>
-              </div>
-
-              <!-- 128k MP3 -->
-              <div class="quality-row" id="qrow-full-128k">
-                <div class="q-left">
-                  <span class="q-icon">⚪</span>
-                  <div class="q-meta">
-                    <div class="q-label">128 kbps (Lightweight MP3) <span class="badge-tag sd">128K MP3</span></div>
-                    <div class="q-desc">Full Length Track • Smallest File Size</div>
-                  </div>
-                </div>
-                <button type="button" class="dl-btn" onclick="downloadAudio('full', '128k', this)">
-                  <span>⬇️</span> <span>Download 128k</span>
+                <button type="button" class="dl-btn" style="background: #059669;" onclick="downloadAudio('full', 'flac', this)">
+                  <span>Download FLAC</span>
                 </button>
               </div>
 
               <!-- Native M4A -->
-              <div class="quality-row" id="qrow-full-m4a" style="border-left: 4px solid #d97706; background: linear-gradient(135deg, rgba(217,119,6,0.03) 0%, rgba(255,255,255,1) 100%);">
+              <div class="quality-row" id="qrow-full-m4a" style="border-left: 3px solid #d97706;">
                 <div class="q-left">
-                  <span class="q-icon">⚡</span>
                   <div class="q-meta">
-                    <div class="q-label">Original M4A (YouTube Native AAC) <span class="badge-tag audio" style="background:#d97706; color:#fff;">NATIVE M4A</span></div>
-                    <div class="q-desc">Full Length Track • Original YouTube Audio Stream Without Re-encoding</div>
+                    <div class="q-label" style="font-weight: 700; color: #7c2d12;">M4A (Original AAC) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #fef3c7; color: #92400e;">Fastest</span></div>
+                    <div class="q-desc">Full Track • Original YouTube audio stream without re-encoding</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background:#d97706;" onclick="downloadAudio('full', 'm4a', this)">
-                  <span>⬇️</span> <span>Download M4A</span>
+                <button type="button" class="dl-btn" style="background: #d97706;" onclick="downloadAudio('full', 'm4a', this)">
+                  <span>Download M4A</span>
+                </button>
+              </div>
+
+              <!-- 128k MP3 -->
+              <div class="quality-row" id="qrow-full-128k" style="border-left: 3px solid #64748b;">
+                <div class="q-left">
+                  <div class="q-meta">
+                    <div class="q-label" style="font-weight: 700; color: #334155;">MP3 (128 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #f1f5f9; color: #475569;">Lightweight</span></div>
+                    <div class="q-desc">Full Track • Smallest file size • Quick download</div>
+                  </div>
+                </div>
+                <button type="button" class="dl-btn" style="background: #64748b;" onclick="downloadAudio('full', '128k', this)">
+                  <span>Download MP3</span>
                 </button>
               </div>
             </div>
