@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>YouTube Audio Cutter - Cut &amp; Convert to MP3, WAV, FLAC &amp; M4A Free | YTCuttr</title>
-  <meta name="description" content="Cut and download audio from any YouTube video with exact timestamps. Convert to studio WAV (44.1kHz PCM), lossless FLAC, 320kbps MP3, and native M4A free. Fast cloud audio trimmer &amp; sample cutter." />
-  <meta name="keywords" content="youtube audio cutter, cut youtube audio, youtube to wav, youtube to flac, youtube to mp3 320kbps, convert youtube to wav, youtube mp3 trimmer, cut audio from youtube video, download youtube audio specific time, youtube sample cutter, extract audio from youtube, safe youtube to wav, trim youtube sound" />
+  <title>YouTube Audio Cutter &amp; Downloader - Cut Clips or Full Track (MP3, WAV) | YTCuttr</title>
+  <meta name="description" content="Download full audio tracks or cut specific clips with exact timestamps from YouTube. Export in Studio WAV, 320kbps MP3, Lossless FLAC, and Native M4A free." />
+  <meta name="keywords" content="youtube audio cutter, youtube audio downloader, download full audio from youtube, cut audio from youtube, cut youtube audio, youtube to mp3 320kbps, youtube to wav, youtube to flac, youtube mp3 trimmer, download youtube audio specific time, extract audio from youtube, youtube sample cutter, safe youtube to wav" />
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#e63030">
   <link rel="canonical" href="https://ytcuttr.com/youtube-audio-cutter/">
@@ -13,8 +13,8 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ytcuttr.com/youtube-audio-cutter/">
-  <meta property="og:title" content="YouTube Audio Cutter - Cut &amp; Convert to MP3, WAV, FLAC &amp; M4A | YTCuttr" />
-  <meta property="og:description" content="Cut specific audio clips with millisecond timestamps or download full tracks in Studio WAV, Lossless FLAC, 320kbps MP3, and Native M4A." />
+  <meta property="og:title" content="YouTube Audio Cutter &amp; Downloader - Cut Clips or Full Audio | YTCuttr" />
+  <meta property="og:description" content="Download full audio tracks or trim custom audio clips by timestamp from YouTube into Studio WAV, 320kbps MP3, FLAC, and M4A." />
   <meta property="og:image" content="https://ytcuttr.com/img/feat_audio.png">
 
   <!-- Twitter -->
@@ -38,9 +38,9 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "YTCuttr - YouTube Audio Cutter & Converter (WAV, FLAC, MP3, M4A)",
+    "name": "YTCuttr - YouTube Audio Cutter & Downloader (WAV, FLAC, MP3, M4A)",
     "url": "https://ytcuttr.com/youtube-audio-cutter/",
-    "description": "Free online YouTube Audio Cutter and Converter. Cut audio from YouTube videos by timestamp or download full audio tracks in uncompressed studio WAV, lossless FLAC, 320kbps MP3, and native M4A format.",
+    "description": "Free online YouTube Audio Cutter and Downloader. Download full audio tracks or cut specific clips by timestamp in studio WAV, lossless FLAC, 320kbps MP3, and native M4A format.",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "All",
     "browserRequirements": "Requires JavaScript. Requires HTML5.",
@@ -598,15 +598,15 @@
     /* ── CUT PANEL (OPTION 1) ── */
     .preview-player-box {
       width: 100%;
-      max-width: 280px;
+      max-width: 420px;
       aspect-ratio: 16 / 9;
-      margin: 0 auto 12px;
-      border-radius: 10px;
+      margin: 0 auto 14px;
+      border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: #000000;
       position: relative;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
     }
 
     .preview-player-box iframe {
@@ -1651,7 +1651,7 @@
         padding: 12px;
       }
       .preview-player-box {
-        max-width: 220px !important;
+        max-width: 240px !important;
         margin: 0 auto 10px !important;
         border-radius: 8px;
       }
@@ -1811,12 +1811,12 @@
 
   <!-- HERO SECTION -->
   <header class="hero">
-    <h1>YouTube Audio Cutter <span>&amp; Converter</span></h1>
-    <p class="hero-lead">Download complete audio tracks or cut specific clips with exact timestamps. Export in Studio WAV, 320kbps MP3, Lossless FLAC, and Native M4A.</p>
+    <h1>YouTube Audio Cutter <span>&amp; Downloader</span></h1>
+    <p class="hero-lead">Download complete audio tracks or cut specific clips with exact timestamps. Export in Studio WAV (FL Studio &amp; Ableton), 320kbps MP3, Lossless FLAC, and Native M4A.</p>
     <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
-      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;">✂️ Cut Specific Part</span>
-      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">🎵 Full Audio Download</span>
-      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">🎚️ Studio WAV &amp; 320k MP3</span>
+      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;">✂️ Cut Specific Audio Clips</span>
+      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">🎵 Full Track Downloader</span>
+      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">🎚️ Studio WAV, 320k MP3 &amp; FLAC</span>
     </div>
   </header>
 
@@ -2271,6 +2271,12 @@
     <!-- SEMANTIC AUDIO FORMAT COMPARISON SECTION (FROM DEEP SEO REPORT) -->
   <section class="format-guide-section" style="max-width: 960px; margin: 40px auto; padding: 0 16px;">
     <div style="background: var(--card-bg, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: 16px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;">
+        <h3 style="font-size: 17px; font-weight: 800; color: var(--text, #0f172a); margin: 0 0 6px;">Two Ways to Save Audio: Full Track or Custom Trimmed Clip</h3>
+        <p style="font-size: 13.5px; color: var(--muted, #64748b); line-height: 1.5; margin: 0;">
+          Whether you want to <strong>download a complete 2-hour podcast or song</strong> in one click, or <strong>cut an exact 15-second audio sample</strong> using millisecond timestamps, YTCuttr gives you full control with zero quality loss.
+        </p>
+      </div>
       <h2 style="font-size: 22px; font-weight: 800; color: var(--text, #0f172a); margin-bottom: 8px;">Which Audio Format Should You Choose?</h2>
       <p style="color: var(--muted, #64748b); font-size: 14.5px; margin-bottom: 24px;">Compare bitrates, compatibility, and ideal use cases to select the perfect format for your project:</p>
       
