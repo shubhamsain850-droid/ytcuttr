@@ -182,24 +182,24 @@ def get_video_id(url: str) -> str:
     m = re.search(r'(?:v=|\/|be\/|shorts\/)([0-9A-Za-z_-]{11})', url)
     return m.group(1) if m else url
 
-# QUALITY MAP: Strictly prioritizes AVC (H.264) + AAC (M4A) for zero-transcode instant cutting
+# QUALITY MAP: Prioritizes AVC (H.264) + AAC (M4A) for zero-transcode cutting, with clean height bounds
 QUALITY_MAP = {
-    "2160p": "bv*[vcodec^=avc][height<=2160]+ba[ext=m4a]/bv*[height<=2160][ext=mp4]+ba[ext=m4a]/bv*[height<=2160]+ba/b[height<=2160]/best",
-    "1440p": "bv*[vcodec^=avc][height<=1440]+ba[ext=m4a]/bv*[height<=1440][ext=mp4]+ba[ext=m4a]/bv*[height<=1440]+ba/b[height<=1440]/best",
-    "1080p": "bv*[vcodec^=avc][height<=1080]+ba[ext=m4a]/bv*[height<=1080][ext=mp4]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/best",
-    "720p":  "22/bv*[vcodec^=avc][height<=720]+ba[ext=m4a]/bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4]/best",
-    "480p":  "bv*[vcodec^=avc][height<=480]+ba[ext=m4a]/bv*[height<=480][ext=mp4]+ba[ext=m4a]/b[height<=480][ext=mp4]/best",
-    "360p":  "18/bv*[vcodec^=avc][height<=360]+ba[ext=m4a]/bv*[height<=360][ext=mp4]+ba[ext=m4a]/b[height<=360][ext=mp4]/best",
-    "240p":  "bv*[vcodec^=avc][height<=240]+ba[ext=m4a]/bv*[height<=240][ext=mp4]+ba[ext=m4a]/b[height<=240][ext=mp4]/best",
-    "144p":  "bv*[vcodec^=avc][height<=144]+ba[ext=m4a]/bv*[height<=144][ext=mp4]+ba[ext=m4a]/b[height<=144][ext=mp4]/best",
-    "320k":  "ba[ext=m4a]/ba/b/best",
-    "256k":  "ba[ext=m4a]/ba/b/best",
-    "192k":  "ba[ext=m4a]/ba/b/best",
-    "128k":  "ba[ext=m4a]/ba/b/best",
-    "wav":   "ba[ext=m4a]/ba/b/best",
-    "flac":  "ba[ext=m4a]/ba/b/best",
-    "m4a":   "ba[ext=m4a]/ba/b/best",
-    "audio": "ba[ext=m4a]/ba/b/best",
+    "2160p": "bv*[height<=2160]+ba[ext=m4a]/bv*[height<=2160]+ba/bestvideo[height<=2160]+bestaudio/best[height<=2160]/best",
+    "1440p": "bv*[height<=1440]+ba[ext=m4a]/bv*[height<=1440]+ba/bestvideo[height<=1440]+bestaudio/best[height<=1440]/best",
+    "1080p": "bv*[height<=1080][vcodec^=avc]+ba[ext=m4a]/bv*[height<=1080]+ba/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
+    "720p":  "bv*[height<=720][vcodec^=avc]+ba[ext=m4a]/22/bv*[height<=720]+ba/bestvideo[height<=720]+bestaudio/best[height<=720]/best",
+    "480p":  "bv*[height<=480][vcodec^=avc]+ba[ext=m4a]/bv*[height<=480]+ba/bestvideo[height<=480]+bestaudio/best[height<=480]/best",
+    "360p":  "18/bv*[height<=360][vcodec^=avc]+ba[ext=m4a]/bv*[height<=360]+ba/bestvideo[height<=360]+bestaudio/best[height<=360]/best",
+    "240p":  "bv*[height<=240]+ba/bestvideo[height<=240]+bestaudio/best[height<=240]/best",
+    "144p":  "bv*[height<=144]+ba/bestvideo[height<=144]+bestaudio/best[height<=144]/best",
+    "320k":  "ba[ext=m4a]/ba/best",
+    "256k":  "ba[ext=m4a]/ba/best",
+    "192k":  "ba[ext=m4a]/ba/best",
+    "128k":  "ba[ext=m4a]/ba/best",
+    "wav":   "ba[ext=m4a]/ba/best",
+    "flac":  "ba[ext=m4a]/ba/best",
+    "m4a":   "ba[ext=m4a]/ba/best",
+    "audio": "ba[ext=m4a]/ba/best",
 }
 
 def clean_quality_key(quality: str) -> str:
@@ -219,9 +219,12 @@ def clean_quality_key(quality: str) -> str:
     if "128" in q: return "128k"
     if "m4a" in q: return "m4a"
     if "audio" in q or "mp3" in q: return "320k"
+    for r in ["2160p", "1440p", "1080p", "720p", "480p", "360p", "240p", "144p"]:
+        if r in q:
+            return r
     return q.split()[0]
 
-def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: str = "visionos,web_creator,web") -> list:
+def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: str = "") -> list:
     cmd = [
         "yt-dlp",
         "-4",
@@ -331,7 +334,7 @@ async def get_video_info(req: InfoRequest):
             return cached_data
 
     # Primary: Run yt-dlp to extract exact stream formats, duration and metadata
-    cmd = build_ytdlp_cmd(["--dump-json", req.url], player_client="visionos,web_creator,web")
+    cmd = build_ytdlp_cmd(["--dump-json", req.url], player_client="")
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
         if result.returncode != 0 or not result.stdout.strip():
@@ -404,7 +407,14 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     ext = "wav" if is_wav else ("flac" if is_flac else ("mp3" if is_mp3 else ("m4a" if is_audio else "mp4")))
 
     merge_fmt_args = [] if is_audio else ["--merge-output-format", "mp4"]
-    fallback_fmt = "ba[ext=m4a]/ba/b/best" if is_audio else "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best"
+    target_height = 720
+    if q_key.endswith("p"):
+        try:
+            target_height = int(q_key[:-1])
+        except ValueError:
+            target_height = 720
+
+    fallback_fmt = "ba[ext=m4a]/ba/best" if is_audio else f"bv*[height<={target_height}]+ba/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best"
     out_path = out_dir / f"clip.{ext}"
     raw_path = out_dir / f"raw.{'m4a' if is_audio else 'mp4'}"
     fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
@@ -416,8 +426,19 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         jobs[job_id]["status"] = "downloading"
         r_dl = None
 
-        # ATTEMPT 1 (Turbo Stream Pipeline): Native 8-thread download via cached info-json
-        if info_json_file.exists() and info_json_file.stat().st_size > 1000:
+        # ATTEMPT 1: Direct native download with cookies and target resolution
+        cmd_dl_url = build_ytdlp_cmd([
+            "-N", "8",
+            "--concurrent-fragments", "8",
+            "-f", fmt,
+            *merge_fmt_args,
+            "-o", str(raw_path),
+            url,
+        ], use_cookies=True, player_client="")
+        r_dl = subprocess.run(cmd_dl_url, capture_output=True, text=True, timeout=120)
+
+        # ATTEMPT 2: Fallback with cached info-json if available
+        if (not raw_path.exists() or raw_path.stat().st_size == 0) and info_json_file.exists() and info_json_file.stat().st_size > 1000:
             cmd_dl_cached = build_ytdlp_cmd([
                 "--load-info-json", str(info_json_file),
                 "-N", "8",
@@ -425,22 +446,10 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 "-f", fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path),
-            ], use_cookies=True, player_client="visionos,web_creator,web")
-            r_dl = subprocess.run(cmd_dl_cached, capture_output=True, text=True, timeout=80)
+            ], use_cookies=True, player_client="")
+            r_dl = subprocess.run(cmd_dl_cached, capture_output=True, text=True, timeout=120)
 
-        # ATTEMPT 2: Native download using direct URL with visionos,web_creator,web
-        if not raw_path.exists() or raw_path.stat().st_size == 0:
-            cmd_dl_url = build_ytdlp_cmd([
-                "-N", "8",
-                "--concurrent-fragments", "8",
-                "-f", fmt,
-                *merge_fmt_args,
-                "-o", str(raw_path),
-                url,
-            ], use_cookies=True, player_client="visionos,web_creator,web")
-            r_dl = subprocess.run(cmd_dl_url, capture_output=True, text=True, timeout=80)
-
-        # ATTEMPT 3: Fallback on best stream with visionos,web_creator,web
+        # ATTEMPT 3: Fallback on best stream matching target height with cookies
         if not raw_path.exists() or raw_path.stat().st_size == 0:
             cmd_dl_best = build_ytdlp_cmd([
                 "-N", "8",
@@ -449,31 +458,31 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
-            ], use_cookies=True, player_client="visionos,web_creator,web")
-            r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=80)
+            ], use_cookies=True, player_client="")
+            r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=120)
 
-        # ATTEMPT 4: Fallback with default client without cookies
+        # ATTEMPT 4: Direct URL without cookies with target resolution
         if not raw_path.exists() or raw_path.stat().st_size == 0:
             cmd_dl_anon = build_ytdlp_cmd([
                 "-N", "8",
                 "--concurrent-fragments", "8",
+                "-f", fmt,
+                *merge_fmt_args,
+                "-o", str(raw_path),
+                url,
+            ], use_cookies=False, player_client="")
+            r_dl = subprocess.run(cmd_dl_anon, capture_output=True, text=True, timeout=120)
+
+        # ATTEMPT 5: Direct URL without cookies with height-matching fallback
+        if not raw_path.exists() or raw_path.stat().st_size == 0:
+            cmd_dl_safe = build_ytdlp_cmd([
+                "-N", "4",
                 "-f", fallback_fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
             ], use_cookies=False, player_client="")
-            r_dl = subprocess.run(cmd_dl_anon, capture_output=True, text=True, timeout=80)
-
-        # ATTEMPT 5: Fallback on format ba/b/best
-        if not raw_path.exists() or raw_path.stat().st_size == 0:
-            cmd_dl_safe = build_ytdlp_cmd([
-                "-N", "4",
-                "-f", "ba/b/best",
-                *merge_fmt_args,
-                "-o", str(raw_path),
-                url,
-            ], use_cookies=False, player_client="visionos,web_creator,web")
-            r_dl = subprocess.run(cmd_dl_safe, capture_output=True, text=True, timeout=80)
+            r_dl = subprocess.run(cmd_dl_safe, capture_output=True, text=True, timeout=120)
 
         # Step 2: Local cut via FFmpeg
         if raw_path.exists() and raw_path.stat().st_size > 0:
@@ -547,7 +556,23 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                     "-avoid_negative_ts", "make_zero",
                     str(out_path),
                 ]
-                subprocess.run(cmd_cut, capture_output=True, text=True, timeout=20)
+                subprocess.run(cmd_cut, capture_output=True, text=True, timeout=25)
+                # If stream-copy produced an empty/failed file, transcode accurately at high visual quality (CRF 18)
+                if not out_path.exists() or out_path.stat().st_size == 0:
+                    cmd_cut_hq = [
+                        "ffmpeg", "-y",
+                        "-ss", start_hms,
+                        "-to", end_hms,
+                        "-i", str(raw_path),
+                        "-c:v", "libx264",
+                        "-preset", "veryfast",
+                        "-crf", "18",
+                        "-c:a", "aac",
+                        "-b:a", "192k",
+                        "-avoid_negative_ts", "make_zero",
+                        str(out_path),
+                    ]
+                    subprocess.run(cmd_cut_hq, capture_output=True, text=True, timeout=60)
 
             try:
                 raw_path.unlink(missing_ok=True)
@@ -556,10 +581,22 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
 
         elapsed = round(time.time() - t_start, 2)
         if out_path.exists() and out_path.stat().st_size > 0:
+            res_str = ""
+            if not is_audio:
+                try:
+                    ff = subprocess.run(
+                        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", str(out_path)],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    res_str = ff.stdout.strip()
+                except Exception:
+                    pass
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)
-            jobs[job_id]["filename"] = f"ytcuttr_audio_{start_hms.replace(':','-')}_{end_hms.replace(':','-')}.{ext}"
+            jobs[job_id]["filename"] = f"ytcuttr_{'audio' if is_audio else 'clip'}_{start_hms.replace(':','-')}_{end_hms.replace(':','-')}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
+            if res_str:
+                jobs[job_id]["resolution"] = res_str
         else:
             err = r_dl.stderr[-400:] if (r_dl and r_dl.stderr) else "Unknown download failure"
             jobs[job_id]["status"] = "error"
@@ -590,7 +627,14 @@ def _run_download(job_id: str, url: str, quality: str):
     out_path = out_dir / f"video.{ext}"
     raw_path = out_dir / f"raw.{'m4a' if is_audio else 'mp4'}"
     merge_fmt_args = [] if is_audio else ["--merge-output-format", "mp4"]
-    fallback_fmt = "ba[ext=m4a]/ba/b/best" if is_audio else "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b/best"
+    target_height = 720
+    if q_key.endswith("p"):
+        try:
+            target_height = int(q_key[:-1])
+        except ValueError:
+            target_height = 720
+
+    fallback_fmt = "ba[ext=m4a]/ba/best" if is_audio else f"bv*[height<={target_height}]+ba/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best"
     fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
 
     vid = get_video_id(url)
@@ -599,33 +643,32 @@ def _run_download(job_id: str, url: str, quality: str):
     try:
         jobs[job_id]["status"] = "downloading"
         r = None
+        target_check = raw_path if is_audio else out_path
 
-        # Attempt 1: Using cached info.json if available
-        if info_json_file.exists() and info_json_file.stat().st_size > 1000:
-            cmd = build_ytdlp_cmd([
+        # Attempt 1: Direct native download with cookies and target resolution
+        cmd = build_ytdlp_cmd([
+            "-N", "8",
+            "--concurrent-fragments", "8",
+            "-f", fmt,
+            *merge_fmt_args,
+            "-o", str(raw_path if is_audio else out_path),
+            url,
+        ], use_cookies=True, player_client="")
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+
+        # Attempt 2: Using cached info.json if available
+        if (not target_check.exists() or target_check.stat().st_size == 0) and info_json_file.exists() and info_json_file.stat().st_size > 1000:
+            cmd_cached = build_ytdlp_cmd([
                 "--load-info-json", str(info_json_file),
                 "-N", "8",
                 "--concurrent-fragments", "8",
                 "-f", fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
-            ], use_cookies=True, player_client="visionos,web_creator,web")
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=240)
+            ], use_cookies=True, player_client="")
+            r = subprocess.run(cmd_cached, capture_output=True, text=True, timeout=240)
 
-        # Attempt 2: Direct URL with visionos,web_creator,web
-        target_check = raw_path if is_audio else out_path
-        if not target_check.exists() or target_check.stat().st_size == 0:
-            cmd = build_ytdlp_cmd([
-                "-N", "8",
-                "--concurrent-fragments", "8",
-                "-f", fmt,
-                *merge_fmt_args,
-                "-o", str(raw_path if is_audio else out_path),
-                url,
-            ], use_cookies=True, player_client="visionos,web_creator,web")
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-
-        # Attempt 3: Fallback to best format with cookies
+        # Attempt 3: Fallback on height-matching fallback with cookies
         if not target_check.exists() or target_check.stat().st_size == 0:
             fallback_cmd = build_ytdlp_cmd([
                 "-N", "8",
@@ -634,30 +677,30 @@ def _run_download(job_id: str, url: str, quality: str):
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
-            ], use_cookies=True, player_client="visionos,web_creator,web")
+            ], use_cookies=True, player_client="")
             r = subprocess.run(fallback_cmd, capture_output=True, text=True, timeout=300)
 
-        # Attempt 4: Fallback with default client without cookies
+        # Attempt 4: Fallback with target resolution without cookies
         if not target_check.exists() or target_check.stat().st_size == 0:
             fallback_anon = build_ytdlp_cmd([
                 "-N", "8",
                 "--concurrent-fragments", "8",
-                "-f", fallback_fmt,
+                "-f", fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
             ], use_cookies=False, player_client="")
             r = subprocess.run(fallback_anon, capture_output=True, text=True, timeout=300)
 
-        # Attempt 5: Fallback on format ba/b/best
+        # Attempt 5: Fallback on height-matching fallback without cookies
         if not target_check.exists() or target_check.stat().st_size == 0:
             fallback_safe = build_ytdlp_cmd([
                 "-N", "4",
-                "-f", "ba/b/best",
+                "-f", fallback_fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
-            ], use_cookies=False, player_client="visionos,web_creator,web")
+            ], use_cookies=False, player_client="")
             r = subprocess.run(fallback_safe, capture_output=True, text=True, timeout=300)
 
         # If audio, convert/extract cleanly with FFmpeg
@@ -718,14 +761,25 @@ def _run_download(job_id: str, url: str, quality: str):
 
         elapsed = round(time.time() - t_start, 2)
         if out_path.exists() and out_path.stat().st_size > 0:
+            res_str = ""
+            if not is_audio:
+                try:
+                    ff = subprocess.run(
+                        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", str(out_path)],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    res_str = ff.stdout.strip()
+                except Exception:
+                    pass
             jobs[job_id]["status"] = "done"
             jobs[job_id]["file"] = str(out_path)
-            jobs[job_id]["filename"] = f"ytcuttr_audio.{ext}"
+            jobs[job_id]["filename"] = f"ytcuttr_{'audio' if is_audio else 'video'}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
+            if res_str:
+                jobs[job_id]["resolution"] = res_str
         else:
             jobs[job_id]["status"] = "error"
             jobs[job_id]["error"] = r.stderr[-400:] if (r and r.stderr) else "Download failed"
-            jobs[job_id]["time_taken"] = elapsed
             jobs[job_id]["time_taken"] = elapsed
     except subprocess.TimeoutExpired:
         jobs[job_id]["status"] = "error"
