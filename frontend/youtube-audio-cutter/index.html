@@ -327,7 +327,7 @@
 
     /* ── URL INPUT BAR ── */
     .url-section {
-      padding: 24px 28px;
+      padding: 18px 20px;
       background: var(--white);
       border-bottom: 1px solid var(--border);
     }
@@ -337,6 +337,9 @@
       gap: 10px;
       align-items: stretch;
       position: relative;
+      max-width: 620px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .url-input-wrapper {
@@ -344,11 +347,12 @@
       position: relative;
       display: flex;
       align-items: center;
+      min-width: 0;
     }
 
     .url-input-icon {
       position: absolute;
-      left: 16px;
+      left: 14px;
       color: var(--muted);
       pointer-events: none;
       display: flex;
@@ -357,11 +361,11 @@
 
     .url-input {
       width: 100%;
-      height: 52px;
-      padding: 0 44px 0 46px;
+      height: 46px;
+      padding: 0 38px 0 40px;
       border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
-      font-size: 15px;
+      font-size: 14.5px;
       color: var(--text);
       outline: none;
       background: var(--bg);
@@ -371,12 +375,12 @@
     .url-input:focus {
       background: var(--white);
       border-color: var(--red);
-      box-shadow: 0 0 0 4px var(--red-glow);
+      box-shadow: 0 0 0 3px var(--red-glow);
     }
 
     .url-clear-btn {
       position: absolute;
-      right: 14px;
+      right: 12px;
       background: none;
       border: none;
       color: var(--muted);
@@ -392,13 +396,13 @@
     .url-clear-btn.visible { display: flex; }
 
     .fetch-btn {
-      height: 52px;
-      padding: 0 24px;
+      height: 46px;
+      padding: 0 20px;
       background: var(--red);
       color: var(--white);
       border: none;
       border-radius: var(--radius-sm);
-      font-size: 15px;
+      font-size: 14.5px;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -407,7 +411,7 @@
       gap: 8px;
       transition: var(--transition);
       white-space: nowrap;
-      box-shadow: 0 2px 10px var(--red-glow);
+      box-shadow: 0 2px 8px var(--red-glow);
       flex-shrink: 0;
     }
 
@@ -428,7 +432,8 @@
     /* ── STATUS MESSAGE ── */
     .status-badge {
       display: none;
-      margin-top: 14px;
+      max-width: 620px;
+      margin: 12px auto 0;
       padding: 10px 14px;
       border-radius: var(--radius-sm);
       font-size: 13.5px;
@@ -1532,24 +1537,27 @@
         overflow: hidden;
       }
       .url-section {
-        padding: 14px 12px;
+        padding: 12px 14px;
       }
       .url-input-container {
-        flex-direction: column;
+        flex-direction: row;
         gap: 8px;
+        max-width: 100%;
       }
       .url-input-wrapper {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
       }
       .url-input {
-        height: 48px;
-        font-size: 14px;
-        padding: 0 38px 0 40px;
+        height: 44px;
+        font-size: 13.5px;
+        padding: 0 32px 0 36px;
       }
       .fetch-btn {
-        width: 100%;
-        height: 48px;
-        font-size: 15px;
+        width: auto;
+        height: 44px;
+        font-size: 13.5px;
+        padding: 0 16px;
       }
       .audio-workspace {
         padding: 14px 12px;
@@ -1786,7 +1794,7 @@
               type="url"
               id="audio-url-input"
               class="url-input"
-              placeholder="Paste YouTube video or song link (e.g. https://www.youtube.com/watch?v=...)"
+              placeholder="Paste YouTube video or song link..."
               aria-label="YouTube Video URL"
               autocomplete="off"
               autocorrect="off"
