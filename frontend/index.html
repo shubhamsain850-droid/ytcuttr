@@ -617,6 +617,63 @@
       margin-bottom: 16px;
       animation: fadeIn 0.25s ease;
     }
+    .full-mode-warning {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.25s ease;
+    }
+    .full-mode-warning .warning-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .full-mode-warning .warning-icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .full-mode-warning .warning-text {
+      font-size: 13px;
+      color: #92400e;
+      line-height: 1.45;
+    }
+    .full-mode-warning .warning-text strong {
+      display: block;
+      font-size: 13.5px;
+      margin-bottom: 2px;
+      color: #78350f;
+    }
+    .full-mode-warning .warning-btn {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .full-mode-warning .warning-btn:hover {
+      background: #b91c1c;
+    }
+    .action-btn.warning-mode {
+      background: #b45309;
+      color: #fff;
+    }
+    .action-btn.warning-mode:hover {
+      background: #92400e;
+    }
     .notice-icon-box {
       font-size: 20px;
       line-height: 1;
@@ -2030,6 +2087,20 @@ footer a { color: var(--red); text-decoration: none; }
               </div>
             </div>
 
+            <!-- FULL VIDEO WARNING (When video > 30 minutes in Full Mode) -->
+            <div id="full-duration-warning" class="full-mode-warning" style="display:none;">
+              <div class="warning-top">
+                <span class="warning-icon">⚠️</span>
+                <div class="warning-text">
+                  <strong>Full Download Limited to 30 Min</strong>
+                  <span>This stream/video is <strong id="full-warn-dur-text" style="display:inline;color:#b91c1c;">long</strong>. Full video downloads are capped at 30 minutes to protect cloud resources. Please use <strong>Clip Cutter</strong> to cut any segment up to 10 minutes!</span>
+                </div>
+              </div>
+              <button type="button" class="warning-btn" onclick="switchMode('clip')">
+                <span>✂️ Switch to Clip Cutter</span>
+              </button>
+            </div>
+
             <!-- PRIMARY ACTION BUTTON -->
             <button type="button" class="action-btn" id="primary-action-btn" onclick="handlePrimaryActionClick()">
               <span id="action-btn-text">⬇ Download Clip</span>
@@ -2946,16 +3017,17 @@ footer a { color: var(--red); text-decoration: none; }
       const clipGroup = document.getElementById("clip-controls-group");
       const quickGroup = document.getElementById("clip-quick-actions");
       const fullNotice = document.getElementById("full-mode-notice");
+      const fullWarning = document.getElementById("full-duration-warning");
 
       if (mode === "clip") {
         if (clipGroup) clipGroup.style.display = "block";
         if (quickGroup) quickGroup.style.display = "grid";
         if (fullNotice) fullNotice.style.display = "none";
+        if (fullWarning) fullWarning.style.display = "none";
         ClipState.syncAll(true);
       } else {
         if (clipGroup) clipGroup.style.display = "none";
         if (quickGroup) quickGroup.style.display = "none";
-        if (fullNotice) fullNotice.style.display = "flex";
       }
       updatePrimaryButtonText();
     }
@@ -2964,14 +3036,37 @@ footer a { color: var(--red); text-decoration: none; }
     function updatePrimaryButtonText() {
       const btnText = document.getElementById('action-btn-text');
       const btn = document.getElementById('primary-action-btn');
+      const fullNotice = document.getElementById('full-mode-notice');
+      const fullWarning = document.getElementById('full-duration-warning');
+      const fullWarnDurText = document.getElementById('full-warn-dur-text');
       if (!btnText || !btn) return;
 
+      const dur = (currentVideoData && currentVideoData.duration) ? currentVideoData.duration : 0;
+      const isOverLimit = dur > 1800; // 30 minutes cap for full downloads
+
       if (currentMode === 'clip') {
+        if (fullNotice) fullNotice.style.display = 'none';
+        if (fullWarning) fullWarning.style.display = 'none';
+        btn.classList.remove('warning-mode');
         btnText.textContent = '⬇ Download Clip';
         btn.disabled = !ClipState.validate().valid;
       } else {
-        btnText.textContent = '⬇ Download Full Video';
-        btn.disabled = false;
+        if (isOverLimit) {
+          if (fullNotice) fullNotice.style.display = 'none';
+          if (fullWarning) {
+            fullWarning.style.display = 'flex';
+            if (fullWarnDurText) fullWarnDurText.textContent = formatSeconds(dur);
+          }
+          btn.classList.add('warning-mode');
+          btnText.textContent = '✂️ Switch to Clip Cutter (Max 30m Full Download)';
+          btn.disabled = false;
+        } else {
+          if (fullNotice) fullNotice.style.display = 'flex';
+          if (fullWarning) fullWarning.style.display = 'none';
+          btn.classList.remove('warning-mode');
+          btnText.textContent = '⬇ Download Full Video';
+          btn.disabled = false;
+        }
       }
     }
 
@@ -3030,12 +3125,28 @@ footer a { color: var(--red); text-decoration: none; }
             signal: AbortSignal.timeout(50000)
           });
 
-          if (!resp.ok) {
-            const errData = await resp.json().catch(() => ({}));
-            throw new Error(errData.detail || `Server error (${resp.status})`);
+          let data = null;
+          const cType = resp.headers.get("content-type") || "";
+          if (cType.includes("application/json")) {
+            try {
+              data = await resp.json();
+            } catch(e) {
+              data = null;
+            }
           }
 
-          const data = await resp.json();
+          if (!resp.ok) {
+            const errDetail = data && data.detail
+              ? data.detail
+              : (resp.status === 403 || resp.status === 503
+                  ? "Server is currently sleeping or waking up. Please retry in 1 minute."
+                  : `Server error (${resp.status})`);
+            throw new Error(errDetail);
+          }
+
+          if (!data) {
+            throw new Error("Server is currently warming up. Please try again in a few moments.");
+          }
 
           // Ensure complete resolutions list (Never collapse to only 360p)
           const rawRes = (data.resolutions && data.resolutions.length > 0) ? data.resolutions : [];
@@ -3071,6 +3182,7 @@ footer a { color: var(--red); text-decoration: none; }
           // Successfully retrieved info
           hideStatus();
           displayLoadedVideo();
+          updatePrimaryButtonText();
           fetchBtn.disabled = false;
           fetchBtn.querySelector('span').textContent = 'Get Video';
           return;
@@ -3106,6 +3218,7 @@ footer a { color: var(--red); text-decoration: none; }
           const durEl = document.getElementById('loaded-video-duration');
           if (durEl) durEl.textContent = formatSeconds(dur);
           ClipState.updateVideoDuration(dur);
+          updatePrimaryButtonText();
           return true;
         }
       } catch(e) {}
@@ -3339,6 +3452,14 @@ footer a { color: var(--red); text-decoration: none; }
           showToast(val.error, true);
           return;
         }
+      } else {
+        // Enforce 30-min limit for full downloads
+        const dur = (currentVideoData && currentVideoData.duration) ? currentVideoData.duration : 0;
+        if (dur > 1800) {
+          showToast(`Full download is restricted to videos under 30 minutes (this video is ${formatSeconds(dur)}). Switched to Clip Cutter for up to 10-min clips!`, true);
+          switchMode('clip');
+          return;
+        }
       }
 
       // Open sponsored Smartlink in new tab for higher resolutions (1080p, 1440p, 4K)
@@ -3373,12 +3494,30 @@ footer a { color: var(--red); text-decoration: none; }
           body: JSON.stringify(payload)
         });
 
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.detail || 'Failed to submit processing job');
+        let data = null;
+        const cType = resp.headers.get("content-type") || "";
+        if (cType.includes("application/json")) {
+          try {
+            data = await resp.json();
+          } catch(e) {
+            data = null;
+          }
         }
 
-        const data = await resp.json();
+        if (!resp.ok) {
+          if (data && data.detail) {
+            throw new Error(data.detail);
+          }
+          if (resp.status === 403 || resp.status === 503 || resp.status === 502) {
+            throw new Error("Backend server is currently restarting or busy. Please try again shortly.");
+          }
+          throw new Error(`Server request failed (${resp.status}). Please try again.`);
+        }
+
+        if (!data || !data.job_id) {
+          throw new Error("Server returned an invalid response. Please try again.");
+        }
+
         pollJobStatus(data.job_id, isClip);
 
       } catch(e) {
@@ -3477,6 +3616,9 @@ footer a { color: var(--red); text-decoration: none; }
         try {
           const statusResp = await fetch(`${API}/status/${jobId}`);
           if (!statusResp.ok) return;
+
+          const sContentType = statusResp.headers.get("content-type") || "";
+          if (!sContentType.includes("application/json")) return;
 
           const job = await statusResp.json();
 

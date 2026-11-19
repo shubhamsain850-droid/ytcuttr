@@ -3407,6 +3407,14 @@ footer a { color: var(--red); text-decoration: none; }
           showToast(val.error, true);
           return;
         }
+      } else {
+        // Enforce 30-min limit for full downloads
+        const dur = (currentVideoData && currentVideoData.duration) ? currentVideoData.duration : 0;
+        if (dur > 1800) {
+          showToast(`Full download is restricted to videos under 30 minutes (this video is ${formatSeconds(dur)}). Switched to Clip Cutter for up to 10-min clips!`, true);
+          switchMode('clip');
+          return;
+        }
       }
 
       // Open sponsored Smartlink in new tab for higher resolutions (1080p, 1440p, 4K)
@@ -3441,12 +3449,30 @@ footer a { color: var(--red); text-decoration: none; }
           body: JSON.stringify(payload)
         });
 
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.detail || 'Failed to submit processing job');
+        let data = null;
+        const cType = resp.headers.get("content-type") || "";
+        if (cType.includes("application/json")) {
+          try {
+            data = await resp.json();
+          } catch(e) {
+            data = null;
+          }
         }
 
-        const data = await resp.json();
+        if (!resp.ok) {
+          if (data && data.detail) {
+            throw new Error(data.detail);
+          }
+          if (resp.status === 403 || resp.status === 503 || resp.status === 502) {
+            throw new Error("Backend server is currently restarting or busy. Please try again shortly.");
+          }
+          throw new Error(`Server request failed (${resp.status}). Please try again.`);
+        }
+
+        if (!data || !data.job_id) {
+          throw new Error("Server returned an invalid response. Please try again.");
+        }
+
         pollJobStatus(data.job_id, isClip);
 
       } catch(e) {

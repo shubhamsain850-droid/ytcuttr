@@ -1830,6 +1830,10 @@
       }, 250);
 
       try {
+        if (activeVideoData && activeVideoData.duration && activeVideoData.duration > 1800) {
+          throw new Error('This video exceeds the 30-minute download limit. Please use the YTCuttr Clip Cutter on the home page.');
+        }
+
         // 3. Call Backend Download Endpoint
         const dlResp = await fetch(`${API}/download`, {
           method: 'POST',
@@ -1840,12 +1844,26 @@
           })
         });
 
-        if (!dlResp.ok) {
-          const errData = await dlResp.json().catch(() => ({}));
-          throw new Error(errData.detail || 'Download failed to queue. Please try again.');
+        let dlData = null;
+        const cType = dlResp.headers.get("content-type") || "";
+        if (cType.includes("application/json")) {
+          try {
+            dlData = await dlResp.json();
+          } catch(e) {
+            dlData = null;
+          }
         }
 
-        const { job_id } = await dlResp.json();
+        if (!dlResp.ok) {
+          const errDetail = dlData && dlData.detail ? dlData.detail : 'Download failed to queue. Server may be warming up.';
+          throw new Error(errDetail);
+        }
+
+        if (!dlData || !dlData.job_id) {
+          throw new Error('Server returned an unexpected response. Please try again.');
+        }
+
+        const { job_id } = dlData;
 
         // 4. Poll Status
         let attempts = 0;

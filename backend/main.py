@@ -182,6 +182,11 @@ def get_video_id(url: str) -> str:
     m = re.search(r'(?:v=|\/|be\/|shorts\/)([0-9A-Za-z_-]{11})', url)
     return m.group(1) if m else url
 
+# SAFETY LIMITS (Prevents massive cloud bandwidth spikes, disk exhaustion & abuse bans)
+MAX_CLIP_SECONDS = 600           # 10 minutes maximum duration per clip
+MAX_FULL_VIDEO_SECONDS = 1800     # 30 minutes maximum for full video download
+MAX_FILE_SIZE_LIMIT = "500M"      # Hard limit: abort download if stream > 500 MB
+
 # QUALITY MAP: Prioritizes AVC (H.264) + AAC (M4A) for zero-transcode cutting, with clean height bounds
 QUALITY_MAP = {
     "2160p": "bv*[height<=2160]+ba[ext=m4a]/bv*[height<=2160]+ba/bestvideo[height<=2160]+bestaudio/best[height<=2160]/best",
@@ -232,6 +237,7 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: s
         "--no-warnings",
         "--cache-dir", str(CACHE_DIR),
         "--no-check-formats",
+        "--max-filesize", MAX_FILE_SIZE_LIMIT,
         "--add-header", "Accept-Language:en-US,en;q=0.9",
     ]
     if player_client:
@@ -640,6 +646,18 @@ def _run_download(job_id: str, url: str, quality: str):
     vid = get_video_id(url)
     info_json_file = CACHE_DIR / f"{vid}.info.json"
 
+    # Safety Check: Never download full videos longer than MAX_FULL_VIDEO_SECONDS (30 mins)
+    if info_json_file.exists():
+        try:
+            cdata = json.loads(info_json_file.read_text(encoding="utf-8"))
+            cdur = int(cdata.get("duration") or 0)
+            if cdur > MAX_FULL_VIDEO_SECONDS:
+                jobs[job_id]["status"] = "error"
+                jobs[job_id]["error"] = "Full video download is limited to videos under 30 minutes to preserve server resources. Please use the Clip Cutter tab for clips up to 10 minutes."
+                return
+        except Exception:
+            pass
+
     try:
         jobs[job_id]["status"] = "downloading"
         r = None
@@ -862,8 +880,10 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
 
     if end_sec <= start_sec:
         raise HTTPException(400, detail="End time must be after start time.")
-    if (end_sec - start_sec) > 600:
-        raise HTTPException(400, detail="Max clip length is 10 minutes.")
+    if (end_sec - start_sec) > MAX_CLIP_SECONDS:
+        raise HTTPException(400, detail=f"Max clip length is {MAX_CLIP_SECONDS // 60} minutes ({MAX_CLIP_SECONDS} seconds).")
+    if (end_sec - start_sec) < 1:
+        raise HTTPException(400, detail="Clip duration must be at least 1 second.")
 
     client_ip = get_client_ip(request)
 
@@ -902,6 +922,27 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
 
 @app.post("/download")
 async def download_video(req: DownloadRequest, request: Request, bg: BackgroundTasks):
+    # Safety Guard: Check video duration before accepting full download job
+    vid = get_video_id(req.url)
+    video_dur = 0
+    if vid in INFO_CACHE:
+        video_dur = int(INFO_CACHE[vid][1].get("duration") or 0)
+    else:
+        info_json_file = CACHE_DIR / f"{vid}.info.json"
+        if info_json_file.exists():
+            try:
+                data = json.loads(info_json_file.read_text(encoding="utf-8"))
+                video_dur = int(data.get("duration") or 0)
+            except Exception:
+                pass
+
+    if video_dur > MAX_FULL_VIDEO_SECONDS:
+        dur_hms = to_hms(video_dur)
+        raise HTTPException(
+            400,
+            detail=f"Full video download is restricted to videos under 30 minutes (this video is {dur_hms} long) to prevent cloud bandwidth overload. Please use the Clip Cutter tab to extract your desired segment up to 10 minutes!"
+        )
+
     client_ip = get_client_ip(request)
 
     with QUEUE_LOCK:

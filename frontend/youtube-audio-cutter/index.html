@@ -3064,6 +3064,15 @@
       const banner = document.getElementById(bannerId);
       if (banner) banner.classList.remove('visible');
 
+      if (!isClip && activeVideoData && activeVideoData.durationSec > 1800) {
+        showStatus('Full audio track download is limited to videos under 30 minutes. Switched to Cut Audio for clips up to 10 minutes!', 'error');
+        switchMode('cut');
+        allRows.forEach(r => r.classList.remove('dimmed'));
+        btnEl.classList.remove('loading');
+        btnEl.innerHTML = originalHtml;
+        return;
+      }
+
       try {
         const endpoint = isClip ? `${API}/clip` : `${API}/download`;
         const payload = isClip ? {
@@ -3082,12 +3091,26 @@
           body: JSON.stringify(payload)
         });
 
-        if (!resp.ok) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.detail || 'Server busy. Please try again.');
+        let data = null;
+        const cType = resp.headers.get("content-type") || "";
+        if (cType.includes("application/json")) {
+          try {
+            data = await resp.json();
+          } catch(e) {
+            data = null;
+          }
         }
 
-        const { job_id } = await resp.json();
+        if (!resp.ok) {
+          const errDetail = data && data.detail ? data.detail : 'Server busy or waking up. Please try again.';
+          throw new Error(errDetail);
+        }
+
+        if (!data || !data.job_id) {
+          throw new Error('Server returned an unexpected response. Please try again.');
+        }
+
+        const { job_id } = data;
 
         // Poll status
         let attempts = 0;
