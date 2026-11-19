@@ -428,6 +428,18 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     vid = get_video_id(url)
     info_json_file = CACHE_DIR / f"{vid}.info.json"
 
+    # Safety Check: Never download full videos longer than MAX_FULL_VIDEO_SECONDS (30 mins)
+    if info_json_file.exists():
+        try:
+            cdata = json.loads(info_json_file.read_text(encoding="utf-8"))
+            cdur = int(cdata.get("duration") or 0)
+            if cdur > MAX_FULL_VIDEO_SECONDS:
+                jobs[job_id]["status"] = "error"
+                jobs[job_id]["error"] = f"Full video download is limited to videos under 30 minutes to preserve server resources. Please use the Clip Cutter tab for clips up to 10 minutes."
+                return
+        except Exception:
+            pass
+
     try:
         jobs[job_id]["status"] = "downloading"
         r_dl = None
@@ -653,7 +665,7 @@ def _run_download(job_id: str, url: str, quality: str):
             cdur = int(cdata.get("duration") or 0)
             if cdur > MAX_FULL_VIDEO_SECONDS:
                 jobs[job_id]["status"] = "error"
-                jobs[job_id]["error"] = "Full video download is limited to videos under 30 minutes to preserve server resources. Please use the Clip Cutter tab for clips up to 10 minutes."
+                jobs[job_id]["error"] = f"Full video download is limited to videos under 30 minutes to preserve server resources. Please use the Clip Cutter tab for clips up to 10 minutes."
                 return
         except Exception:
             pass
