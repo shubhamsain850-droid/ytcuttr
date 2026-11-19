@@ -1,10 +1,10 @@
 {
-  "enabled": false,
+  "enabled": true,
   "title": "Server Performance Upgrade in Progress",
   "reason": "We are currently upgrading YTCuttr cloud servers to enable faster video cutting and higher stability. All services will resume shortly. Thank you for your patience!",
   "durationMinutes": 720,
-  "startTime": "2026-11-19T23:49:20.750177",
-  "endTime": null,
-  "formattedEndTime": "20-Nov-2026, 11:49 AM",
-  "updatedAt": "2026-11-19T23:52:14.060618"
+  "startTime": "2026-11-20T00:05:16.002892",
+  "endTime": "2026-11-20T12:05:16.002892",
+  "formattedEndTime": "20-Nov-2026, 12:05 PM",
+  "updatedAt": "2026-11-20T00:05:16.033872"
 }
