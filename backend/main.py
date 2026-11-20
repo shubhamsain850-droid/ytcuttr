@@ -235,6 +235,7 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: s
         "-4",
         "--no-playlist",
         "--no-warnings",
+        "--js-runtimes", "node",
         "--cache-dir", str(CACHE_DIR),
         "--no-check-formats",
         "--max-filesize", MAX_FILE_SIZE_LIMIT,
