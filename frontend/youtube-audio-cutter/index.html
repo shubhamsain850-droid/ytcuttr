@@ -693,18 +693,15 @@
       width: 25%;
     }
 
-    /* Draggable Thumbs */
+    /* Draggable Arrow Thumbs */
     .timeline-handle {
       position: absolute;
       top: 50%;
-      width: 30px;
-      height: 30px;
-      margin-top: -15px;
-      margin-left: -15px;
-      border-radius: 50%;
-      background: var(--white);
-      border: 3.5px solid var(--red);
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+      width: 18px;
+      height: 28px;
+      margin-top: -14px;
+      margin-left: -9px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
       cursor: grab;
       touch-action: none !important;
       -webkit-user-select: none;
@@ -713,63 +710,59 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.12s ease, box-shadow 0.15s ease;
       left: 0%;
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
     }
 
     #handle-start {
-      border-color: #2563eb;
+      background: #2563eb;
+      border-radius: 5px 2px 2px 5px;
       z-index: 15;
     }
-    #handle-start .handle-center-dot {
-      background: #2563eb;
-    }
     #handle-start:hover, #handle-start.dragging {
-      border-color: #1d4ed8;
-      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.55);
+      background: #1d4ed8;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.6);
     }
 
     #handle-end {
-      border-color: var(--red);
+      background: var(--red);
+      border-radius: 2px 5px 5px 2px;
       z-index: 14;
     }
-    #handle-end .handle-center-dot {
-      background: var(--red);
-    }
     #handle-end:hover, #handle-end.dragging {
-      border-color: #b91c1c;
-      box-shadow: 0 4px 18px rgba(185, 28, 28, 0.55);
+      background: #b91c1c;
+      box-shadow: 0 4px 14px rgba(185, 28, 28, 0.6);
     }
 
-    /* Extended touch target for mobile fingertips (54px x 54px) */
+    .handle-arrow-icon {
+      width: 8px;
+      height: 12px;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* Extended touch target for mobile fingertips */
     .timeline-handle::after {
       content: '';
       position: absolute;
       top: -12px;
       bottom: -12px;
-      left: -12px;
-      right: -12px;
-      border-radius: 50%;
+      left: -14px;
+      right: -14px;
+      border-radius: 6px;
     }
 
     .timeline-handle:hover,
     .timeline-handle:focus-visible {
-      transform: scale(1.18);
+      transform: scale(1.15);
       outline: none;
     }
 
     .timeline-handle.dragging {
       cursor: grabbing;
-      transform: scale(1.25);
+      transform: scale(1.22);
       z-index: 45 !important;
-    }
-
-    .timeline-handle .handle-center-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--red);
-      pointer-events: none;
     }
 
     .timeline-ticks {
@@ -1903,10 +1896,10 @@
               <div class="timeline-rail" id="timeline-rail">
                 <div class="timeline-segment" id="timeline-segment"></div>
                 <div class="timeline-handle" id="handle-start" role="slider" tabindex="0" aria-label="Start Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                  <div class="handle-center-dot"></div>
+                  <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none"><path d="M2 2L6 6L2 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
                 <div class="timeline-handle" id="handle-end" role="slider" tabindex="0" aria-label="End Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30">
-                  <div class="handle-center-dot"></div>
+                  <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none"><path d="M6 2L2 6L6 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
               </div>
             </div>
@@ -3158,8 +3151,16 @@
       if (banner) banner.classList.remove('visible');
 
       if (!isClip && activeVideoData && activeVideoData.durationSec > 1800) {
-        showStatus('Full audio track download is limited to videos under 30 minutes. Switched to Cut Audio for clips up to 10 minutes!', 'error');
+        showStatus('Full audio track download is limited to videos under 30 minutes. Switched to Cut Audio for clips up to 5 minutes!', 'error');
         switchMode('cut');
+        allRows.forEach(r => r.classList.remove('dimmed'));
+        btnEl.classList.remove('loading');
+        btnEl.innerHTML = originalHtml;
+        return;
+      }
+
+      if (isClip && (currentEndSec - currentStartSec) > 300) {
+        showStatus('Clip duration exceeds 5 minute limit. Please adjust start and end timestamps.', 'error');
         allRows.forEach(r => r.classList.remove('dimmed'));
         btnEl.classList.remove('loading');
         btnEl.innerHTML = originalHtml;

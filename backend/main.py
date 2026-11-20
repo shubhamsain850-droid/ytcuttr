@@ -25,8 +25,8 @@ jobs: dict = {}
 INFO_CACHE: dict = {}
 INFO_CACHE_TTL = 3600  # 1 hour cache
 
-# Concurrency & Smart Queue Manager (Max 1 concurrent conversion for 1GB VPS stability)
-MAX_CONCURRENT_JOBS = 1
+# Concurrency & Smart Queue Manager (3 concurrent conversion slots; fast-track for <100MB)
+MAX_CONCURRENT_JOBS = 3
 MAX_QUEUE_CAP = 30
 MAX_PER_IP = 3
 COOLDOWN_DURATION = 600  # 10 minutes temporary block on excessive concurrent requests
@@ -183,9 +183,28 @@ def get_video_id(url: str) -> str:
     return m.group(1) if m else url
 
 # SAFETY LIMITS (Prevents massive cloud bandwidth spikes, disk exhaustion & abuse bans)
-MAX_CLIP_SECONDS = 600           # 10 minutes maximum duration per clip
+MAX_CLIP_SECONDS = 300           # 5 minutes maximum duration per clip
 MAX_FULL_VIDEO_SECONDS = 1800     # 30 minutes maximum for full video download
 MAX_FILE_SIZE_LIMIT = "500M"      # Hard limit: abort download if stream > 500 MB
+
+def estimate_clip_mb(duration_sec: int, quality: str) -> float:
+    """Estimate clip file size in MB based on duration and format quality."""
+    q = quality.lower()
+    if any(k in q for k in ["audio", "mp3", "wav", "flac", "m4a", "320k", "256k", "192k", "128k"]):
+        return duration_sec * 0.04
+    elif "2160" in q or "4k" in q:
+        return duration_sec * 1.5
+    elif "1440" in q or "2k" in q:
+        return duration_sec * 0.8
+    elif "1080" in q:
+        return duration_sec * 0.44
+    elif "720" in q:
+        return duration_sec * 0.23
+    elif "480" in q:
+        return duration_sec * 0.15
+    elif any(k in q for k in ["360", "240", "144"]):
+        return duration_sec * 0.08
+    return duration_sec * 0.25
 
 # QUALITY MAP: Prioritizes AVC (H.264) + AAC (M4A) for zero-transcode cutting, with clean height bounds
 QUALITY_MAP = {
@@ -851,6 +870,9 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
         raise HTTPException(400, detail="Clip duration must be at least 1 second.")
 
     client_ip = get_client_ip(request)
+    clip_dur = end_sec - start_sec
+    est_mb = estimate_clip_mb(clip_dur, req.quality)
+    is_under_100mb = (est_mb < 100.0)
 
     with QUEUE_LOCK:
         check_ip_rate_limit(client_ip)
@@ -861,14 +883,18 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
         job_id = str(uuid.uuid4())
         IP_ACTIVE_JOBS[client_ip].add(job_id)
 
-        if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
+        # 100 MB Rule: If clip is under 100 MB -> NO WAIT (Fast-Track execution).
+        # Heavy clips (>= 100 MB) follow the 3-user concurrency queue: 4th user waits in queue.
+        if is_under_100mb or len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
             ACTIVE_JOBS.add(job_id)
             jobs[job_id] = {
                 "status": "queued",
                 "queue_position": 0,
                 "created_at": time.time(),
                 "client_ip": client_ip,
-                "max_concurrent": MAX_CONCURRENT_JOBS
+                "max_concurrent": MAX_CONCURRENT_JOBS,
+                "est_mb": round(est_mb, 1),
+                "is_fast_track": is_under_100mb
             }
         else:
             WAITING_QUEUE.append(job_id)
@@ -878,7 +904,9 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
                 "queue_position": pos,
                 "created_at": time.time(),
                 "client_ip": client_ip,
-                "max_concurrent": MAX_CONCURRENT_JOBS
+                "max_concurrent": MAX_CONCURRENT_JOBS,
+                "est_mb": round(est_mb, 1),
+                "is_fast_track": False
             }
 
     bg.add_task(_queue_worker, job_id, _run_clip, req.url, to_hms(start_sec), to_hms(end_sec), req.quality)
@@ -909,6 +937,9 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
         )
 
     client_ip = get_client_ip(request)
+    clip_dur = end_sec - start_sec
+    est_mb = estimate_clip_mb(clip_dur, req.quality)
+    is_under_100mb = (est_mb < 100.0)
 
     with QUEUE_LOCK:
         check_ip_rate_limit(client_ip)
@@ -919,14 +950,18 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
         job_id = str(uuid.uuid4())
         IP_ACTIVE_JOBS[client_ip].add(job_id)
 
-        if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
+        # 100 MB Rule: If clip is under 100 MB -> NO WAIT (Fast-Track execution).
+        # Heavy clips (>= 100 MB) follow the 3-user concurrency queue: 4th user waits in queue.
+        if is_under_100mb or len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
             ACTIVE_JOBS.add(job_id)
             jobs[job_id] = {
                 "status": "queued",
                 "queue_position": 0,
                 "created_at": time.time(),
                 "client_ip": client_ip,
-                "max_concurrent": MAX_CONCURRENT_JOBS
+                "max_concurrent": MAX_CONCURRENT_JOBS,
+                "est_mb": round(est_mb, 1),
+                "is_fast_track": is_under_100mb
             }
         else:
             WAITING_QUEUE.append(job_id)
@@ -936,7 +971,9 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
                 "queue_position": pos,
                 "created_at": time.time(),
                 "client_ip": client_ip,
-                "max_concurrent": MAX_CONCURRENT_JOBS
+                "max_concurrent": MAX_CONCURRENT_JOBS,
+                "est_mb": round(est_mb, 1),
+                "is_fast_track": False
             }
 
     bg.add_task(_queue_worker, job_id, _run_download, req.url, req.quality)

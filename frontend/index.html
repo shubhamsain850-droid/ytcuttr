@@ -980,18 +980,15 @@
       width: 50%;
     }
 
-    /* Draggable Thumbs */
+    /* Draggable Arrow Thumbs */
     .timeline-handle {
       position: absolute;
       top: 50%;
-      width: 30px;
-      height: 30px;
-      margin-top: -15px;
-      margin-left: -15px;
-      border-radius: 50%;
-      background: var(--white);
-      border: 3.5px solid var(--red);
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+      width: 18px;
+      height: 28px;
+      margin-top: -14px;
+      margin-left: -9px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
       cursor: grab;
       touch-action: none !important;
       -webkit-user-select: none;
@@ -1000,63 +997,59 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.12s ease, box-shadow 0.15s ease;
       left: 0%;
+      border: 1.5px solid rgba(255, 255, 255, 0.95);
     }
 
     #handle-start {
-      border-color: #2563eb;
+      background: #2563eb;
+      border-radius: 5px 2px 2px 5px;
       z-index: 15;
     }
-    #handle-start .handle-center-dot {
-      background: #2563eb;
-    }
     #handle-start:hover, #handle-start.dragging {
-      border-color: #1d4ed8;
-      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.55);
+      background: #1d4ed8;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.6);
     }
 
     #handle-end {
-      border-color: var(--red);
+      background: var(--red);
+      border-radius: 2px 5px 5px 2px;
       z-index: 14;
     }
-    #handle-end .handle-center-dot {
-      background: var(--red);
-    }
     #handle-end:hover, #handle-end.dragging {
-      border-color: #b91c1c;
-      box-shadow: 0 4px 18px rgba(185, 28, 28, 0.55);
+      background: #b91c1c;
+      box-shadow: 0 4px 14px rgba(185, 28, 28, 0.6);
     }
 
-    /* Extended touch target for mobile fingertips (54px x 54px) */
+    .handle-arrow-icon {
+      width: 8px;
+      height: 12px;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* Extended touch target for mobile fingertips */
     .timeline-handle::after {
       content: '';
       position: absolute;
       top: -12px;
       bottom: -12px;
-      left: -12px;
-      right: -12px;
-      border-radius: 50%;
+      left: -14px;
+      right: -14px;
+      border-radius: 6px;
     }
 
     .timeline-handle:hover,
     .timeline-handle:focus-visible {
-      transform: scale(1.18);
+      transform: scale(1.15);
       outline: none;
     }
 
     .timeline-handle.dragging {
       cursor: grabbing;
-      transform: scale(1.25);
+      transform: scale(1.22);
       z-index: 45 !important;
-    }
-
-    .timeline-handle .handle-center-dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--red);
-      pointer-events: none;
     }
 
     .timeline-ticks {
@@ -2002,7 +1995,7 @@ footer a { color: var(--red); text-decoration: none; }
                     <span>✂️</span>
                     <span>Clip Range Selector</span>
                   </span>
-                  <span class="timeline-clip-len valid" id="clip-duration-badge">Clip: 00:01:00 (Max 10:00)</span>
+                  <span class="timeline-clip-len valid" id="clip-duration-badge">Clip: 00:01:00 (Max 05:00)</span>
                 </div>
 
                 <!-- Touch & Pointer Draggable Scrubber -->
@@ -2010,10 +2003,10 @@ footer a { color: var(--red); text-decoration: none; }
                   <div class="timeline-rail" id="timeline-rail">
                     <div class="timeline-segment" id="timeline-segment"></div>
                     <div class="timeline-handle" id="handle-start" role="slider" tabindex="0" aria-label="Start Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                      <div class="handle-center-dot"></div>
+                      <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none"><path d="M2 2L6 6L2 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
                     <div class="timeline-handle" id="handle-end" role="slider" tabindex="0" aria-label="End Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60">
-                      <div class="handle-center-dot"></div>
+                      <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none"><path d="M6 2L2 6L6 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
                   </div>
                 </div>
@@ -2590,10 +2583,10 @@ footer a { color: var(--red); text-decoration: none; }
 
     // ── AUTHORITATIVE SINGLE SOURCE OF TRUTH FOR TIMESTAMPS ──
     const ClipState = {
-      videoDurationSeconds: 600,
+      videoDurationSeconds: 300,
       startSeconds: 0,
       endSeconds: 60,
-      maxClipLimit: 600, // 10 minutes backend max limit
+      maxClipLimit: 300, // 5 minutes backend max limit
       isDurationEstimated: true,
 
       // Compatibility getters and setters
@@ -2698,7 +2691,7 @@ footer a { color: var(--red); text-decoration: none; }
         if (this.startSeconds < 0) return { valid: false, error: "Start timestamp cannot be negative." };
         if (this.endSeconds <= this.startSeconds) return { valid: false, error: "End timestamp must be strictly greater than start timestamp." };
         if (this.videoDurationSeconds > 0 && this.endSeconds > this.videoDurationSeconds) return { valid: false, error: "End timestamp exceeds the video duration." };
-        if (len > this.maxClipLimit) return { valid: false, error: `Clip length exceeds 10 minute limit (current: ${formatSeconds(len)}).` };
+        if (len > this.maxClipLimit) return { valid: false, error: `Clip length exceeds 5 minute limit (current: ${formatSeconds(len)}).` };
         return { valid: true, error: "" };
       },
 
@@ -2724,7 +2717,7 @@ footer a { color: var(--red); text-decoration: none; }
         if (badge) {
           if (val.valid) {
             badge.className = 'timeline-clip-len valid';
-            badge.textContent = `Clip: ${formatSeconds(len)} (Max 10:00)`;
+            badge.textContent = `Clip: ${formatSeconds(len)} (Max 05:00)`;
           } else {
             badge.className = 'timeline-clip-len invalid';
             badge.textContent = `Clip: ${formatSeconds(len)}`;
