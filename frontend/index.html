@@ -3708,10 +3708,14 @@ footer a { color: var(--red); text-decoration: none; }
           if (job.status === "waiting") {
             const pos = job.queue_position || 1;
             targetProgress = 12;
-            setProcProgress(12, `In Queue (#${pos})`, `Server busy with 5 active tasks. You are #${pos} in line...`);
-          } else if (job.status === "queued") {
+            setProcProgress(12, `In Queue (#${pos})`, `Server busy with active tasks. You are #${pos} in line...`);
+          } else if (job.status === "starting" || job.status === "queued") {
             targetProgress = 25;
-            setProcProgress(currentProgressPercent, null, "Task queued in worker...");
+            if (job.is_fast_track) {
+              setProcProgress(currentProgressPercent, "Fast-Track", "⚡ Direct stream fast-track initiated...");
+            } else {
+              setProcProgress(currentProgressPercent, null, "Connecting to YouTube stream...");
+            }
           } else if (job.status === "downloading") {
             targetProgress = Math.max(targetProgress, 65);
             setProcProgress(

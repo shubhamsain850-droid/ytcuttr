@@ -21,6 +21,19 @@ CLIPS_DIR.mkdir(exist_ok=True)
 CACHE_DIR = Path("/tmp/ytdlp_cache")
 CACHE_DIR.mkdir(exist_ok=True)
 
+@app.on_event("startup")
+def startup_clean():
+    """Purge any stale clips/cache on boot to ensure 100% zero leftover cache."""
+    try:
+        if CLIPS_DIR.exists():
+            shutil.rmtree(CLIPS_DIR, ignore_errors=True)
+        CLIPS_DIR.mkdir(parents=True, exist_ok=True)
+        if CACHE_DIR.exists():
+            shutil.rmtree(CACHE_DIR, ignore_errors=True)
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        logger.error(f"Startup clean error: {e}")
+
 jobs: dict = {}
 INFO_CACHE: dict = {}
 INFO_CACHE_TTL = 3600  # 1 hour cache
@@ -35,6 +48,53 @@ ACTIVE_JOBS: set[str] = set()
 WAITING_QUEUE: list[str] = []
 IP_ACTIVE_JOBS: dict[str, set[str]] = {}
 IP_COOLDOWNS: dict[str, float] = {}
+
+def _sweeper_worker():
+    """Background daemon thread: sweeps temporary files, clips, and stale jobs every 60s."""
+    while True:
+        try:
+            now = time.time()
+            # 1. Clean clips older than 5 minutes (300 seconds)
+            if CLIPS_DIR.exists():
+                for item in list(CLIPS_DIR.iterdir()):
+                    try:
+                        mtime = item.stat().st_mtime
+                        if now - mtime > 300:
+                            if item.is_dir():
+                                shutil.rmtree(item, ignore_errors=True)
+                            else:
+                                item.unlink(missing_ok=True)
+                    except Exception:
+                        pass
+
+            # 2. Clean yt-dlp cache / temp files older than 5 minutes
+            if CACHE_DIR.exists():
+                for item in list(CACHE_DIR.iterdir()):
+                    try:
+                        if now - item.stat().st_mtime > 300:
+                            if item.is_dir():
+                                shutil.rmtree(item, ignore_errors=True)
+                            else:
+                                item.unlink(missing_ok=True)
+                    except Exception:
+                        pass
+
+            # 3. Clean in-memory jobs older than 10 minutes
+            with QUEUE_LOCK:
+                stale_jobs = [jid for jid, jdata in jobs.items() if now - jdata.get("created_at", now) > 600]
+                for jid in stale_jobs:
+                    jobs.pop(jid, None)
+                    _cleanup_ip_job(jid)
+                    ACTIVE_JOBS.discard(jid)
+                    if jid in WAITING_QUEUE:
+                        WAITING_QUEUE.remove(jid)
+
+        except Exception as e:
+            pass
+
+        time.sleep(60)
+
+threading.Thread(target=_sweeper_worker, daemon=True, name="YTCuttrSweeper").start()
 
 def get_client_ip(req: Request) -> str:
     xff = req.headers.get("x-forwarded-for")
@@ -582,6 +642,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 except Exception:
                     pass
             jobs[job_id]["status"] = "done"
+            jobs[job_id]["completed_at"] = time.time()
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_{'audio' if is_audio else 'clip'}_{start_hms.replace(':','-')}_{end_hms.replace(':','-')}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
@@ -595,10 +656,13 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 "r_dl_code": r_dl.returncode if r_dl else -1,
                 "r_dl_stderr": err,
             }
+            shutil.rmtree(out_dir, ignore_errors=True)
     except subprocess.TimeoutExpired:
+        shutil.rmtree(out_dir, ignore_errors=True)
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = "Operation timed out. Video may be too large or restricted."
     except Exception as e:
+        shutil.rmtree(out_dir, ignore_errors=True)
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = f"Server error: {str(e)}"
 
@@ -774,6 +838,7 @@ def _run_download(job_id: str, url: str, quality: str):
                 except Exception:
                     pass
             jobs[job_id]["status"] = "done"
+            jobs[job_id]["completed_at"] = time.time()
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_{'audio' if is_audio else 'video'}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
@@ -783,10 +848,13 @@ def _run_download(job_id: str, url: str, quality: str):
             jobs[job_id]["status"] = "error"
             jobs[job_id]["error"] = r.stderr[-400:] if (r and r.stderr) else "Download failed"
             jobs[job_id]["time_taken"] = elapsed
+            shutil.rmtree(out_dir, ignore_errors=True)
     except subprocess.TimeoutExpired:
+        shutil.rmtree(out_dir, ignore_errors=True)
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = "Download timed out."
     except Exception as e:
+        shutil.rmtree(out_dir, ignore_errors=True)
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)
 
@@ -815,7 +883,7 @@ def _queue_worker(job_id: str, run_func, *args):
             if len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS and WAITING_QUEUE and WAITING_QUEUE[0] == job_id:
                 WAITING_QUEUE.pop(0)
                 ACTIVE_JOBS.add(job_id)
-                jobs[job_id]["status"] = "queued"
+                jobs[job_id]["status"] = "starting"
                 jobs[job_id]["queue_position"] = 0
                 for idx, q_id in enumerate(WAITING_QUEUE):
                     if q_id in jobs:
@@ -888,7 +956,7 @@ async def create_clip(req: ClipRequest, request: Request, bg: BackgroundTasks):
         if is_under_100mb or len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
             ACTIVE_JOBS.add(job_id)
             jobs[job_id] = {
-                "status": "queued",
+                "status": "starting",
                 "queue_position": 0,
                 "created_at": time.time(),
                 "client_ip": client_ip,
@@ -933,11 +1001,11 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
         dur_hms = to_hms(video_dur)
         raise HTTPException(
             400,
-            detail=f"Full video download is restricted to videos under 30 minutes (this video is {dur_hms} long) to prevent cloud bandwidth overload. Please use the Clip Cutter tab to extract your desired segment up to 10 minutes!"
+            detail=f"Full video download is restricted to videos under 30 minutes (this video is {dur_hms} long) to prevent cloud bandwidth overload. Please use the Clip Cutter tab to extract your desired segment up to 5 minutes!"
         )
 
     client_ip = get_client_ip(request)
-    clip_dur = end_sec - start_sec
+    clip_dur = video_dur if video_dur > 0 else 600
     est_mb = estimate_clip_mb(clip_dur, req.quality)
     is_under_100mb = (est_mb < 100.0)
 
@@ -955,7 +1023,7 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
         if is_under_100mb or len(ACTIVE_JOBS) < MAX_CONCURRENT_JOBS:
             ACTIVE_JOBS.add(job_id)
             jobs[job_id] = {
-                "status": "queued",
+                "status": "starting",
                 "queue_position": 0,
                 "created_at": time.time(),
                 "client_ip": client_ip,
@@ -993,7 +1061,7 @@ async def get_status(job_id: str):
     return job_copy
 
 
-async def delayed_cleanup(job_id: str, delay: int = 60):
+async def delayed_cleanup(job_id: str, delay: int = 30):
     await asyncio.sleep(delay)
     shutil.rmtree(CLIPS_DIR / job_id, ignore_errors=True)
     with QUEUE_LOCK:
@@ -1020,7 +1088,7 @@ async def get_file(job_id: str, bg: BackgroundTasks):
     if not file_path.exists():
         raise HTTPException(404, detail="File not found")
 
-    bg.add_task(delayed_cleanup, job_id, 60)
+    bg.add_task(delayed_cleanup, job_id, 30)
     file_size = file_path.stat().st_size
     filename = job.get("filename", "clip.mp4")
 
