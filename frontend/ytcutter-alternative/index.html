@@ -3178,7 +3178,7 @@ footer a { color: var(--red); text-decoration: none; }
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url: rawUrl }),
-            signal: AbortSignal.timeout(50000)
+            signal: AbortSignal.timeout(18000)
           });
 
           if (!resp.ok) {
@@ -3228,7 +3228,11 @@ footer a { color: var(--red); text-decoration: none; }
 
         } catch(e) {
           lastErr = e;
-          const isNet = (e.name === 'TypeError' || e.name === 'AbortError' || e.message === 'Failed to fetch');
+          const isTimeout = (e.name === 'TimeoutError' || e.name === 'AbortError' || (e.message && (e.message.toLowerCase().includes('timeout') || e.message.toLowerCase().includes('signal') || e.message.toLowerCase().includes('aborted'))));
+          if (isTimeout) {
+            lastErr = new Error('⚠️ Connection timed out while reaching server. Please click Get Video again.');
+          }
+          const isNet = (e.name === 'TypeError' || e.name === 'AbortError' || e.name === 'TimeoutError' || isTimeout || e.message === 'Failed to fetch');
           if (!isNet || attempt === MAX_RETRIES) break;
         }
       }
@@ -3236,8 +3240,8 @@ footer a { color: var(--red); text-decoration: none; }
       // If failed after retries
       fetchBtn.disabled = false;
       fetchBtn.querySelector('span').textContent = 'Get Video';
-      const msg = (lastErr && (lastErr.name === 'AbortError' || lastErr.message === 'Failed to fetch'))
-        ? '⚠️ Server is currently waking up. Please click Get Video again in a few seconds.'
+      const msg = (lastErr && (lastErr.name === 'AbortError' || lastErr.name === 'TimeoutError' || lastErr.message.includes('waking') || lastErr.message === 'Failed to fetch'))
+        ? '⚠️ Server is currently busy or warming up. Please click Get Video again in a moment.'
         : (lastErr ? lastErr.message : 'Could not fetch video. Please check the URL.');
       showStatus(msg, 'error', false);
       showToast(msg, true);
