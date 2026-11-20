@@ -429,147 +429,100 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     vid = get_video_id(url)
     info_json_file = CACHE_DIR / f"{vid}.info.json"
 
-    # Safety Check: Never download full videos longer than MAX_FULL_VIDEO_SECONDS (30 mins)
-    if info_json_file.exists():
-        try:
-            cdata = json.loads(info_json_file.read_text(encoding="utf-8"))
-            cdur = int(cdata.get("duration") or 0)
-            if cdur > MAX_FULL_VIDEO_SECONDS:
-                jobs[job_id]["status"] = "error"
-                jobs[job_id]["error"] = f"Full video download is limited to videos under 30 minutes to preserve server resources. Please use the Clip Cutter tab for clips up to 10 minutes."
-                return
-        except Exception:
-            pass
-
     try:
         jobs[job_id]["status"] = "downloading"
         r_dl = None
 
-        # ATTEMPT 1: Direct native download with cookies and target resolution
-        cmd_dl_url = build_ytdlp_cmd([
-            "-N", "8",
-            "--concurrent-fragments", "8",
+        section_spec = f"*{start_hms}-{end_hms}"
+        section_target = str(out_path if (not is_audio or ext == "m4a") else raw_path)
+
+        # ATTEMPT 1: Fast section download with cookies and target resolution
+        cmd_dl_section = build_ytdlp_cmd([
+            "--download-sections", section_spec,
+            "--force-keyframes-at-cuts",
+            "-N", "4",
             "-f", fmt,
             *merge_fmt_args,
-            "-o", str(raw_path),
+            "-o", section_target,
             url,
         ], use_cookies=True, player_client="")
-        r_dl = subprocess.run(cmd_dl_url, capture_output=True, text=True, timeout=120)
+        r_dl = subprocess.run(cmd_dl_section, capture_output=True, text=True, timeout=90)
 
-        # ATTEMPT 2: Fallback with cached info-json if available
-        if (not raw_path.exists() or raw_path.stat().st_size == 0) and info_json_file.exists() and info_json_file.stat().st_size > 1000:
-            cmd_dl_cached = build_ytdlp_cmd([
-                "--load-info-json", str(info_json_file),
-                "-N", "8",
-                "--concurrent-fragments", "8",
-                "-f", fmt,
-                *merge_fmt_args,
-                "-o", str(raw_path),
-            ], use_cookies=True, player_client="")
-            r_dl = subprocess.run(cmd_dl_cached, capture_output=True, text=True, timeout=120)
-
-        # ATTEMPT 3: Fallback on best stream matching target height with cookies
-        if not raw_path.exists() or raw_path.stat().st_size == 0:
+        # ATTEMPT 2: Fallback section download with height-matching format with cookies
+        target_check = out_path if (not is_audio or ext == "m4a") else raw_path
+        if not target_check.exists() or target_check.stat().st_size == 0:
             cmd_dl_best = build_ytdlp_cmd([
-                "-N", "8",
-                "--concurrent-fragments", "8",
+                "--download-sections", section_spec,
+                "--force-keyframes-at-cuts",
+                "-N", "4",
                 "-f", fallback_fmt,
                 *merge_fmt_args,
-                "-o", str(raw_path),
+                "-o", section_target,
                 url,
             ], use_cookies=True, player_client="")
-            r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=120)
+            r_dl = subprocess.run(cmd_dl_best, capture_output=True, text=True, timeout=90)
 
-        # ATTEMPT 4: Direct URL without cookies with target resolution
-        if not raw_path.exists() or raw_path.stat().st_size == 0:
+        # ATTEMPT 3: Section download fallback without cookies
+        if not target_check.exists() or target_check.stat().st_size == 0:
             cmd_dl_anon = build_ytdlp_cmd([
-                "-N", "8",
-                "--concurrent-fragments", "8",
-                "-f", fmt,
+                "--download-sections", section_spec,
+                "--force-keyframes-at-cuts",
+                "-N", "4",
+                "-f", fallback_fmt,
                 *merge_fmt_args,
-                "-o", str(raw_path),
+                "-o", section_target,
                 url,
             ], use_cookies=False, player_client="")
-            r_dl = subprocess.run(cmd_dl_anon, capture_output=True, text=True, timeout=120)
+            r_dl = subprocess.run(cmd_dl_anon, capture_output=True, text=True, timeout=90)
 
-        # ATTEMPT 5: Direct URL without cookies with height-matching fallback
-        if not raw_path.exists() or raw_path.stat().st_size == 0:
-            cmd_dl_safe = build_ytdlp_cmd([
+        # ATTEMPT 4: Legacy full-video download fallback (for sources not supporting byte-range sections)
+        if not target_check.exists() or target_check.stat().st_size == 0:
+            cmd_dl_full = build_ytdlp_cmd([
                 "-N", "4",
                 "-f", fallback_fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path),
                 url,
-            ], use_cookies=False, player_client="")
-            r_dl = subprocess.run(cmd_dl_safe, capture_output=True, text=True, timeout=120)
+            ], use_cookies=True, player_client="")
+            r_dl = subprocess.run(cmd_dl_full, capture_output=True, text=True, timeout=120)
 
-        # Step 2: Local cut via FFmpeg
-        if raw_path.exists() and raw_path.stat().st_size > 0:
+        # Step 2: Audio Conversion / Local FFmpeg cut if needed
+        if (not out_path.exists() or out_path.stat().st_size == 0) and raw_path.exists() and raw_path.stat().st_size > 0:
             jobs[job_id]["status"] = "processing"
+            # Check if raw_path is already the trimmed section
+            raw_dur = 0
+            try:
+                probe_res = subprocess.run(
+                    ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(raw_path)],
+                    capture_output=True, text=True, timeout=5
+                )
+                raw_dur = float(probe_res.stdout.strip() or 0)
+            except Exception:
+                pass
+
+            # If raw_dur is close to clip length, it was already trimmed by section downloader
+            is_pretrimmed = (0 < raw_dur <= (clip_len + 8))
+            trim_args = [] if is_pretrimmed else ["-ss", start_hms, "-to", end_hms]
+
             if is_wav:
-                cmd_cut = [
-                    "ffmpeg", "-y",
-                    "-ss", start_hms,
-                    "-to", end_hms,
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "pcm_s16le",
-                    "-ar", "44100",
-                    str(out_path),
-                ]
+                cmd_cut = ["ffmpeg", "-y", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "pcm_s16le", "-ar", "44100", str(out_path)]
                 subprocess.run(cmd_cut, capture_output=True, text=True, timeout=30)
             elif is_flac:
-                cmd_cut = [
-                    "ffmpeg", "-y",
-                    "-ss", start_hms,
-                    "-to", end_hms,
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "flac",
-                    str(out_path),
-                ]
+                cmd_cut = ["ffmpeg", "-y", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "flac", str(out_path)]
                 subprocess.run(cmd_cut, capture_output=True, text=True, timeout=30)
             elif is_mp3:
-                cmd_cut = [
-                    "ffmpeg", "-y",
-                    "-ss", start_hms,
-                    "-to", end_hms,
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "libmp3lame",
-                    "-b:a", q_key,
-                    str(out_path),
-                ]
+                cmd_cut = ["ffmpeg", "-y", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "libmp3lame", "-b:a", q_key, str(out_path)]
                 subprocess.run(cmd_cut, capture_output=True, text=True, timeout=30)
             elif ext == "m4a":
-                cmd_cut = [
-                    "ffmpeg", "-y",
-                    "-ss", start_hms,
-                    "-to", end_hms,
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "copy",
-                    "-avoid_negative_ts", "make_zero",
-                    str(out_path),
-                ]
+                cmd_cut = ["ffmpeg", "-y", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "copy", "-avoid_negative_ts", "make_zero", str(out_path)]
                 subprocess.run(cmd_cut, capture_output=True, text=True, timeout=20)
                 if not out_path.exists() or out_path.stat().st_size == 0:
-                    cmd_cut_aac = [
-                        "ffmpeg", "-y",
-                        "-ss", start_hms,
-                        "-to", end_hms,
-                        "-i", str(raw_path),
-                        "-vn",
-                        "-c:a", "aac",
-                        "-b:a", "256k",
-                        str(out_path),
-                    ]
+                    cmd_cut_aac = ["ffmpeg", "-y", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "aac", "-b:a", "256k", str(out_path)]
                     subprocess.run(cmd_cut_aac, capture_output=True, text=True, timeout=30)
             else:
                 cmd_cut = [
                     "ffmpeg", "-y",
-                    "-ss", start_hms,
-                    "-to", end_hms,
+                    *trim_args,
                     "-i", str(raw_path),
                     "-c", "copy",
                     "-avoid_negative_ts", "make_zero",
@@ -580,8 +533,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 if not out_path.exists() or out_path.stat().st_size == 0:
                     cmd_cut_hq = [
                         "ffmpeg", "-y",
-                        "-ss", start_hms,
-                        "-to", end_hms,
+                        *trim_args,
                         "-i", str(raw_path),
                         "-c:v", "libx264",
                         "-preset", "veryfast",
