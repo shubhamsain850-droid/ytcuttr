@@ -1,5 +1,5 @@
 {
-  "enabled": true,
+  "enabled": false,
   "title": "Server Performance Upgrade in Progress",
   "reason": "We are currently upgrading YTCuttr cloud servers to enable faster video cutting and higher stability. All services will resume shortly. Thank you for your patience!",
   "durationMinutes": 720,
