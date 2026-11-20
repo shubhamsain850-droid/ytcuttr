@@ -25,10 +25,10 @@ jobs: dict = {}
 INFO_CACHE: dict = {}
 INFO_CACHE_TTL = 3600  # 1 hour cache
 
-# Concurrency & Smart Queue Manager (Max 5 concurrent conversions)
-MAX_CONCURRENT_JOBS = 5
+# Concurrency & Smart Queue Manager (Max 1 concurrent conversion for 1GB VPS stability)
+MAX_CONCURRENT_JOBS = 1
 MAX_QUEUE_CAP = 30
-MAX_PER_IP = 5
+MAX_PER_IP = 3
 COOLDOWN_DURATION = 600  # 10 minutes temporary block on excessive concurrent requests
 QUEUE_LOCK = threading.Lock()
 ACTIVE_JOBS: set[str] = set()
@@ -1003,7 +1003,7 @@ async def get_status(job_id: str):
     return job_copy
 
 
-async def delayed_cleanup(job_id: str, delay: int = 300):
+async def delayed_cleanup(job_id: str, delay: int = 60):
     await asyncio.sleep(delay)
     shutil.rmtree(CLIPS_DIR / job_id, ignore_errors=True)
     with QUEUE_LOCK:
@@ -1030,7 +1030,7 @@ async def get_file(job_id: str, bg: BackgroundTasks):
     if not file_path.exists():
         raise HTTPException(404, detail="File not found")
 
-    bg.add_task(delayed_cleanup, job_id, 300)
+    bg.add_task(delayed_cleanup, job_id, 60)
     file_size = file_path.stat().st_size
     filename = job.get("filename", "clip.mp4")
 
