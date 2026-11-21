@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>YouTube Shorts Downloader - Free 1080p HD MP4 Download | YTCuttr</title>
-  <meta name="description" content="Download YouTube Shorts in high quality 1080p and 720p MP4 free with sound. No watermark, no app install, instant 1-click download on Android, iPhone and PC.">
-  <meta name="keywords" content="youtube shorts downloader, cut youtube shorts online, trim youtube short, download part of youtube short, download youtube shorts, youtube shorts to mp4, download youtube shorts 1080p, save youtube shorts without watermark, download yt shorts with sound, youtube shorts video download, youtube shorts audio download">
+  <title>YouTube Full Video &amp; Shorts Downloader - Free 1080p HD MP4 &amp; MP3 | YTCuttr</title>
+  <meta name="description" content="Download full YouTube videos, Shorts, and audio tracks in high-quality 1080p, 4K, 720p MP4 or MP3, WAV, FLAC with sound. Free online downloader, no watermark.">
+  <meta name="keywords" content="youtube video downloader, youtube shorts downloader, download full youtube video, download youtube shorts 1080p, youtube to mp4, youtube to mp3 320kbps, youtube to wav, free youtube downloader online, save youtube video without watermark">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#e63030">
   <link rel="canonical" href="https://ytcuttr.com/youtube-shorts-downloader/">
@@ -13,15 +13,15 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ytcuttr.com/youtube-shorts-downloader/">
-  <meta property="og:title" content="YouTube Shorts Downloader — Free 1080p HD MP4 Download | YTCuttr">
-  <meta property="og:description" content="Download YouTube Shorts in full 1080p HD or 720p MP4 free with audio. No watermark, no signup, instant 1-click download.">
+  <meta property="og:title" content="YouTube Full Video &amp; Shorts Downloader — Free 1080p HD MP4 &amp; MP3 | YTCuttr">
+  <meta property="og:description" content="Download full YouTube videos, Shorts, and audio tracks in high-quality 1080p, 4K, 720p MP4 or MP3, WAV, FLAC free with sound. No watermark.">
   <meta property="og:image" content="https://ytcuttr.com/img/feat_shorts.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://ytcuttr.com/youtube-shorts-downloader">
-  <meta property="twitter:title" content="YouTube Shorts Downloader — Free 1080p HD MP4 Download | YTCuttr">
-  <meta property="twitter:description" content="Download YouTube Shorts in full 1080p HD or 720p MP4 free with audio. No watermark, no signup, instant 1-click download.">
+  <meta property="twitter:title" content="YouTube Full Video &amp; Shorts Downloader — Free 1080p HD MP4 &amp; MP3 | YTCuttr">
+  <meta property="twitter:description" content="Download full YouTube videos, Shorts, and audio tracks in high-quality 1080p, 4K, 720p MP4 or MP3, WAV, FLAC free with sound. No watermark.">
   <meta property="twitter:image" content="https://ytcuttr.com/img/feat_shorts.png">
 
   <!-- Favicon -->
@@ -715,6 +715,15 @@
       overflow: hidden;
       box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.25), 0 0 0 6px #1e293b;
       position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .phone-mockup.wide-video {
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 16 / 9;
+      border-radius: 14px;
+      box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.25), 0 0 0 4px #1e293b;
     }
 
     .shorts-poster {
@@ -1308,9 +1317,9 @@
           <span>✂️</span>
           <span>Clip Cutter</span>
         </a>
-        <a href="/youtube-shorts-downloader" class="nav-btn active" aria-label="YouTube Shorts Downloader (Active)">
+        <a href="/youtube-shorts-downloader" class="nav-btn active" aria-label="Full Video &amp; Shorts Downloader (Active)">
           <span>⚡</span>
-          <span>Shorts</span>
+          <span>Full Video &amp; Shorts</span>
         </a>
         <a href="/youtube-audio-cutter" class="nav-btn" aria-label="Switch to Audio Cutter">
           <span>🎵</span>
@@ -1322,8 +1331,8 @@
 
   <!-- HERO SECTION -->
   <header class="hero">
-    <h1>YouTube Shorts Downloader <span>in 1080p Full HD</span></h1>
-    <p class="hero-lead">Paste any YouTube Short link below to download MP4 in crisp 1080p HD or extract audio in seconds.</p>
+    <h1>YouTube Full Video &amp; Shorts Downloader <span>in 1080p Full HD</span></h1>
+    <p class="hero-lead">Paste any YouTube video or Shorts link below to download full videos in 1080p, 4K, 720p or audio (MP3, WAV, FLAC, M4A) free in seconds.</p>
   </header>
 
   <!-- TOP AD BANNER (728x90) -->
@@ -1363,8 +1372,8 @@
               type="url"
               id="shorts-url-input"
               class="url-input"
-              placeholder="Paste YouTube Shorts URL here (e.g. https://www.youtube.com/shorts/...)"
-              aria-label="YouTube Shorts URL"
+              placeholder="Paste YouTube Video or Shorts URL here (e.g. https://www.youtube.com/watch?v=... or /shorts/...)"
+              aria-label="YouTube Video or Shorts URL"
               autocomplete="off"
               autocorrect="off"
               spellcheck="false"
@@ -1379,7 +1388,7 @@
             </button>
           </div>
           <button type="button" class="fetch-btn" id="fetch-btn" onclick="handleFetch()">
-            <span>Get Short</span>
+            <span>Get Video</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
@@ -1732,11 +1741,18 @@
         .catch(() => {});
     }
 
-    // Render Loaded Short + 9:16 Preview + Resolution Table
+    // Render Loaded Short + 9:16 or 16:9 Preview + Resolution Table
     function renderShort(data) {
       document.getElementById('empty-state').style.display = 'none';
       const workspace = document.getElementById('shorts-workspace');
       workspace.classList.add('visible');
+
+      // Adapt preview aspect ratio: 9:16 for Shorts, 16:9 widescreen for regular videos
+      const isShort = (data.url && data.url.includes('/shorts/'));
+      const mockup = document.getElementById('phone-mockup');
+      if (mockup) {
+        mockup.classList.toggle('wide-video', !isShort);
+      }
 
       // 1. Instantly display poster thumbnail (loads in ~30ms)
       const poster = document.getElementById('shorts-poster');
@@ -1746,7 +1762,7 @@
         poster.style.opacity = '1';
       }
 
-      // 2. Load 9:16 Iframe Preview smoothly
+      // 2. Load Iframe Preview smoothly
       const iframe = document.getElementById('shorts-iframe');
       iframe.onload = () => {
         if (poster) {
@@ -1757,7 +1773,7 @@
       iframe.src = `https://www.youtube-nocookie.com/embed/${data.videoId}?autoplay=1&mute=1&loop=1&playlist=${data.videoId}&playsinline=1&controls=1&rel=0`;
 
       // Update Title
-      document.getElementById('shorts-title').textContent = data.title || 'YouTube Short';
+      document.getElementById('shorts-title').textContent = data.title || 'YouTube Video / Short';
 
       // Build Resolutions Table (Highest to Lowest)
       buildResolutionsTable(data.resolutions || []);
@@ -1781,7 +1797,11 @@
         { key: '720p',  label: '720p HD',      tag: '720p',  desc: 'High Definition • Fast Download', isHd: true, icon: '🔵' },
         { key: '480p',  label: '480p SD',      tag: '480p',  desc: 'Standard Definition • Moderate Size', icon: '⚪' },
         { key: '360p',  label: '360p Saver',   tag: '360p',  desc: 'Lightweight • Small File Size', icon: '⚪' },
-        { key: 'audio', label: 'Audio Only',   tag: 'M4A',   desc: 'Original Background Music / Sound Track', isAudio: true, icon: '🎵' },
+        { key: '320k',  label: 'MP3 (320 kbps)', tag: 'MP3', desc: 'Ultra HQ 320k MP3 Audio', isAudio: true, icon: '🎵' },
+        { key: '128k',  label: 'MP3 (128 kbps)', tag: 'MP3', desc: 'Standard 128k MP3 Audio', isAudio: true, icon: '🎵' },
+        { key: 'wav',   label: 'WAV Studio Audio', tag: 'WAV', desc: 'Uncompressed Lossless 16-bit PCM Audio', isAudio: true, icon: '🎼' },
+        { key: 'flac',  label: 'FLAC Lossless',  tag: 'FLAC', desc: 'Master Lossless Audio Quality', isAudio: true, icon: '💿' },
+        { key: 'audio', label: 'Original M4A Track', tag: 'M4A', desc: 'Original Background Sound / AAC Track', isAudio: true, icon: '🎧' },
       ];
 
       // Check which tiers exist or fallback to full list
@@ -1789,7 +1809,7 @@
 
       ORDERED_TIERS.forEach(tier => {
         // If API returned resolutions, check match (always include audio)
-        if (hasApiInfo && tier.key !== 'audio') {
+        if (hasApiInfo && !tier.isAudio) {
           const match = apiResolutions.some(r => r.toLowerCase().includes(tier.key));
           if (!match && tier.key !== '1080p' && tier.key !== '720p') {
             return; // Skip tiers not present in source video

@@ -1845,9 +1845,9 @@ footer a { color: var(--red); text-decoration: none; }
           <span>✂️</span>
           <span>Clip Cutter</span>
         </a>
-        <a href="/youtube-shorts-downloader" class="nav-btn" aria-label="Switch to Shorts Downloader">
+        <a href="/youtube-shorts-downloader" class="nav-btn" aria-label="Switch to Full Video & Shorts Downloader">
           <span>⚡</span>
-          <span>Shorts</span>
+          <span>Full Video &amp; Shorts</span>
         </a>
         <a href="/youtube-audio-cutter" class="nav-btn" aria-label="Switch to Audio Cutter">
           <span>🎵</span>
@@ -1885,19 +1885,6 @@ footer a { color: var(--red); text-decoration: none; }
   <!-- WORKSPACE TOOL CONTAINER -->
   <main class="workspace-wrap" id="cutter-tool">
     <div class="tool-card">
-
-      <!-- TABS BAR (ANIMATED SLIDING SWITCH) -->
-      <div class="tabs-bar" id="tabs-bar-container" data-active="clip" role="tablist" aria-label="Tool Selection">
-        <div class="tab-slider-bg" id="tab-slider-bg" aria-hidden="true"></div>
-        <button class="tab-item active" id="tab-clip-btn" role="tab" aria-selected="true" aria-controls="clip-controls-group" onclick="switchMode('clip')">
-          <span class="tab-icon">✂️</span>
-          <span class="tab-text">Clip Cutter</span>
-        </button>
-        <button class="tab-item" id="tab-full-btn" role="tab" aria-selected="false" aria-controls="full-mode-notice" onclick="switchMode('full')">
-          <span class="tab-icon">⬇️</span>
-          <span class="tab-text">Full Video &amp; Shorts</span>
-        </button>
-      </div>
 
       <!-- UNIFIED URL INPUT BAR -->
       <section class="url-section" aria-label="Video Input">
@@ -1941,6 +1928,11 @@ footer a { color: var(--red); text-decoration: none; }
         <div class="status-badge" id="status-badge" role="status" aria-live="polite">
           <div class="status-spinner" id="status-spinner"></div>
           <span id="status-message">Connecting to YouTube...</span>
+        </div>
+
+        <!-- Quick Switch to Full Video & Shorts -->
+        <div class="quick-nav-hint" style="text-align: center; margin-top: 14px; font-size: 13.5px; color: var(--muted, #64748b);">
+          Want to download the complete video or Short without cutting? <a href="/youtube-shorts-downloader" style="color: var(--red, #e63030); font-weight: 700; text-decoration: underline;">Open Full Video &amp; Shorts Downloader &rarr;</a>
         </div>
       </section>
 
@@ -2082,38 +2074,24 @@ footer a { color: var(--red); text-decoration: none; }
 
             </div>
 
-            <!-- QUALITY / RESOLUTION SELECTION -->
+            <!-- QUALITY & FORMAT SELECTION -->
             <div class="res-section">
               <div class="res-header">
-                <span>Select Quality</span>
-                <span style="font-size: 12px; color: var(--muted); font-weight: 500;">MP4 / M4A Audio</span>
+                <span>Select Format &amp; Quality</span>
+                <span id="selected-format-label" style="font-size: 12px; color: var(--muted); font-weight: 600;">MP4 Video &amp; Studio Audio</span>
               </div>
+
+              <!-- Video Resolutions -->
+              <div class="format-category-title" style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted, #64748b); margin: 6px 0 6px;">🎬 Video Quality (MP4)</div>
               <div class="res-pills-grid" id="resolution-grid" role="radiogroup" aria-label="Available Video Qualities">
-                <!-- Dynamically populated -->
+                <!-- Dynamically populated video pills -->
               </div>
-            </div>
 
-            <!-- FULL VIDEO NOTICE (When in Full Mode) -->
-            <div id="full-mode-notice" class="full-mode-notice" style="display:none;">
-              <div class="notice-icon-box">⬇️</div>
-              <div class="notice-text">
-                <strong>Full Video &amp; Shorts Mode</strong>
-                <span>Downloads the complete video or Short in your chosen resolution with crisp audio.</span>
+              <!-- Audio Formats -->
+              <div class="format-category-title" style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted, #64748b); margin: 14px 0 6px;">🎵 Audio Formats</div>
+              <div class="res-pills-grid" id="audio-formats-grid" role="radiogroup" aria-label="Available Audio Formats">
+                <!-- Dynamically populated audio pills: MP3 320k, MP3 128k, WAV, FLAC, M4A -->
               </div>
-            </div>
-
-            <!-- FULL VIDEO WARNING (When video > 30 minutes in Full Mode) -->
-            <div id="full-duration-warning" class="full-mode-warning" style="display:none;">
-              <div class="warning-top">
-                <span class="warning-icon">⚠️</span>
-                <div class="warning-text">
-                  <strong>Full Download Limited to 30 Min</strong>
-                  <span>This stream/video is <strong id="full-warn-dur-text" style="display:inline;color:#b91c1c;">long</strong>. Full video downloads are capped at 30 minutes to protect cloud resources. Please use <strong>Clip Cutter</strong> to cut any segment up to 10 minutes!</span>
-                </div>
-              </div>
-              <button type="button" class="warning-btn" onclick="switchMode('clip')">
-                <span>✂️ Switch to Clip Cutter</span>
-              </button>
             </div>
 
             <!-- PRIMARY ACTION BUTTON -->
@@ -3110,32 +3088,9 @@ footer a { color: var(--red); text-decoration: none; }
       fetchVideoData(val, vid);
     }
 
-    // ── MODE SWITCHING (Clip vs Full) ────────────────────────
+    // ── MODE HANDLING (Always Pure Clip Cutter) ──────────────
     function switchMode(mode) {
-      currentMode = mode;
-      const tabsBar = document.getElementById("tabs-bar-container");
-      if (tabsBar) tabsBar.setAttribute("data-active", mode);
-
-      document.getElementById("tab-clip-btn").classList.toggle("active", mode === "clip");
-      document.getElementById("tab-clip-btn").setAttribute("aria-selected", mode === "clip");
-      document.getElementById("tab-full-btn").classList.toggle("active", mode === "full");
-      document.getElementById("tab-full-btn").setAttribute("aria-selected", mode === "full");
-
-      const clipGroup = document.getElementById("clip-controls-group");
-      const quickGroup = document.getElementById("clip-quick-actions");
-      const fullNotice = document.getElementById("full-mode-notice");
-      const fullWarning = document.getElementById("full-duration-warning");
-
-      if (mode === "clip") {
-        if (clipGroup) clipGroup.style.display = "block";
-        if (quickGroup) quickGroup.style.display = "grid";
-        if (fullNotice) fullNotice.style.display = "none";
-        if (fullWarning) fullWarning.style.display = "none";
-        ClipState.syncAll(true);
-      } else {
-        if (clipGroup) clipGroup.style.display = "none";
-        if (quickGroup) quickGroup.style.display = "none";
-      }
+      currentMode = 'clip';
       updatePrimaryButtonText();
     }
     window.switchMode = switchMode;
@@ -3143,38 +3098,16 @@ footer a { color: var(--red); text-decoration: none; }
     function updatePrimaryButtonText() {
       const btnText = document.getElementById('action-btn-text');
       const btn = document.getElementById('primary-action-btn');
-      const fullNotice = document.getElementById('full-mode-notice');
-      const fullWarning = document.getElementById('full-duration-warning');
-      const fullWarnDurText = document.getElementById('full-warn-dur-text');
       if (!btnText || !btn) return;
+      btn.classList.remove('warning-mode');
 
-      const dur = (currentVideoData && currentVideoData.duration) ? currentVideoData.duration : 0;
-      const isOverLimit = dur > 1800; // 30 minutes cap for full downloads
-
-      if (currentMode === 'clip') {
-        if (fullNotice) fullNotice.style.display = 'none';
-        if (fullWarning) fullWarning.style.display = 'none';
-        btn.classList.remove('warning-mode');
-        btnText.textContent = '⬇ Download Clip';
-        btn.disabled = !ClipState.validate().valid;
+      const isAudio = ['320k', '128k', 'wav', 'flac', 'm4a', 'audio'].some(a => (selectedQuality || '').toLowerCase().includes(a));
+      if (isAudio) {
+        btnText.textContent = `⬇ Download Audio Clip (${(selectedQuality || 'MP3').toUpperCase()})`;
       } else {
-        if (isOverLimit) {
-          if (fullNotice) fullNotice.style.display = 'none';
-          if (fullWarning) {
-            fullWarning.style.display = 'flex';
-            if (fullWarnDurText) fullWarnDurText.textContent = formatSeconds(dur);
-          }
-          btn.classList.add('warning-mode');
-          btnText.textContent = '✂️ Switch to Clip Cutter (Max 30m Full Download)';
-          btn.disabled = false;
-        } else {
-          if (fullNotice) fullNotice.style.display = 'flex';
-          if (fullWarning) fullWarning.style.display = 'none';
-          btn.classList.remove('warning-mode');
-          btnText.textContent = '⬇ Download Full Video';
-          btn.disabled = false;
-        }
+        btnText.textContent = `⬇ Download Video Clip (${selectedQuality || '720p'})`;
       }
+      btn.disabled = !ClipState.validate().valid;
     }
 
     // ── STATUS HELPERS (Honest Feedback) ─────────────────────
@@ -3510,81 +3443,102 @@ footer a { color: var(--red); text-decoration: none; }
     }
     window.previewSelectedClip = previewSelectedClip;
 
-    // ── QUALITY RESOLUTION PICKER ────────────────────────────
+    // ── QUALITY & AUDIO FORMATS PICKER ───────────────────────
+    const AUDIO_FORMATS = [
+      { key: '320k', label: 'MP3 (320k)', tag: 'Ultra HQ' },
+      { key: '128k', label: 'MP3 (128k)', tag: 'Standard' },
+      { key: 'wav',  label: 'WAV',        tag: 'Studio Lossless' },
+      { key: 'flac', label: 'FLAC',       tag: 'Master Lossless' },
+      { key: 'm4a',  label: 'M4A',        tag: 'Original AAC' },
+    ];
+
     function renderResolutionPills() {
-      const grid = document.getElementById('resolution-grid');
-      grid.innerHTML = '';
+      const vGrid = document.getElementById('resolution-grid');
+      const aGrid = document.getElementById('audio-formats-grid');
+      if (vGrid) vGrid.innerHTML = '';
+      if (aGrid) aGrid.innerHTML = '';
 
-      if (!currentVideoData || !currentVideoData.resolutions || currentVideoData.resolutions.length === 0) return;
+      if (!currentVideoData) return;
 
-      // Select 720p by default for fast mobile streaming, or 1080p, else first available
-      let defIdx = currentVideoData.resolutions.findIndex(r => r.startsWith('720p'));
-      if (defIdx === -1) defIdx = currentVideoData.resolutions.findIndex(r => r.startsWith('1080p'));
+      // Filter video resolutions (exclude 'Audio only')
+      const rawRes = (currentVideoData.resolutions || ["1080p", "720p", "480p", "360p"]).filter(r => !r.toLowerCase().includes('audio'));
+      if (rawRes.length === 0) rawRes.push("720p", "480p", "360p");
+
+      // Default to 720p or 1080p
+      let defIdx = rawRes.findIndex(r => r.startsWith('720p'));
+      if (defIdx === -1) defIdx = rawRes.findIndex(r => r.startsWith('1080p'));
       if (defIdx === -1) defIdx = 0;
+      selectedQuality = rawRes[defIdx];
 
-      currentVideoData.resolutions.forEach((res, i) => {
-        const isSelected = (i === defIdx);
+      // 1. Video Pills
+      rawRes.forEach(res => {
+        const isSelected = (res === selectedQuality);
         const pill = document.createElement('button');
         pill.type = 'button';
         pill.className = 'res-pill' + (isSelected ? ' active' : '');
         pill.setAttribute('role', 'radio');
         pill.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-        
+        pill.setAttribute('data-quality', res);
+
         if (isHighResQuality(res)) {
           pill.innerHTML = `<span>${res}</span><span class="res-ad-badge" title="Sponsored by partner">AD</span>`;
         } else {
           pill.textContent = res;
         }
 
-        pill.onclick = () => selectResolution(res, pill);
-        grid.appendChild(pill);
+        pill.onclick = () => selectAnyQuality(res, pill);
+        if (vGrid) vGrid.appendChild(pill);
       });
 
-      selectedQuality = currentVideoData.resolutions[defIdx];
+      // 2. Audio Pills
+      if (aGrid) {
+        AUDIO_FORMATS.forEach(af => {
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'res-pill audio-pill';
+          pill.setAttribute('role', 'radio');
+          pill.setAttribute('aria-checked', 'false');
+          pill.setAttribute('data-quality', af.key);
+          pill.innerHTML = `<span>${af.label}</span><span style="font-size: 10px; opacity: 0.8; margin-left: 4px;">(${af.tag})</span>`;
+          pill.onclick = () => selectAnyQuality(af.key, pill);
+          aGrid.appendChild(pill);
+        });
+      }
+
+      updatePrimaryButtonText();
     }
 
-    function selectResolution(res, el) {
+    function selectAnyQuality(res, el) {
       selectedQuality = res;
-      document.querySelectorAll('#resolution-grid .res-pill').forEach(b => {
+      document.querySelectorAll('#resolution-grid .res-pill, #audio-formats-grid .res-pill').forEach(b => {
         b.classList.remove('active');
         b.setAttribute('aria-checked', 'false');
       });
       el.classList.add('active');
       el.setAttribute('aria-checked', 'true');
+      updatePrimaryButtonText();
     }
 
-    // ── PRIMARY ACTION TRIGGER (Clip / Download) ─────────────
+    // ── PRIMARY ACTION TRIGGER (Pure Clip Cutter) ────────────
     async function handlePrimaryActionClick() {
       if (!currentVideoData) return;
 
-      const isClip = currentMode === 'clip';
       const btn = document.getElementById('primary-action-btn');
-
-      if (isClip) {
-        const len = ClipState.getDuration();
-        if (len > ClipState.maxClipLimit) {
-          showToast(`⚠️ Maximum clip limit is 5 minutes (selected: ${formatSeconds(len)}). Please adjust to under 5 minutes!`, true);
-          const valMsg = document.getElementById('time-val-msg');
-          if (valMsg) {
-            valMsg.className = 'time-validation-msg error visible';
-            valMsg.textContent = `⚠️ Selected clip is ${formatSeconds(len)} (Max allowed is 5 minutes). Please shorten your selection.`;
-            valMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-          return;
+      const len = ClipState.getDuration();
+      if (len > ClipState.maxClipLimit) {
+        showToast(`⚠️ Maximum clip limit is 5 minutes (selected: ${formatSeconds(len)}). Please adjust to under 5 minutes!`, true);
+        const valMsg = document.getElementById('time-val-msg');
+        if (valMsg) {
+          valMsg.className = 'time-validation-msg error visible';
+          valMsg.textContent = `⚠️ Selected clip is ${formatSeconds(len)} (Max allowed is 5 minutes). Please shorten your selection.`;
+          valMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        const val = ClipState.validate();
-        if (!val.valid) {
-          showToast(val.error, true);
-          return;
-        }
-      } else {
-        // Enforce 30-min limit for full downloads
-        const dur = (currentVideoData && currentVideoData.duration) ? currentVideoData.duration : 0;
-        if (dur > 1800) {
-          showToast(`Full download is restricted to videos under 30 minutes (this video is ${formatSeconds(dur)}). Switched to Clip Cutter for up to 10-min clips!`, true);
-          switchMode('clip');
-          return;
-        }
+        return;
+      }
+      const val = ClipState.validate();
+      if (!val.valid) {
+        showToast(val.error, true);
+        return;
       }
 
       // Open sponsored Smartlink in new tab for higher resolutions (1080p, 1440p, 4K)
@@ -3597,23 +3551,18 @@ footer a { color: var(--red); text-decoration: none; }
       btn.disabled = true;
       btn.classList.add('processing');
 
-      const qVal = selectedQuality === 'Audio only' ? 'audio' : selectedQuality;
-
-      showProcessingBox(isClip ? 'Submitting clip request...' : 'Preparing full video download...');
+      const isAudio = ['320k', '128k', 'wav', 'flac', 'm4a', 'audio'].some(a => (selectedQuality || '').toLowerCase().includes(a));
+      showProcessingBox(isAudio ? 'Processing audio clip in cloud...' : 'Cutting video clip in cloud...');
 
       try {
-        let endpoint = isClip ? `${API}/clip` : `${API}/download`;
-        let payload = isClip ? {
+        const payload = {
           url: currentVideoData.url,
           start: formatSeconds(ClipState.startSec),
           end: formatSeconds(ClipState.endSec),
-          quality: qVal
-        } : {
-          url: currentVideoData.url,
-          quality: qVal
+          quality: selectedQuality
         };
 
-        const resp = await fetch(endpoint, {
+        const resp = await fetch(`${API}/clip`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
