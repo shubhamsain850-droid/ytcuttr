@@ -483,6 +483,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     t_start = time.time()
     out_dir = CLIPS_DIR / job_id
     out_dir.mkdir(exist_ok=True)
+    clip_len = max(1, parse_hms(end_hms) - parse_hms(start_hms))
     q_key = clean_quality_key(quality)
     is_wav = (q_key == "wav")
     is_flac = (q_key == "flac")
