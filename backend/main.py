@@ -495,7 +495,14 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
     fallback_fmt = "ba[ext=m4a]/ba/best" if is_audio else f"bv*[height<={target_height}]+ba/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best"
     out_path = out_dir / f"clip.{ext}"
     raw_path = out_dir / f"raw.{'m4a' if is_audio else 'mp4'}"
-    fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
+
+    # Format & Sorting: supports both landscape and vertical/portrait videos accurately
+    sort_args = []
+    if is_audio:
+        fmt = "ba[ext=m4a]/ba/best"
+    else:
+        fmt = "bv*+ba/b"
+        sort_args = ["-S", f"res:{target_height},vcodec:h264,acodec:m4a"]
 
     vid = get_video_id(url)
     info_json_file = CACHE_DIR / f"{vid}.info.json"
@@ -511,6 +518,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         cmd_dl_section = build_ytdlp_cmd([
             "--download-sections", section_spec,
             "-N", "1",
+            *sort_args,
             "-f", fmt,
             *merge_fmt_args,
             "-o", section_target,
@@ -518,13 +526,14 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         ], use_cookies=True, player_client="")
         r_dl = run_process(cmd_dl_section, timeout=60)
 
-        # ATTEMPT 2: Fallback section stream-copy with height-matching format with cookies
+        # ATTEMPT 2: Fallback section stream-copy with target resolution with cookies
         target_check = out_path if (not is_audio or ext == "m4a") else raw_path
         if not target_check.exists() or target_check.stat().st_size == 0:
             cmd_dl_best = build_ytdlp_cmd([
                 "--download-sections", section_spec,
                 "-N", "1",
-                "-f", fallback_fmt,
+                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", section_target,
                 url,
@@ -536,7 +545,8 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             cmd_dl_anon = build_ytdlp_cmd([
                 "--download-sections", section_spec,
                 "-N", "1",
-                "-f", fallback_fmt,
+                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", section_target,
                 url,
@@ -667,7 +677,14 @@ def _run_download(job_id: str, url: str, quality: str):
             target_height = 720
 
     fallback_fmt = "ba[ext=m4a]/ba/best" if is_audio else f"bv*[height<={target_height}]+ba/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best"
-    fmt = QUALITY_MAP.get(q_key, QUALITY_MAP["720p"])
+
+    # Format & Sorting: supports both landscape and vertical/portrait videos accurately
+    sort_args = []
+    if is_audio:
+        fmt = "ba[ext=m4a]/ba/best"
+    else:
+        fmt = "bv*+ba/b"
+        sort_args = ["-S", f"res:{target_height},vcodec:h264,acodec:m4a"]
 
     vid = get_video_id(url)
     info_json_file = CACHE_DIR / f"{vid}.info.json"
@@ -693,6 +710,7 @@ def _run_download(job_id: str, url: str, quality: str):
         cmd = build_ytdlp_cmd([
             "-N", "8",
             "--concurrent-fragments", "8",
+            *sort_args,
             "-f", fmt,
             *merge_fmt_args,
             "-o", str(raw_path if is_audio else out_path),
@@ -706,6 +724,7 @@ def _run_download(job_id: str, url: str, quality: str):
                 "--load-info-json", str(info_json_file),
                 "-N", "8",
                 "--concurrent-fragments", "8",
+                *sort_args,
                 "-f", fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
@@ -717,7 +736,8 @@ def _run_download(job_id: str, url: str, quality: str):
             fallback_cmd = build_ytdlp_cmd([
                 "-N", "2",
                 "--concurrent-fragments", "2",
-                "-f", fallback_fmt,
+                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
@@ -729,7 +749,8 @@ def _run_download(job_id: str, url: str, quality: str):
             fallback_anon = build_ytdlp_cmd([
                 "-N", "2",
                 "--concurrent-fragments", "2",
-                "-f", fmt,
+                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,

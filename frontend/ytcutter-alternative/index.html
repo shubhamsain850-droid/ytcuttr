@@ -926,8 +926,10 @@
       height: 48px;
       display: flex;
       align-items: center;
-      touch-action: none;
+      touch-action: none !important;
       cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .timeline-rail {
@@ -936,6 +938,9 @@
       height: 10px;
       background: #cbd5e1;
       border-radius: 6px;
+      touch-action: none !important;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .timeline-segment {
@@ -1003,11 +1008,11 @@
     .timeline-handle::after {
       content: '';
       position: absolute;
-      top: -12px;
-      bottom: -12px;
-      left: -14px;
-      right: -14px;
-      border-radius: 6px;
+      top: -16px;
+      bottom: -16px;
+      left: -16px;
+      right: -16px;
+      border-radius: 8px;
     }
 
     .timeline-handle:hover,
@@ -1147,12 +1152,16 @@
     .time-validation-msg {
       font-size: 12.5px;
       font-weight: 600;
-      padding: 8px 14px;
+      padding: 10px 14px;
       border-radius: 8px;
       display: none;
       margin-top: 12px;
-      line-height: 1.4;
+      line-height: 1.45;
       animation: fadeIn 0.2s ease;
+      max-width: 100%;
+      box-sizing: border-box;
+      word-break: break-word;
+      white-space: normal;
     }
     .time-validation-msg.visible { display: block; }
     .time-validation-msg.error {
@@ -1362,35 +1371,42 @@
     }
     .trust-badge span { color: var(--success); }
 
-    /* ── GENERAL TOAST ── */
+    /* ── GENERAL TOAST NOTIFICATION ── */
     .toast {
       position: fixed;
       bottom: 24px;
-      right: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(90px);
       background: #1e293b;
-      color: #f8fafc;
-      padding: 14px 22px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: var(--shadow-lg);
-      transform: translateY(100px);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      line-height: 1.45;
+      text-align: center;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
       opacity: 0;
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
-      z-index: 9999;
-      max-width: 90vw;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+      z-index: 99999;
+      max-width: calc(100vw - 32px);
+      width: max-content;
+      box-sizing: border-box;
+      word-break: break-word;
+      white-space: normal;
+      pointer-events: none;
     }
     .toast.show {
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
     .toast.error {
-      background: #991b1b;
-      color: #fff;
+      background: #dc2626;
+      color: #ffffff;
     }
     .toast.success {
-      background: #166534;
-      color: #fff;
+      background: #16a34a;
+      color: #ffffff;
     }
 
     /* ── ANIMATIONS ── */
@@ -1496,24 +1512,6 @@ footer {
 }
 footer a { color: var(--red); text-decoration: none; }
 
-/* ── TOAST ── */
-.toast {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: var(--text);
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 99px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: transform 0.3s;
-  z-index: 999;
-  white-space: nowrap;
-}
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.error { background: var(--red); }
 
 /* ── SUPPORTS HINT ── */
 .supports-hint {
@@ -2797,7 +2795,7 @@ footer a { color: var(--red); text-decoration: none; }
     }
     window.nudgeTime = nudgeTime;
 
-    // ── ROBUST POINTER-DRAGGABLE TIMELINE SCRUBBER WITH PROXIMITY RESOLUTION ──
+    // ── ROBUST TOUCH & POINTER-DRAGGABLE TIMELINE SCRUBBER ──
     let scrubberInitialized = false;
     let activePointerDrag = null; // 'start' | 'end' | null
     let dragLastClientX = 0;
@@ -2825,7 +2823,7 @@ footer a { color: var(--red); text-decoration: none; }
         return Math.round(pct * ClipState.videoDurationSeconds);
       }
 
-      function resolveTargetHandle(e) {
+      function resolveTargetHandle(clientX, targetEl) {
         const rStart = handleStart.getBoundingClientRect();
         const rEnd = handleEnd.getBoundingClientRect();
         const cStart = rStart.left + rStart.width / 2;
@@ -2835,59 +2833,35 @@ footer a { color: var(--red); text-decoration: none; }
         // When handles are overlapping or very close (< 38px), split by midpoint
         if (distancePx < 38) {
           const midpointX = (cStart + cEnd) / 2;
-          return e.clientX < midpointX ? 'start' : 'end';
+          return clientX < midpointX ? 'start' : 'end';
         }
 
         // When separated, check exact target or proximity
-        if (handleStart.contains(e.target) || e.target === handleStart) return 'start';
-        if (handleEnd.contains(e.target) || e.target === handleEnd) return 'end';
+        if (targetEl && (handleStart.contains(targetEl) || targetEl === handleStart)) return 'start';
+        if (targetEl && (handleEnd.contains(targetEl) || targetEl === handleEnd)) return 'end';
 
-        const distToStart = Math.abs(e.clientX - cStart);
-        const distToEnd = Math.abs(e.clientX - cEnd);
+        const distToStart = Math.abs(clientX - cStart);
+        const distToEnd = Math.abs(clientX - cEnd);
         return distToStart <= distToEnd ? 'start' : 'end';
       }
 
-      function startDrag(target, e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        activePointerDrag = target;
-        dragLastClientX = e.clientX;
-
-        if (target === 'start') {
-          handleStart.classList.add('dragging');
-          handleEnd.classList.remove('dragging');
-          handleStart.style.zIndex = '50';
-          handleEnd.style.zIndex = '20';
-          try { handleStart.setPointerCapture(e.pointerId); } catch(err) {}
-        } else {
-          handleEnd.classList.add('dragging');
-          handleStart.classList.remove('dragging');
-          handleEnd.style.zIndex = '50';
-          handleStart.style.zIndex = '20';
-          try { handleEnd.setPointerCapture(e.pointerId); } catch(err) {}
-        }
-      }
-
-      function onPointerMove(e) {
+      function applyDragUpdate(clientX) {
         if (!activePointerDrag) return;
-        const targetSec = getSecFromPointerX(e.clientX);
-        const deltaX = e.clientX - dragLastClientX;
-        dragLastClientX = e.clientX;
+        const targetSec = getSecFromPointerX(clientX);
+        const deltaX = clientX - dragLastClientX;
+        dragLastClientX = clientX;
 
         // Dynamic Directional Handoff: If handles are squeezed tight (<= 2 sec gap)
         // and user drags in the direction of the other handle, seamlessly transfer drag!
         const gap = ClipState.endSeconds - ClipState.startSeconds;
         if (gap <= 2) {
           if (activePointerDrag === 'end' && deltaX < -3 && targetSec <= ClipState.startSeconds) {
-            // Dragging left while hitting start handle -> switch control to start handle!
             activePointerDrag = 'start';
             handleEnd.classList.remove('dragging');
             handleStart.classList.add('dragging');
             handleStart.style.zIndex = '50';
             handleEnd.style.zIndex = '20';
           } else if (activePointerDrag === 'start' && deltaX > 3 && targetSec >= ClipState.endSeconds) {
-            // Dragging right while hitting end handle -> switch control to end handle!
             activePointerDrag = 'end';
             handleStart.classList.remove('dragging');
             handleEnd.classList.add('dragging');
@@ -2903,56 +2877,118 @@ footer a { color: var(--red); text-decoration: none; }
         }
       }
 
-      function onPointerEnd(e) {
+      function startDragHandle(target, clientX) {
+        activePointerDrag = target;
+        dragLastClientX = clientX;
+
+        if (target === 'start') {
+          handleStart.classList.add('dragging');
+          handleEnd.classList.remove('dragging');
+          handleStart.style.zIndex = '50';
+          handleEnd.style.zIndex = '20';
+        } else {
+          handleEnd.classList.add('dragging');
+          handleStart.classList.remove('dragging');
+          handleEnd.style.zIndex = '50';
+          handleStart.style.zIndex = '20';
+        }
+      }
+
+      function stopDrag() {
         if (!activePointerDrag) return;
         handleStart.classList.remove('dragging');
         handleEnd.classList.remove('dragging');
         handleStart.style.zIndex = '25';
         handleEnd.style.zIndex = '20';
-
-        try {
-          if (e.pointerId !== undefined) {
-            if (handleStart.hasPointerCapture && handleStart.hasPointerCapture(e.pointerId)) {
-              handleStart.releasePointerCapture(e.pointerId);
-            }
-            if (handleEnd.hasPointerCapture && handleEnd.hasPointerCapture(e.pointerId)) {
-              handleEnd.releasePointerCapture(e.pointerId);
-            }
-          }
-        } catch(err) {}
-
         activePointerDrag = null;
       }
 
-      // Handle pointerdown events directly with intelligent target resolution
+      // ── MOUSE & DESKTOP POINTER EVENTS ──
       handleStart.addEventListener('pointerdown', (e) => {
-        const resolved = resolveTargetHandle(e);
-        startDrag(resolved, e);
+        if (e.pointerType === 'touch') return; // Handled by touch events
+        e.preventDefault();
+        e.stopPropagation();
+        const resolved = resolveTargetHandle(e.clientX, e.target);
+        startDragHandle(resolved, e.clientX);
+        try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
       });
 
       handleEnd.addEventListener('pointerdown', (e) => {
-        const resolved = resolveTargetHandle(e);
-        startDrag(resolved, e);
+        if (e.pointerType === 'touch') return;
+        e.preventDefault();
+        e.stopPropagation();
+        const resolved = resolveTargetHandle(e.clientX, e.target);
+        startDragHandle(resolved, e.clientX);
+        try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
       });
 
-      // Window pointermove/pointerup as universal fallback for smooth dragging offscreen
-      window.addEventListener('pointermove', onPointerMove, { passive: false });
-      window.addEventListener('pointerup', onPointerEnd);
-      window.addEventListener('pointercancel', onPointerEnd);
-
-      // Clicking Rail to jump closest handle
       rail.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') return;
         if (e.target === handleStart || e.target === handleEnd) return;
+        e.preventDefault();
         const targetSec = getSecFromPointerX(e.clientX);
-        const resolved = resolveTargetHandle(e);
-
+        const resolved = resolveTargetHandle(e.clientX, e.target);
         if (resolved === 'start') {
           ClipState.setStart(targetSec, true);
         } else {
           ClipState.setEnd(targetSec, true);
         }
-        startDrag(resolved, e);
+        startDragHandle(resolved, e.clientX);
       });
+
+      window.addEventListener('pointermove', (e) => {
+        if (e.pointerType === 'touch') return;
+        if (!activePointerDrag) return;
+        e.preventDefault();
+        applyDragUpdate(e.clientX);
+      }, { passive: false });
+
+      window.addEventListener('pointerup', (e) => {
+        if (e.pointerType === 'touch') return;
+        stopDrag();
+      });
+      window.addEventListener('pointercancel', (e) => {
+        if (e.pointerType === 'touch') return;
+        stopDrag();
+      });
+
+      // ── DEDICATED NATIVE TOUCH EVENTS (Smooth & Reliable on Mobile) ──
+      function onTouchStart(e) {
+        if (!e.touches || e.touches.length === 0) return;
+        const touch = e.touches[0];
+        const clientX = touch.clientX;
+        const resolved = resolveTargetHandle(clientX, e.target);
+
+        // If tapping directly on rail outside handles, jump closest handle
+        if (e.target === rail || (!handleStart.contains(e.target) && !handleEnd.contains(e.target))) {
+          const targetSec = getSecFromPointerX(clientX);
+          if (resolved === 'start') {
+            ClipState.setStart(targetSec, true);
+          } else {
+            ClipState.setEnd(targetSec, true);
+          }
+        }
+
+        startDragHandle(resolved, clientX);
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      function onTouchMove(e) {
+        if (!activePointerDrag || !e.touches || e.touches.length === 0) return;
+        e.preventDefault(); // Stop mobile page scrolling while dragging slider!
+        e.stopPropagation();
+        applyDragUpdate(e.touches[0].clientX);
+      }
+
+      function onTouchEnd(e) {
+        stopDrag();
+      }
+
+      scrubber.addEventListener('touchstart', onTouchStart, { passive: false });
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('touchend', onTouchEnd, { passive: false });
+      window.addEventListener('touchcancel', onTouchEnd, { passive: false });
 
       // Keyboard Accessibility on Handles
       handleStart.addEventListener('keydown', (e) => {
@@ -3464,11 +3500,11 @@ footer a { color: var(--red); text-decoration: none; }
       if (isClip) {
         const len = ClipState.getDuration();
         if (len > ClipState.maxClipLimit) {
-          showToast(`⚠️ Maximum clip duration is 5 minutes (05:00). You have selected ${formatSeconds(len)}. Please trim your selection to 5 minutes or less to download.`, true);
+          showToast(`⚠️ Maximum clip limit is 5 minutes (selected: ${formatSeconds(len)}). Please adjust to under 5 minutes!`, true);
           const valMsg = document.getElementById('time-val-msg');
           if (valMsg) {
             valMsg.className = 'time-validation-msg error visible';
-            valMsg.textContent = `⚠️ Selected clip is ${formatSeconds(len)} (Exceeds 5-minute limit). Please adjust your selection to 5 minutes or less.`;
+            valMsg.textContent = `⚠️ Selected clip is ${formatSeconds(len)} (Max allowed is 5 minutes). Please shorten your selection.`;
             valMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
           return;
