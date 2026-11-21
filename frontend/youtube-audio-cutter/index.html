@@ -2649,8 +2649,7 @@
       const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
       sec = Math.max(0, Math.min(sec, maxTotal - 1));
       if (sec >= currentEndSec) {
-        currentEndSec = Math.min(maxTotal, sec + 5);
-        document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+        sec = Math.max(0, currentEndSec - 1);
       }
       currentStartSec = sec;
       document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
@@ -2661,8 +2660,7 @@
       const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
       sec = Math.max(1, Math.min(sec, maxTotal));
       if (sec <= currentStartSec) {
-        currentStartSec = Math.max(0, sec - 5);
-        document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
+        sec = Math.min(maxTotal, currentStartSec + 1);
       }
       currentEndSec = sec;
       document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
@@ -2830,10 +2828,9 @@
               if (durBadge) durBadge.textContent = formatSecondsToHms(videoDurationSec);
               updateTimelineTicks(videoDurationSec);
               
-              if (currentStartSec === 0 && currentEndSec <= 30) {
-                currentEndSec = Math.min(30, videoDurationSec);
-                document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
-              }
+              currentStartSec = 0;
+              currentEndSec = videoDurationSec;
+              document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
               updateTimelineHandles(currentStartSec, currentEndSec, videoDurationSec);
             }
           }
@@ -2948,11 +2945,8 @@
             if (durBadge) durBadge.textContent = formatSecondsToHms(dur);
             updateTimelineTicks(dur);
             
-            // Adjust slider with real video duration
-            if (currentEndSec <= 30 && dur > 30) {
-              currentEndSec = Math.min(30, dur);
-              document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
-            }
+            currentEndSec = dur;
+            document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
             updateTimelineHandles(currentStartSec, currentEndSec, dur);
           }
           return true;
@@ -2993,7 +2987,7 @@
       initTimelineScrubber();
       updateTimelineTicks(data.durationSec || 180);
       currentStartSec = 0;
-      currentEndSec = Math.min(30, data.durationSec || 180);
+      currentEndSec = data.durationSec || 180;
       document.getElementById('start-time-input').value = '00:00:00';
       document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
       updateTimelineHandles(currentStartSec, currentEndSec, data.durationSec || 180);
@@ -3104,6 +3098,12 @@
 
         if (eSec <= sSec) {
           showStatus('End time must be greater than start time.', 'error');
+          return;
+        }
+
+        if ((eSec - sSec) > 300) {
+          const lenHms = formatSecondsToHms(eSec - sSec);
+          showStatus(`⚠️ Maximum audio clip duration is 5 minutes (05:00). You selected ${lenHms}. Please trim your selection to 5 minutes or less before downloading.`, 'error');
           return;
         }
       }

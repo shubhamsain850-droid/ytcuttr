@@ -2556,13 +2556,11 @@ footer a { color: var(--red); text-decoration: none; }
           this.videoDurationSeconds = d;
           this.isDurationEstimated = false;
         } else {
-          // If video duration is unknown (0 from oEmbed), use a generous 600s baseline.
-          // NEVER lock the user into an unusable 1-second freeze!
           this.videoDurationSeconds = 600;
           this.isDurationEstimated = true;
         }
         this.startSeconds = 0;
-        this.endSeconds = Math.min(this.videoDurationSeconds, 60);
+        this.endSeconds = this.videoDurationSeconds;
         this.syncAll(true);
         updateTimelineTicks(this.videoDurationSeconds);
       },
@@ -2572,16 +2570,8 @@ footer a { color: var(--red); text-decoration: none; }
         this.videoDurationSeconds = d;
         this.isDurationEstimated = false;
 
-        // Ensure start and end fit within the new duration
-        if (this.startSeconds >= d) {
-          this.startSeconds = Math.max(0, d - 10);
-        }
-        if (this.endSeconds > d || this.endSeconds <= this.startSeconds) {
-          this.endSeconds = Math.min(d, Math.max(this.startSeconds + 1, Math.min(60, d)));
-        }
-        if ((this.endSeconds - this.startSeconds) > this.maxClipLimit) {
-          this.endSeconds = Math.min(d, this.startSeconds + this.maxClipLimit);
-        }
+        this.startSeconds = 0;
+        this.endSeconds = d;
         this.syncAll(true);
         updateTimelineTicks(this.videoDurationSeconds);
       },
@@ -2590,18 +2580,9 @@ footer a { color: var(--red); text-decoration: none; }
         sec = Math.round(Number(sec) || 0);
         sec = Math.max(0, Math.min(sec, this.videoDurationSeconds - 1));
 
-        // Enforce: start < end
+        // Start cannot cross beyond end handle (keep at least 1s difference)
         if (sec >= this.endSeconds) {
-          if (sec + 1 <= this.videoDurationSeconds) {
-            this.endSeconds = Math.min(this.videoDurationSeconds, sec + 5);
-          } else {
-            sec = Math.max(0, this.endSeconds - 1);
-          }
-        }
-
-        // Enforce max clip limit: (end - start) <= 600
-        if ((this.endSeconds - sec) > this.maxClipLimit) {
-          this.endSeconds = Math.min(this.videoDurationSeconds, sec + this.maxClipLimit);
+          sec = Math.max(0, this.endSeconds - 1);
         }
 
         this.startSeconds = sec;
@@ -2617,18 +2598,9 @@ footer a { color: var(--red); text-decoration: none; }
         sec = Math.round(Number(sec) || 0);
         sec = Math.max(1, Math.min(sec, this.videoDurationSeconds));
 
-        // Enforce: end > start
+        // End cannot cross behind start handle (keep at least 1s difference)
         if (sec <= this.startSeconds) {
-          if (sec - 1 >= 0) {
-            this.startSeconds = Math.max(0, sec - 5);
-          } else {
-            sec = Math.min(this.videoDurationSeconds, this.startSeconds + 1);
-          }
-        }
-
-        // Enforce max clip limit: (end - start) <= 600
-        if ((sec - this.startSeconds) > this.maxClipLimit) {
-          sec = Math.min(this.videoDurationSeconds, this.startSeconds + this.maxClipLimit);
+          sec = Math.min(this.videoDurationSeconds, this.startSeconds + 1);
         }
 
         this.endSeconds = sec;
@@ -2668,27 +2640,28 @@ footer a { color: var(--red); text-decoration: none; }
         const len = this.getDuration();
 
         if (badge) {
-          if (val.valid) {
+          if (len <= this.maxClipLimit) {
             badge.className = 'timeline-clip-len valid';
             badge.textContent = `Clip: ${formatSeconds(len)} (Max 05:00)`;
           } else {
             badge.className = 'timeline-clip-len invalid';
-            badge.textContent = `Clip: ${formatSeconds(len)}`;
+            badge.textContent = `Clip: ${formatSeconds(len)} (⚠️ Exceeds 05:00)`;
           }
         }
 
         if (valMsg) {
-          if (val.valid) {
+          if (len <= this.maxClipLimit) {
             valMsg.className = 'time-validation-msg';
             valMsg.textContent = '';
           } else {
             valMsg.className = 'time-validation-msg error visible';
-            valMsg.textContent = val.error;
+            valMsg.textContent = `⚠️ Selected clip is ${formatSeconds(len)}. Maximum allowed clip length is 5 minutes (05:00). Please trim to under 5 minutes before downloading.`;
           }
         }
 
+        // Action button remains enabled so clicking gives direct warning feedback if >5m
         if (actionBtn && currentMode === 'clip') {
-          actionBtn.disabled = !val.valid;
+          actionBtn.disabled = false;
         }
       }
     };
@@ -3445,6 +3418,17 @@ footer a { color: var(--red); text-decoration: none; }
       const btn = document.getElementById('primary-action-btn');
 
       if (isClip) {
+        const len = ClipState.getDuration();
+        if (len > ClipState.maxClipLimit) {
+          showToast(`⚠️ Maximum clip duration is 5 minutes (05:00). You have selected ${formatSeconds(len)}. Please trim your selection to 5 minutes or less to download.`, true);
+          const valMsg = document.getElementById('time-val-msg');
+          if (valMsg) {
+            valMsg.className = 'time-validation-msg error visible';
+            valMsg.textContent = `⚠️ Selected clip is ${formatSeconds(len)} (Exceeds 5-minute limit). Please adjust your selection to 5 minutes or less.`;
+            valMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+          return;
+        }
         const val = ClipState.validate();
         if (!val.valid) {
           showToast(val.error, true);
