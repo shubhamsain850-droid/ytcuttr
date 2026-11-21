@@ -1302,7 +1302,7 @@
       line-height: 1.2;
     }
 
-    /* ── CROSS-ACTION BANNER ABOVE CLOUD DOWNLOADER ── */
+        /* ── CROSS-ACTION BANNER (CLIP CUTTER SHORTCUT) ── */
     .ytcuttr-switch-bar {
       display: flex;
       align-items: center;
@@ -1355,9 +1355,9 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 9px 16px;
+      padding: 9px 18px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 700;
       text-decoration: none;
       transition: var(--transition);
@@ -1375,18 +1375,6 @@
       transform: translateY(-1px);
     }
 
-    .switch-btn.audio-btn {
-      background: var(--white);
-      color: #4f46e5;
-      border: 1px solid #c7d2fe;
-    }
-
-    .switch-btn.audio-btn:hover {
-      background: #eef2ff;
-      border-color: #818cf8;
-      transform: translateY(-1px);
-    }
-
     @media (max-width: 768px) {
       .ytcuttr-switch-bar {
         flex-direction: column;
@@ -1396,8 +1384,6 @@
       }
       .switch-bar-actions {
         width: 100%;
-        flex-direction: column;
-        gap: 8px;
       }
       .switch-btn {
         width: 100%;
@@ -1405,116 +1391,7 @@
       }
     }
 
-    
-    /* ── FORMAT FILTER TABS ── */
-    .format-filter-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-
-    .format-tab-btn {
-      padding: 6px 14px;
-      border-radius: var(--radius-pill);
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text-soft);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .format-tab-btn:hover {
-      background: var(--white);
-      border-color: var(--border-focus);
-      color: var(--text);
-    }
-
-    .format-tab-btn.active {
-      background: var(--red);
-      color: var(--white);
-      border-color: var(--red);
-      box-shadow: 0 2px 6px var(--red-glow);
-    }
-
-    .cloud-helper-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 14px;
-    }
-
-    .cloud-helper-link {
-      background: none;
-      border: none;
-      color: var(--red);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: underline;
-      padding: 0;
-      white-space: nowrap;
-    }
-
-    .cloud-helper-link:hover {
-      color: var(--red-hover);
-    }
-
-    /* ── MOBILE ROW ADAPTATIONS ── */
-    @media (max-width: 600px) {
-      .res-row {
-        padding: 11px 12px;
-        gap: 8px;
-      }
-      .res-left {
-        gap: 8px;
-      }
-      .res-icon {
-        font-size: 18px;
-      }
-      .res-label {
-        font-size: 13.5px;
-        gap: 5px;
-      }
-      .badge-tag {
-        font-size: 9.5px;
-        padding: 2px 5px;
-      }
-      .res-desc {
-        font-size: 11.5px;
-      }
-      .dl-btn {
-        height: 38px;
-        min-width: 95px;
-        padding: 0 12px;
-        font-size: 13px;
-        gap: 5px;
-      }
-      .format-tab-btn {
-        font-size: 12px;
-        padding: 5px 11px;
-      }
-      .cloud-helper-box {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-        padding: 10px 12px;
-      }
-    }
-
-    /* ── CLOUD EMBED CONTAINER ── */
+    /* ── CLOUD EMBED CONTAINER (YT1s STYLE - 0% VPS LOAD) ── */
     .cloud-frame-wrap {
       width: 100%;
       background: var(--white);
@@ -1523,7 +1400,7 @@
       overflow: hidden;
       box-shadow: var(--shadow-sm);
       position: relative;
-      min-height: 520px;
+      min-height: 720px;
     }
 
     .iframe-loading-placeholder {
@@ -1638,15 +1515,15 @@
       <!-- EMPTY STATE (Zero Bloat Placeholder) -->
       <div class="empty-state hidden" id="empty-state" style="display:none;"></div>
 
-      <!-- LOADED WORKSPACE (PREVIEW + CLEAN FORMATS LIST) -->
-      <div class="shorts-workspace" id="shorts-workspace" style="display: none;">
+      <!-- LOADED WORKSPACE (YT1S-STYLE CLOUD ENGINE + CLIP TRIMMER BANNER) -->
+      <div class="shorts-workspace" id="shorts-workspace" style="display: none; padding: 20px;">
         
-        <!-- YTCUTTR ACTION BAR (TRIM / STUDIO AUDIO SHORTCUTS) -->
+        <!-- YTCUTTR CLIP CUTTER ACTION BANNER -->
         <div class="ytcuttr-switch-bar">
           <div class="switch-bar-left">
             <span class="switch-icon">✂️</span>
             <div class="switch-text">
-              <strong>Need only a part of this video?</strong>
+              <strong>Need only a specific part of this video?</strong>
               <span>Trim exact start &amp; end timestamps with millisecond precision without downloading the whole file.</span>
             </div>
           </div>
@@ -1654,73 +1531,25 @@
             <a id="btn-switch-trim" href="/" class="switch-btn clip-btn">
               <span>✂️ Trim with Clip Cutter</span>
             </a>
-            <a id="btn-switch-audio" href="/youtube-audio-cutter" class="switch-btn audio-btn">
-              <span>🎵 Studio WAV/FLAC Audio</span>
-            </a>
           </div>
         </div>
 
-        <div class="shorts-grid">
-
-          <!-- 9:16 or 16:9 PREVIEW COLUMN -->
-          <div class="preview-col">
-            <div class="phone-mockup" id="phone-mockup">
-              <img id="shorts-poster" class="shorts-poster" src="" alt="YouTube Video Preview">
-              <iframe
-                id="shorts-iframe"
-                src=""
-                title="YouTube Video Preview"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
-            </div>
-            <div class="shorts-title-box">
-              <div class="shorts-video-title" id="shorts-title">YouTube Video</div>
-            </div>
-          </div>
-
-          <!-- FORMATS & RESOLUTIONS COLUMN -->
-          <div class="options-col">
-            <div class="options-header">
-              <h2>Select Download Format</h2>
-              <span id="video-duration-pill">Video &amp; Audio</span>
-            </div>
-
-            <!-- FORMAT CATEGORY FILTER TABS -->
-            <div class="format-filter-tabs">
-              <button type="button" class="format-tab-btn active" id="tab-btn-all" onclick="filterFormats('all')">🌟 All Formats</button>
-              <button type="button" class="format-tab-btn" id="tab-btn-video" onclick="filterFormats('video')">🎬 Video (MP4)</button>
-              <button type="button" class="format-tab-btn" id="tab-btn-audio" onclick="filterFormats('audio')">🎵 Audio (MP3/WAV)</button>
-            </div>
-
-            <!-- FORMAT ROWS -->
-            <div class="res-list" id="res-list">
-              <!-- Dynamically populated rows with Download buttons and Smartlink -->
-            </div>
-
-            <!-- CLOUD SERVER FALLBACK BOX -->
-            <div class="cloud-helper-box">
-              <span>⚡ Need 4K, 2K or an instant cloud mirror?</span>
-              <button type="button" class="cloud-helper-link" onclick="toggleCloudIframe()">Open Cloud Mirror Server &rarr;</button>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- OPTIONAL CLOUD EMBED MODAL / DRAWER -->
-        <div class="cloud-frame-wrap" id="cloud-frame-wrap" style="display: none; margin-top: 24px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px 16px; background:#f1f5f9; border-bottom:1px solid var(--border);">
-            <strong style="font-size:13.5px; color:var(--text);">Cloud Mirror Downloader (0% VPS Load)</strong>
-            <button type="button" onclick="toggleCloudIframe()" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; font-weight:700;">&times;</button>
+        <!-- CLOUD DOWNLOAD ENGINE (ALL FORMATS - 0% VPS LOAD - YT1S ENGINE) -->
+        <div class="cloud-frame-wrap" id="cloud-frame-wrap">
+          <div class="iframe-loading-placeholder" id="iframe-loader">
+            <div class="status-spinner" style="margin: 0 auto 12px; border-width: 3px; width: 32px; height: 32px;"></div>
+            <p style="text-align: center; color: var(--text); font-size: 15px; font-weight: 700;">Loading Video &amp; Available Formats...</p>
+            <p style="text-align: center; color: var(--muted); font-size: 13px; margin-top: 4px;">Preparing all 1080p, 720p, 480p, 360p &amp; MP3 formats with zero wait.</p>
           </div>
           <iframe 
             id="cloud-download-iframe" 
             src="" 
             width="100%" 
-            height="580" 
+            height="720" 
             frameborder="0" 
-            style="border: none; width: 100%; min-height: 540px;"
-            allow="clipboard-write; web-share">
+            style="border: none; border-radius: 12px; width: 100%; min-height: 700px; display: none;"
+            allow="clipboard-write; web-share"
+            onload="onCloudFrameLoaded()">
           </iframe>
         </div>
 
@@ -1906,40 +1735,13 @@
 
   <!-- APPLICATION LOGIC -->
   <script>
-    const API = "https://mnca3.aiccloud.online";
     const ADSTERRA_SMARTLINK = "https://araplhn.org/4/65571464d0c894253cdb9626a0e501a6";
-    let activeVideoData = null;
-    let isDownloading = false;
-    let currentFilter = 'all'; // 'all' | 'video' | 'audio'
-
-    // Master Formats Catalog
-    const ALL_FORMAT_TIERS = [
-      { key: '1080p', type: 'video', label: '1080p Full HD', format: 'MP4', tag: '1080p', desc: 'Crisp Full HD • High Quality MP4 with Audio', isHd: true, isFeatured: true, icon: '🎬' },
-      { key: '720p',  type: 'video', label: '720p HD',      format: 'MP4', tag: '720p',  desc: 'High Definition • Fast Download', isHd: true, icon: '🎬' },
-      { key: '480p',  type: 'video', label: '480p SD',      format: 'MP4', tag: '480p',  desc: 'Standard Definition • Medium Size', isHd: false, icon: '🎬' },
-      { key: '360p',  type: 'video', label: '360p Saver',   format: 'MP4', tag: '360p',  desc: 'Data Saver • Smallest File Size', isHd: false, icon: '🎬' },
-      { key: '320k',  type: 'audio', label: 'MP3 (320 kbps)', format: 'MP3', tag: '320k', desc: 'Ultra High Quality 320k MP3 Audio', isAudio: true, icon: '🎵' },
-      { key: '128k',  type: 'audio', label: 'MP3 (128 kbps)', format: 'MP3', tag: '128k', desc: 'Standard 128k MP3 Audio for Music', isAudio: true, icon: '🎵' },
-      { key: 'wav',   type: 'audio', label: 'Studio WAV Audio', format: 'WAV', tag: 'WAV', desc: 'Uncompressed 16-bit 44.1kHz Lossless PCM', isAudio: true, icon: '🎼' },
-      { key: 'flac',  type: 'audio', label: 'FLAC Lossless',  format: 'FLAC', tag: 'FLAC', desc: 'Bit-Perfect Lossless Master Audio', isAudio: true, icon: '💿' },
-      { key: 'audio', type: 'audio', label: 'Original M4A Track', format: 'M4A', tag: 'M4A', desc: 'Native Untouched AAC Audio Stream', isAudio: true, icon: '🎧' }
-    ];
 
     // Helper: Extract 11-char Video ID
     function extractVideoId(url) {
       if (!url) return null;
       const m = url.match(/(?:shorts\/|v=|youtu\.be\/|\/embed\/|\/v\/|live\/)([A-Za-z0-9_-]{11})/);
       return m ? m[1] : null;
-    }
-
-    function formatSecondsToHms(totalSec) {
-      totalSec = Math.max(0, Math.floor(totalSec));
-      const h = Math.floor(totalSec / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
-      if (h > 0) return `${h}h ${m}m ${s}s`;
-      if (m > 0) return `${m}m ${s}s`;
-      return `${s}s`;
     }
 
     function handleInput() {
@@ -1968,56 +1770,15 @@
       document.getElementById('status-badge').className = 'status-badge';
     }
 
-    function showToast(msg, isError = false) {
-      let toast = document.getElementById('toast-msg');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toast-msg';
-        toast.className = 'toast';
-        document.body.appendChild(toast);
-      }
-      toast.textContent = msg;
-      toast.classList.toggle('error', isError);
-      toast.classList.add('visible');
-      setTimeout(() => {
-        toast.classList.remove('visible');
-      }, 4000);
-    }
-
-    function filterFormats(filterType) {
-      currentFilter = filterType;
-      document.querySelectorAll('.format-tab-btn').forEach(b => b.classList.remove('active'));
-      const activeBtn = document.getElementById(`tab-btn-${filterType}`);
-      if (activeBtn) activeBtn.classList.add('active');
-
-      document.querySelectorAll('.res-row').forEach(row => {
-        const type = row.getAttribute('data-type');
-        if (filterType === 'all' || type === filterType) {
-          row.style.display = 'flex';
-        } else {
-          row.style.display = 'none';
-        }
-      });
-    }
-
-    function toggleCloudIframe() {
-      const wrap = document.getElementById('cloud-frame-wrap');
+    function onCloudFrameLoaded() {
+      const loader = document.getElementById('iframe-loader');
       const frame = document.getElementById('cloud-download-iframe');
-      if (!wrap) return;
-
-      if (wrap.style.display === 'none' || !wrap.style.display) {
-        wrap.style.display = 'block';
-        if (frame && activeVideoData && (!frame.src || frame.src === 'about:blank' || !frame.src.includes(activeVideoData.videoId))) {
-          frame.src = `https://embed.dlsrv.online/v1/search?query=${encodeURIComponent(activeVideoData.url)}`;
-        }
-        wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      } else {
-        wrap.style.display = 'none';
-      }
+      if (loader) loader.style.display = 'none';
+      if (frame) frame.style.display = 'block';
     }
 
-    // Main Fetch Handler
-    async function handleFetch() {
+    // Main Fetch Handler (100% Cloud Server - YT1s Style - 0% VPS Load)
+    function handleFetch() {
       const input = document.getElementById('shorts-url-input');
       const rawUrl = (input ? input.value : '').trim();
       const videoId = extractVideoId(rawUrl);
@@ -2029,338 +1790,38 @@
 
       hideStatus();
 
+      // Trigger Adsterra Smartlink in new tab for 100% Monetization
+      try {
+        window.open(ADSTERRA_SMARTLINK, '_blank');
+      } catch(e) {}
+
       const fetchBtn = document.getElementById('fetch-btn');
       if (fetchBtn) {
-        fetchBtn.disabled = true;
         fetchBtn.innerHTML = '<span>⚡ Loading...</span>';
+        setTimeout(() => {
+          fetchBtn.innerHTML = '<span>Get Video</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        }, 1200);
       }
 
-      // Update Trimmer & Audio shortcuts
+      // Update Clip Cutter Shortcut link with URL preloaded
       const btnTrim = document.getElementById('btn-switch-trim');
       if (btnTrim) btnTrim.href = `/?url=${encodeURIComponent(rawUrl)}`;
-      const btnAudio = document.getElementById('btn-switch-audio');
-      if (btnAudio) btnAudio.href = `/youtube-audio-cutter/?url=${encodeURIComponent(rawUrl)}`;
 
-      activeVideoData = {
-        url: rawUrl,
-        videoId: videoId,
-        title: 'YouTube Video',
-        duration: 0,
-        resolutions: []
-      };
-
-      // 1. Render workspace UI immediately with fast defaults
-      renderShort(activeVideoData);
-
-      // 2. Fetch oEmbed metadata for instantaneous title & author
-      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
-        .then(r => r.ok ? r.json() : null)
-        .then(meta => {
-          if (meta && meta.title) {
-            activeVideoData.title = meta.title;
-            const tEl = document.getElementById('shorts-title');
-            if (tEl) tEl.textContent = meta.title;
-          }
-        })
-        .catch(() => {});
-
-      // 3. Query Backend /info for exact duration and streams
-      fetch(`${API}/info`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: rawUrl })
-      })
-      .then(r => r.ok ? r.json() : null)
-      .then(info => {
-        if (info) {
-          if (info.title) {
-            activeVideoData.title = info.title;
-            const tEl = document.getElementById('shorts-title');
-            if (tEl) tEl.textContent = info.title;
-          }
-          if (info.duration) {
-            activeVideoData.duration = info.duration;
-            const durBadge = document.getElementById('video-duration-pill');
-            if (durBadge) durBadge.textContent = formatSecondsToHms(info.duration);
-          }
-          if (info.resolutions && Array.isArray(info.resolutions)) {
-            activeVideoData.resolutions = info.resolutions;
-            buildResolutionsTable(info.resolutions);
-          }
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (fetchBtn) {
-          fetchBtn.disabled = false;
-          fetchBtn.innerHTML = '<span>Get Video</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
-        }
-      });
-    }
-
-    // Render workspace
-    function renderShort(data) {
+      // Show workspace & cloud iframe
       const workspace = document.getElementById('shorts-workspace');
       if (workspace) workspace.style.display = 'block';
 
-      // Adapt preview aspect ratio: 9:16 for Shorts, 16:9 for regular videos
-      const isShort = (data.url && data.url.includes('/shorts/'));
-      const mockup = document.getElementById('phone-mockup');
-      if (mockup) {
-        mockup.classList.toggle('wide-video', !isShort);
+      const loader = document.getElementById('iframe-loader');
+      const frame = document.getElementById('cloud-download-iframe');
+      if (loader) loader.style.display = 'flex';
+      if (frame) {
+        frame.style.display = 'none';
+        frame.src = `https://embed.dlsrv.online/v1/search?query=${encodeURIComponent(rawUrl)}`;
       }
 
-      // Poster thumbnail
-      const poster = document.getElementById('shorts-poster');
-      if (poster) {
-        poster.src = `https://i.ytimg.com/vi/${data.videoId}/hqdefault.jpg`;
-        poster.classList.add('active');
-        poster.style.opacity = '1';
-      }
-
-      // Iframe preview
-      const iframe = document.getElementById('shorts-iframe');
-      if (iframe) {
-        iframe.onload = () => {
-          if (poster) {
-            poster.style.opacity = '0';
-            setTimeout(() => { poster.classList.remove('active'); }, 400);
-          }
-        };
-        iframe.src = `https://www.youtube-nocookie.com/embed/${data.videoId}?autoplay=1&mute=1&loop=1&playlist=${data.videoId}&playsinline=1&controls=1&rel=0`;
-      }
-
-      // Title
-      const tEl = document.getElementById('shorts-title');
-      if (tEl) tEl.textContent = data.title || 'YouTube Video / Short';
-
-      // Build initial resolutions table
-      buildResolutionsTable(data.resolutions || []);
-
-      // Scroll smoothly on mobile
+      // Smooth scroll to workspace on mobile
       if (window.innerWidth < 768 && workspace) {
         workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-
-    // Build Formats Table with Clean Badges and Download Buttons
-    function buildResolutionsTable(apiResolutions = []) {
-      const container = document.getElementById('res-list');
-      if (!container) return;
-      container.innerHTML = '';
-
-      ALL_FORMAT_TIERS.forEach(tier => {
-        const row = document.createElement('div');
-        row.className = `res-row ${tier.isFeatured ? 'featured' : ''}`;
-        row.id = `res-row-${tier.key}`;
-        row.setAttribute('data-type', tier.type);
-
-        const badgeClass = tier.isHd ? 'badge-tag hd' : (tier.isAudio ? 'badge-tag audio' : 'badge-tag sd');
-
-        row.innerHTML = `
-          <div class="res-left">
-            <span class="res-icon">${tier.icon}</span>
-            <div class="res-meta">
-              <div class="res-label">
-                <span>${tier.label}</span>
-                <span class="${badgeClass}">${tier.tag}</span>
-              </div>
-              <div class="res-desc">${tier.desc}</div>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="dl-btn"
-            id="dl-btn-${tier.key}"
-            onclick="triggerShortDownload('${tier.key}', this)"
-          >
-            <span>⬇️</span>
-            <span>Download</span>
-          </button>
-        `;
-        container.appendChild(row);
-      });
-
-      // Maintain active filter if user selected tab earlier
-      if (currentFilter !== 'all') {
-        filterFormats(currentFilter);
-      }
-    }
-
-    function updateShortBtnProgress(btnEl, pct, label) {
-      pct = Math.min(100, Math.max(0, Math.round(pct)));
-      btnEl.style.setProperty('--progress', `${pct}%`);
-      btnEl.innerHTML = `<span class="btn-spinner"></span> <span class="btn-pct-label">${label}</span> <span class="btn-pct-val">${pct}%</span>`;
-    }
-
-    // Trigger Download with ADSTERRA SMARTLINK on EVERY CLICK!
-    async function triggerShortDownload(qualityKey, btnEl) {
-      if (isDownloading || !activeVideoData) return;
-
-      // ── CRITICAL REVENUE TRIGGER: Open Adsterra Smartlink in New Tab ──
-      try {
-        window.open(ADSTERRA_SMARTLINK, '_blank');
-      } catch (e) {
-        console.warn('Smartlink trigger error', e);
-      }
-
-      isDownloading = true;
-
-      // 1. Lock all other rows
-      document.querySelectorAll('.res-row').forEach(row => {
-        if (row.id !== `res-row-${qualityKey}`) {
-          row.classList.add('dimmed');
-        }
-      });
-
-      // 2. Button state: Loading
-      btnEl.disabled = true;
-      btnEl.className = 'dl-btn btn-loading';
-
-      // Dynamic percentage progress ticker
-      let currentProgress = 15;
-      let currentStatus = 'preparing';
-      updateShortBtnProgress(btnEl, currentProgress, 'Preparing');
-
-      const progressTimer = setInterval(() => {
-        if (currentStatus === 'downloading') {
-          if (currentProgress < 70) {
-            currentProgress += (currentProgress < 45 ? 4 : 2);
-            updateShortBtnProgress(btnEl, currentProgress, 'Processing');
-          }
-        } else if (currentStatus === 'processing') {
-          if (currentProgress < 70) currentProgress = 70;
-          if (currentProgress < 94) {
-            currentProgress += (currentProgress < 85 ? 3 : 1);
-            updateShortBtnProgress(btnEl, currentProgress, 'Converting');
-          }
-        } else {
-          if (currentProgress < 32) {
-            currentProgress += 3;
-            updateShortBtnProgress(btnEl, currentProgress, 'Preparing');
-          }
-        }
-      }, 250);
-
-      try {
-        // If video is longer than 30 minutes, suggest cloud engine
-        if (activeVideoData && activeVideoData.duration && activeVideoData.duration > 1800 && qualityKey !== 'audio') {
-          clearInterval(progressTimer);
-          toggleCloudIframe();
-          throw new Error('This video exceeds the 30-min standard queue limit. Cloud Mirror has opened below!');
-        }
-
-        // 3. Call Backend Download Endpoint
-        const dlResp = await fetch(`${API}/download`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: activeVideoData.url,
-            quality: qualityKey
-          })
-        });
-
-        let dlData = null;
-        const cType = dlResp.headers.get("content-type") || "";
-        if (cType.includes("application/json")) {
-          try {
-            dlData = await dlResp.json();
-          } catch(e) {
-            dlData = null;
-          }
-        }
-
-        if (!dlResp.ok) {
-          const errDetail = dlData && dlData.detail ? dlData.detail : 'Server warming up. Please try Cloud Mirror below.';
-          throw new Error(errDetail);
-        }
-
-        if (!dlData || !dlData.job_id) {
-          throw new Error('Server returned an unexpected response. Please try again.');
-        }
-
-        const { job_id } = dlData;
-
-        // 4. Poll Status
-        let attempts = 0;
-        const maxAttempts = 120; // 2 minutes max
-        let completed = false;
-
-        while (attempts < maxAttempts && !completed) {
-          attempts++;
-          await new Promise(r => setTimeout(r, 1000));
-
-          const statResp = await fetch(`${API}/status/${job_id}`);
-          if (!statResp.ok) continue;
-
-          const job = await statResp.json();
-
-          if (job.status === 'waiting') {
-            currentStatus = 'waiting';
-            const pos = job.queue_position || 1;
-            updateShortBtnProgress(btnEl, 10, `Queue #${pos}`);
-          } else if (job.status === 'downloading') {
-            currentStatus = 'downloading';
-          } else if (job.status === 'processing') {
-            currentStatus = 'processing';
-          } else if (job.status === 'done') {
-            completed = true;
-            clearInterval(progressTimer);
-            btnEl.style.setProperty('--progress', '100%');
-
-            // 5. Button State: Ready!
-            btnEl.className = 'dl-btn btn-done';
-            btnEl.innerHTML = `<span>✅ Ready! 100%</span>`;
-
-            // 6. Direct automatic trigger
-            const fileUrl = `${API}/download-file/${job_id}`;
-            const ext = qualityKey.includes('k') || qualityKey === 'mp3' ? 'mp3' : (qualityKey === 'wav' ? 'wav' : (qualityKey === 'flac' ? 'flac' : (qualityKey === 'audio' ? 'm4a' : 'mp4')));
-            const fileName = job.filename || `ytcuttr_${qualityKey}.${ext}`;
-
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = fileUrl;
-            a.setAttribute('download', fileName);
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              if (a.parentNode) a.parentNode.removeChild(a);
-            }, 500);
-
-            showToast('Download started successfully!');
-
-            // Reset after 3 seconds
-            setTimeout(() => {
-              btnEl.style.removeProperty('--progress');
-              btnEl.className = 'dl-btn';
-              btnEl.disabled = false;
-              btnEl.innerHTML = `<span>⬇️</span> <span>Download</span>`;
-              document.querySelectorAll('.res-row').forEach(r => r.classList.remove('dimmed'));
-              isDownloading = false;
-            }, 3000);
-            return;
-          } else if (job.status === 'error') {
-            throw new Error(job.error || 'Failed to download this resolution.');
-          }
-        }
-
-        if (!completed) {
-          throw new Error('Processing timed out. Please try again.');
-        }
-
-      } catch (err) {
-        clearInterval(progressTimer);
-        btnEl.style.removeProperty('--progress');
-        btnEl.className = 'dl-btn btn-error';
-        btnEl.innerHTML = `<span>⚠️ Retry</span>`;
-        showToast(err.message || 'Download failed. Please try again.', true);
-        setTimeout(() => {
-          btnEl.className = 'dl-btn';
-          btnEl.disabled = false;
-          btnEl.innerHTML = `<span>⬇️</span> <span>Download</span>`;
-          document.querySelectorAll('.res-row').forEach(r => r.classList.remove('dimmed'));
-          isDownloading = false;
-        }, 3500);
       }
     }
 
