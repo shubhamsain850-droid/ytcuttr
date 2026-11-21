@@ -244,7 +244,8 @@
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 1000 !important;
+      pointer-events: auto !important;
     }
 
     .nav-inner {
@@ -254,6 +255,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      pointer-events: auto !important;
     }
 
     .logo {
@@ -273,6 +275,9 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 1001 !important;
     }
 
     .nav-btn {
@@ -290,7 +295,11 @@
       white-space: nowrap;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      cursor: pointer;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 1002 !important;
+      text-decoration: none;
     }
 
     .nav-btn:hover {
@@ -1496,19 +1505,19 @@
         YT<span>Cuttr</span>
       </a>
       <div class="nav-links">
-        <a href="/" class="nav-btn" aria-label="Switch to Clip Cutter">
+        <a href="/" class="nav-btn" id="nav-btn-clip" aria-label="Switch to Clip Cutter" onclick="handleNavClick(event, '/')">
           <span>✂️</span>
           <span>Clip Cutter</span>
         </a>
-        <a href="/youtube-shorts-downloader" class="nav-btn active" aria-label="Full Video &amp; Shorts Downloader (Active)">
+        <a href="/youtube-shorts-downloader" class="nav-btn active" id="nav-btn-full" aria-label="Full Video &amp; Shorts Downloader (Active)" onclick="handleNavClick(event, '/youtube-shorts-downloader')">
           <span>⚡</span>
           <span>Full Video &amp; Shorts</span>
         </a>
-        <a href="/youtube-audio-cutter" class="nav-btn" aria-label="Switch to Audio Cutter">
+        <a href="/youtube-audio-cutter" class="nav-btn" id="nav-btn-audio" aria-label="Switch to Audio Cutter" onclick="handleNavClick(event, '/youtube-audio-cutter')">
           <span>🎵</span>
           <span>Audio Cutter</span>
         </a>
-        </div>
+      </div>
     </div>
   </nav>
 
@@ -1873,10 +1882,70 @@
       }
     }
 
+    function getActiveVideoUrl() {
+      const inp = document.getElementById('shorts-url-input');
+      if (inp && inp.value && inp.value.trim().length > 5) {
+        return inp.value.trim();
+      }
+      const params = new URLSearchParams(window.location.search);
+      return params.get('url') || params.get('v') || params.get('q') || '';
+    }
+
+    function syncNavLinksWithUrl() {
+      const currentUrl = getActiveVideoUrl();
+      const encoded = currentUrl ? encodeURIComponent(currentUrl) : '';
+      
+      const clipBtn = document.getElementById('nav-btn-clip');
+      if (clipBtn) {
+        clipBtn.href = encoded ? `/?url=${encoded}` : '/';
+      }
+      
+      const audioBtn = document.getElementById('nav-btn-audio');
+      if (audioBtn) {
+        audioBtn.href = encoded ? `/youtube-audio-cutter?url=${encoded}` : '/youtube-audio-cutter';
+      }
+      
+      const btnTrim = document.getElementById('btn-switch-trim');
+      if (btnTrim) {
+        btnTrim.href = encoded ? `/?url=${encoded}` : '/';
+      }
+    }
+
+    function handleNavClick(event, targetPath) {
+      if (event) {
+        try { event.preventDefault(); } catch(e) {}
+        try { event.stopPropagation(); } catch(e) {}
+      }
+      const currentUrl = getActiveVideoUrl();
+
+      // If user is already on Full Video and clicks Full Video
+      if (targetPath === '/youtube-shorts-downloader') {
+        if (!window.location.search || window.location.search === '') {
+          const inp = document.getElementById('shorts-url-input');
+          if (inp) {
+            inp.focus();
+            inp.select();
+          }
+          return;
+        }
+        window.location.href = '/youtube-shorts-downloader';
+        return;
+      }
+
+      // If navigating to Clip Cutter or Audio Cutter
+      if (currentUrl) {
+        window.location.href = `${targetPath}${targetPath.includes('?') ? '&' : '?'}url=${encodeURIComponent(currentUrl)}`;
+      } else {
+        window.location.href = targetPath;
+      }
+    }
+    window.handleNavClick = handleNavClick;
+
     function handleInput() {
       const val = document.getElementById('shorts-url-input').value.trim();
       const clearBtn = document.getElementById('url-clear-btn');
       clearBtn.classList.toggle('visible', val.length > 0);
+      syncNavLinksWithUrl();
     }
 
     function clearUrl() {
@@ -1942,6 +2011,7 @@
       // Update Clip Cutter Shortcut link with URL preloaded
       const btnTrim = document.getElementById('btn-switch-trim');
       if (btnTrim) btnTrim.href = `/?url=${encodeURIComponent(targetQuery)}`;
+      syncNavLinksWithUrl();
 
       // Show workspace & cloud iframe
       const workspace = document.getElementById('shorts-workspace');
@@ -1968,6 +2038,7 @@
     // Auto-read ?url=, ?v=, or ?q= on page load
     window.addEventListener('DOMContentLoaded', () => {
       detectAdBlock();
+      syncNavLinksWithUrl();
       const params = new URLSearchParams(window.location.search);
       const u = params.get('url') || params.get('v') || params.get('q');
       if (u) {
@@ -1976,6 +2047,7 @@
           input.value = u.startsWith('http') ? u : `https://www.youtube.com/watch?v=${u}`;
           handleInput();
           handleFetch();
+          syncNavLinksWithUrl();
         }
       }
     });

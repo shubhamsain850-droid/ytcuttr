@@ -3651,7 +3651,7 @@ footer a { color: var(--red); text-decoration: none; }
       }
     }
 
-    function pollJobStatus(jobId, isClip) {
+    function pollJobStatus(jobId, isClip = true) {
       let isCompleted = false;
       procSeconds = 0;
       clearInterval(procTimerInterval);
