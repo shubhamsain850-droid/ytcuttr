@@ -3809,9 +3809,20 @@ footer a { color: var(--red); text-decoration: none; }
       if (!isOpen) item.classList.add('open');
     }
 
-    // Initialize timeline scrubber listeners on DOM load
+    // Initialize timeline scrubber listeners & auto-load url on DOM load
     document.addEventListener('DOMContentLoaded', () => {
       initTimelineScrubber();
+
+      const params = new URLSearchParams(window.location.search);
+      const u = params.get('url') || params.get('v') || params.get('q');
+      if (u) {
+        const input = document.getElementById('main-url-input');
+        if (input) {
+          input.value = u.startsWith('http') ? u : `https://www.youtube.com/watch?v=${u}`;
+          handleUrlInputChange();
+          handleFetchClick();
+        }
+      }
     });
   </script>
 

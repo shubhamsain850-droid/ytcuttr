@@ -1301,6 +1301,130 @@
       vertical-align: middle;
       line-height: 1.2;
     }
+
+    /* ── CROSS-ACTION BANNER ABOVE CLOUD DOWNLOADER ── */
+    .ytcuttr-switch-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--red);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .switch-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .switch-icon {
+      font-size: 24px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .switch-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .switch-text strong {
+      font-size: 14.5px;
+      color: var(--text);
+    }
+
+    .switch-text span {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .switch-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .switch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .switch-btn.clip-btn {
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 0 2px 6px var(--red-glow);
+    }
+
+    .switch-btn.clip-btn:hover {
+      background: var(--red-hover);
+      transform: translateY(-1px);
+    }
+
+    .switch-btn.audio-btn {
+      background: var(--white);
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+    }
+
+    .switch-btn.audio-btn:hover {
+      background: #eef2ff;
+      border-color: #818cf8;
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+      .ytcuttr-switch-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+        gap: 12px;
+      }
+      .switch-bar-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .switch-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* ── CLOUD EMBED CONTAINER ── */
+    .cloud-frame-wrap {
+      width: 100%;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      min-height: 520px;
+    }
+
+    .iframe-loading-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -1405,40 +1529,47 @@
       <!-- EMPTY STATE (Zero Bloat Placeholder) -->
       <div class="empty-state hidden" id="empty-state" style="display:none;"></div>
 
-      <!-- LOADED WORKSPACE (9:16 PREVIEW + RESOLUTION TABLE) -->
-      <div class="shorts-workspace" id="shorts-workspace">
-        <div class="shorts-grid">
-
-          <!-- 9:16 PREVIEW COLUMN -->
-          <div class="preview-col">
-            <div class="phone-mockup" id="phone-mockup">
-              <img id="shorts-poster" class="shorts-poster" src="" alt="YouTube Short Preview">
-              <iframe
-                id="shorts-iframe"
-                src=""
-                title="YouTube Short Preview"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
-            </div>
-            <div class="shorts-title-box">
-              <div class="shorts-video-title" id="shorts-title">YouTube Short</div>
+      <!-- LOADED WORKSPACE (CLOUD DOWNLOAD ENGINE) -->
+      <div class="shorts-workspace" id="shorts-workspace" style="display: none;">
+        
+        <!-- YTCUTTR ACTION BAR (TRIM / STUDIO AUDIO SHORTCUTS) -->
+        <div class="ytcuttr-switch-bar">
+          <div class="switch-bar-left">
+            <span class="switch-icon">✂️</span>
+            <div class="switch-text">
+              <strong>Need only a part of this video?</strong>
+              <span>Trim exact start &amp; end timestamps with millisecond precision without downloading the whole file.</span>
             </div>
           </div>
-
-          <!-- RESOLUTIONS COLUMN (HIGHEST TO LOWEST) -->
-          <div class="options-col">
-            <div class="options-header">
-              <h2>Select Download Resolution</h2>
-              <span>Highest &rarr; Lowest</span>
-            </div>
-
-            <div class="res-list" id="res-list">
-              <!-- Dynamically populated or standard resolutions -->
-            </div>
+          <div class="switch-bar-actions">
+            <a id="btn-switch-trim" href="/" class="switch-btn clip-btn">
+              <span>✂️ Trim with Clip Cutter</span>
+            </a>
+            <a id="btn-switch-audio" href="/youtube-audio-cutter" class="switch-btn audio-btn">
+              <span>🎵 Studio WAV/FLAC Audio</span>
+            </a>
           </div>
-
         </div>
+
+        <!-- CLOUD DOWNLOAD IFRAME (0% VPS LOAD, ANY DURATION & 4K) -->
+        <div class="cloud-frame-wrap" id="cloud-frame-wrap">
+          <div class="iframe-loading-placeholder" id="iframe-loader">
+            <div class="status-spinner" style="margin: 0 auto 12px; border-width: 3px; width: 28px; height: 28px;"></div>
+            <p style="text-align: center; color: var(--text); font-size: 14.5px; font-weight: 700;">Connecting to Cloud Download Server...</p>
+            <p style="text-align: center; color: var(--muted); font-size: 13px; margin-top: 4px;">Preparing full MP4 (1080p/4K) and MP3 formats with zero wait.</p>
+          </div>
+          <iframe 
+            id="cloud-download-iframe" 
+            src="" 
+            width="100%" 
+            height="720" 
+            frameborder="0" 
+            style="border: none; border-radius: 12px; width: 100%; min-height: 700px; display: none;"
+            allow="clipboard-write; web-share"
+            onload="onCloudFrameLoaded()">
+          </iframe>
+        </div>
+
       </div>
 
     </div>
@@ -1675,14 +1806,21 @@
       }, 4000);
     }
 
-    // Fetch Short Metadata & Formats (Instant Zero-Delay UI)
-    async function handleFetch() {
+    function onCloudFrameLoaded() {
+      const loader = document.getElementById('iframe-loader');
+      const frame = document.getElementById('cloud-download-iframe');
+      if (loader) loader.style.display = 'none';
+      if (frame) frame.style.display = 'block';
+    }
+
+    // Fetch Full Video / Shorts via Cloud Turnkey Downloader (0% VPS Load)
+    function handleFetch() {
       const input = document.getElementById('shorts-url-input');
-      const rawUrl = input.value.trim();
+      const rawUrl = (input ? input.value : '').trim();
       const videoId = extractVideoId(rawUrl);
 
       if (!videoId) {
-        showStatus('Please enter a valid YouTube Shorts or video link.', 'error');
+        showStatus('Please enter a valid YouTube Video or Shorts link.', 'error');
         return;
       }
 
@@ -1690,336 +1828,49 @@
 
       const fetchBtn = document.getElementById('fetch-btn');
       if (fetchBtn) {
-        fetchBtn.innerHTML = '<span>⚡ Loaded!</span>';
+        fetchBtn.innerHTML = '<span>⚡ Loading...</span>';
         setTimeout(() => {
-          fetchBtn.innerHTML = '<span>Get Short</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+          fetchBtn.innerHTML = '<span>Get Video</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
         }, 1200);
       }
 
-      // INSTANT RENDER (0 Delay! User sees 9:16 player & download buttons immediately)
-      activeVideoData = {
-        url: rawUrl,
-        videoId: videoId,
-        title: 'YouTube Short',
-        resolutions: ["1080p", "720p", "480p", "360p", "Audio only"]
-      };
+      // Update Trimmer & Audio shortcuts
+      const btnTrim = document.getElementById('btn-switch-trim');
+      if (btnTrim) btnTrim.href = `/?url=${encodeURIComponent(rawUrl)}`;
+      const btnAudio = document.getElementById('btn-switch-audio');
+      if (btnAudio) btnAudio.href = `/youtube-audio-cutter/?url=${encodeURIComponent(rawUrl)}`;
 
-      // 1. Instantly display 9:16 vertical player & resolution options
-      renderShort(activeVideoData);
-
-      // 2. Fetch exact video title via YouTube oEmbed (~100ms superfast)
-      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
-        .then(r => r.ok ? r.json() : null)
-        .then(meta => {
-          if (meta && meta.title) {
-            activeVideoData.title = meta.title;
-            const tEl = document.getElementById('shorts-title');
-            if (tEl) tEl.textContent = meta.title;
-          }
-        })
-        .catch(() => {});
-
-      // 3. Background server warmup and format validation
-      fetch(`${API}/info`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: rawUrl })
-      }).then(r => r.ok ? r.json() : null)
-        .then(apiData => {
-          if (apiData) {
-            if (apiData.title) {
-              activeVideoData.title = apiData.title;
-              const tEl = document.getElementById('shorts-title');
-              if (tEl) tEl.textContent = apiData.title;
-            }
-            if (Array.isArray(apiData.resolutions) && apiData.resolutions.length > 0) {
-              activeVideoData.resolutions = apiData.resolutions;
-              buildResolutionsTable(apiData.resolutions);
-            }
-          }
-        })
-        .catch(() => {});
-    }
-
-    // Render Loaded Short + 9:16 or 16:9 Preview + Resolution Table
-    function renderShort(data) {
-      document.getElementById('empty-state').style.display = 'none';
+      // Show workspace & loader
       const workspace = document.getElementById('shorts-workspace');
-      workspace.classList.add('visible');
+      if (workspace) workspace.style.display = 'block';
 
-      // Adapt preview aspect ratio: 9:16 for Shorts, 16:9 widescreen for regular videos
-      const isShort = (data.url && data.url.includes('/shorts/'));
-      const mockup = document.getElementById('phone-mockup');
-      if (mockup) {
-        mockup.classList.toggle('wide-video', !isShort);
+      const loader = document.getElementById('iframe-loader');
+      const frame = document.getElementById('cloud-download-iframe');
+      if (loader) loader.style.display = 'flex';
+      if (frame) {
+        frame.style.display = 'none';
+        frame.src = `https://embed.dlsrv.online/v1/search?query=${encodeURIComponent(rawUrl)}`;
       }
 
-      // 1. Instantly display poster thumbnail (loads in ~30ms)
-      const poster = document.getElementById('shorts-poster');
-      if (poster) {
-        poster.src = `https://i.ytimg.com/vi/${data.videoId}/hqdefault.jpg`;
-        poster.classList.add('active');
-        poster.style.opacity = '1';
-      }
-
-      // 2. Load Iframe Preview smoothly
-      const iframe = document.getElementById('shorts-iframe');
-      iframe.onload = () => {
-        if (poster) {
-          poster.style.opacity = '0';
-          setTimeout(() => { poster.classList.remove('active'); }, 400);
-        }
-      };
-      iframe.src = `https://www.youtube-nocookie.com/embed/${data.videoId}?autoplay=1&mute=1&loop=1&playlist=${data.videoId}&playsinline=1&controls=1&rel=0`;
-
-      // Update Title
-      document.getElementById('shorts-title').textContent = data.title || 'YouTube Video / Short';
-
-      // Build Resolutions Table (Highest to Lowest)
-      buildResolutionsTable(data.resolutions || []);
-
-      // Scroll smoothly to workspace on mobile
-      if (window.innerWidth < 768) {
+      // Smooth scroll to workspace on mobile
+      if (window.innerWidth < 768 && workspace) {
         workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
 
-    // Build Resolution Options
-    function buildResolutionsTable(apiResolutions) {
-      const container = document.getElementById('res-list');
-      container.innerHTML = '';
-
-      // Standard ordered resolution tiers (Highest to Lowest)
-      const ORDERED_TIERS = [
-        { key: '2160p', label: '2160p (4K)', tag: '4K', desc: 'Ultra HD 4K • MP4 with Sound', isHd: true, icon: '🌟' },
-        { key: '1440p', label: '1440p (2K)', tag: '2K', desc: 'Quad HD 2K • MP4 with Sound', isHd: true, icon: '⚡' },
-        { key: '1080p', label: '1080p Full HD', tag: '1080p', desc: 'Crisp Full HD • MP4 with Sound (Recommended)', isHd: true, isFeatured: true, icon: '🟢' },
-        { key: '720p',  label: '720p HD',      tag: '720p',  desc: 'High Definition • Fast Download', isHd: true, icon: '🔵' },
-        { key: '480p',  label: '480p SD',      tag: '480p',  desc: 'Standard Definition • Moderate Size', icon: '⚪' },
-        { key: '360p',  label: '360p Saver',   tag: '360p',  desc: 'Lightweight • Small File Size', icon: '⚪' },
-        { key: '320k',  label: 'MP3 (320 kbps)', tag: 'MP3', desc: 'Ultra HQ 320k MP3 Audio', isAudio: true, icon: '🎵' },
-        { key: '128k',  label: 'MP3 (128 kbps)', tag: 'MP3', desc: 'Standard 128k MP3 Audio', isAudio: true, icon: '🎵' },
-        { key: 'wav',   label: 'WAV Studio Audio', tag: 'WAV', desc: 'Uncompressed Lossless 16-bit PCM Audio', isAudio: true, icon: '🎼' },
-        { key: 'flac',  label: 'FLAC Lossless',  tag: 'FLAC', desc: 'Master Lossless Audio Quality', isAudio: true, icon: '💿' },
-        { key: 'audio', label: 'Original M4A Track', tag: 'M4A', desc: 'Original Background Sound / AAC Track', isAudio: true, icon: '🎧' },
-      ];
-
-      // Check which tiers exist or fallback to full list
-      const hasApiInfo = Array.isArray(apiResolutions) && apiResolutions.length > 0;
-
-      ORDERED_TIERS.forEach(tier => {
-        // If API returned resolutions, check match (always include audio)
-        if (hasApiInfo && !tier.isAudio) {
-          const match = apiResolutions.some(r => r.toLowerCase().includes(tier.key));
-          if (!match && tier.key !== '1080p' && tier.key !== '720p') {
-            return; // Skip tiers not present in source video
-          }
+    // Auto-read ?url=, ?v=, or ?q= on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const u = params.get('url') || params.get('v') || params.get('q');
+      if (u) {
+        const input = document.getElementById('shorts-url-input');
+        if (input) {
+          input.value = u.startsWith('http') ? u : `https://www.youtube.com/watch?v=${u}`;
+          handleInput();
+          handleFetch();
         }
-
-        const row = document.createElement('div');
-        row.className = `res-row ${tier.isFeatured ? 'featured' : ''}`;
-        row.id = `res-row-${tier.key}`;
-
-        const badgeClass = tier.isHd ? 'badge-tag hd' : (tier.isAudio ? 'badge-tag audio' : 'badge-tag sd');
-        const isHigh = ['2160p', '1440p', '1080p'].includes(tier.key);
-        const adBadgeHtml = isHigh ? `<span class="res-ad-badge" title="Sponsored by partner">AD</span>` : '';
-
-        row.innerHTML = `
-          <div class="res-left">
-            <span class="res-icon">${tier.icon}</span>
-            <div class="res-label">
-              <span>${tier.label}</span>
-              ${adBadgeHtml}
-              <span class="${badgeClass}">${tier.tag}</span>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="dl-btn"
-            id="btn-dl-${tier.key}"
-            data-quality="${tier.key}"
-            onclick="triggerShortDownload('${tier.key}', this)"
-          >
-            <span>⬇️</span>
-            <span>Download</span>
-          </button>
-        `;
-        container.appendChild(row);
-      });
-    }
-
-    function updateShortBtnProgress(btnEl, pct, label) {
-      pct = Math.min(100, Math.max(0, Math.round(pct)));
-      btnEl.style.setProperty('--progress', `${pct}%`);
-      btnEl.innerHTML = `<span class="btn-spinner"></span> <span class="btn-pct-label">${label}</span> <span class="btn-pct-val">${pct}%</span>`;
-    }
-
-    // In-Button Loading & Automatic Download
-    async function triggerShortDownload(qualityKey, btnEl) {
-      if (isDownloading || !activeVideoData) return;
-
-      // Open sponsored Smartlink in new tab for higher resolutions (1080p, 1440p, 4K)
-      if (['2160p', '1440p', '1080p'].includes(qualityKey)) {
-        try {
-          window.open(ADSTERRA_SMARTLINK, '_blank');
-        } catch(e) {}
       }
-
-      isDownloading = true;
-
-      // 1. Lock all other rows
-      document.querySelectorAll('.res-row').forEach(row => {
-        if (row.id !== `res-row-${qualityKey}`) {
-          row.classList.add('dimmed');
-        }
-      });
-
-      // 2. Button state: Loading
-      btnEl.disabled = true;
-      btnEl.className = 'dl-btn btn-loading';
-
-      // Dynamic percentage progress ticker
-      let currentProgress = 15;
-      let currentStatus = 'preparing';
-      updateShortBtnProgress(btnEl, currentProgress, 'Preparing');
-
-      const progressTimer = setInterval(() => {
-        if (currentStatus === 'downloading') {
-          if (currentProgress < 70) {
-            currentProgress += (currentProgress < 45 ? 4 : 2);
-            updateShortBtnProgress(btnEl, currentProgress, 'Processing');
-          }
-        } else if (currentStatus === 'processing') {
-          if (currentProgress < 70) currentProgress = 70;
-          if (currentProgress < 94) {
-            currentProgress += (currentProgress < 85 ? 3 : 1);
-            updateShortBtnProgress(btnEl, currentProgress, 'Converting');
-          }
-        } else {
-          if (currentProgress < 32) {
-            currentProgress += 3;
-            updateShortBtnProgress(btnEl, currentProgress, 'Preparing');
-          }
-        }
-      }, 250);
-
-      try {
-        if (activeVideoData && activeVideoData.duration && activeVideoData.duration > 1800) {
-          throw new Error('This video exceeds the 30-minute download limit. Please use the YTCuttr Clip Cutter on the home page.');
-        }
-
-        // 3. Call Backend Download Endpoint
-        const dlResp = await fetch(`${API}/download`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: activeVideoData.url,
-            quality: qualityKey
-          })
-        });
-
-        let dlData = null;
-        const cType = dlResp.headers.get("content-type") || "";
-        if (cType.includes("application/json")) {
-          try {
-            dlData = await dlResp.json();
-          } catch(e) {
-            dlData = null;
-          }
-        }
-
-        if (!dlResp.ok) {
-          const errDetail = dlData && dlData.detail ? dlData.detail : 'Download failed to queue. Server may be warming up.';
-          throw new Error(errDetail);
-        }
-
-        if (!dlData || !dlData.job_id) {
-          throw new Error('Server returned an unexpected response. Please try again.');
-        }
-
-        const { job_id } = dlData;
-
-        // 4. Poll Status
-        let attempts = 0;
-        const maxAttempts = 120; // 2 minutes max
-        let completed = false;
-
-        while (attempts < maxAttempts && !completed) {
-          attempts++;
-          await new Promise(r => setTimeout(r, 1000));
-
-          const statResp = await fetch(`${API}/status/${job_id}`);
-          if (!statResp.ok) continue;
-
-          const job = await statResp.json();
-
-          if (job.status === 'waiting') {
-            currentStatus = 'waiting';
-            const pos = job.queue_position || 1;
-            updateShortBtnProgress(btnEl, 10, `Queue #${pos}`);
-          } else if (job.status === 'downloading') {
-            currentStatus = 'downloading';
-          } else if (job.status === 'processing') {
-            currentStatus = 'processing';
-          } else if (job.status === 'done') {
-            completed = true;
-            clearInterval(progressTimer);
-            btnEl.style.setProperty('--progress', '100%');
-
-            // 5. Button State: Ready!
-            btnEl.className = 'dl-btn btn-done';
-            btnEl.innerHTML = `<span>✅ Ready! 100%</span>`;
-
-            // 6. Direct automatic trigger
-            const fileUrl = `${API}/download-file/${job_id}`;
-            const fileName = job.filename || (qualityKey === 'audio' ? 'ytcuttr_audio.mp3' : `ytcuttr_short_${qualityKey}.mp4`);
-
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = fileUrl;
-            a.setAttribute('download', fileName);
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              document.body.removeChild(a);
-            }, 500);
-
-            showToast('Download started successfully!');
-
-            // Reset after 3 seconds
-            setTimeout(() => {
-              btnEl.style.removeProperty('--progress');
-              btnEl.className = 'dl-btn';
-              btnEl.disabled = false;
-              btnEl.innerHTML = `<span>⬇️</span> <span>Download</span>`;
-              document.querySelectorAll('.res-row').forEach(r => r.classList.remove('dimmed'));
-              isDownloading = false;
-            }, 3000);
-            return;
-          } else if (job.status === 'error') {
-            throw new Error(job.error || 'Failed to download this resolution.');
-          }
-        }
-
-        if (!completed) {
-          throw new Error('Processing timed out. Please try again.');
-        }
-
-      } catch (err) {
-        clearInterval(progressTimer);
-        btnEl.style.removeProperty('--progress');
-        btnEl.className = 'dl-btn btn-error';
-        btnEl.innerHTML = `<span>⚠️ Retry</span>`;
-        showToast(err.message || 'Download failed. Please try again.', true);
-        setTimeout(() => {
-          btnEl.className = 'dl-btn';
-          btnEl.disabled = false;
-          btnEl.innerHTML = `<span>⬇️</span> <span>Download</span>`;
-          document.querySelectorAll('.res-row').forEach(r => r.classList.remove('dimmed'));
-          isDownloading = false;
-        }, 3500);
-      }
-    }
+    });
 
     // FAQ Accordion
     function toggleFaq(el) {
