@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel
-import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio, time, threading
+import subprocess, base64, uuid, os, re, shutil, json, tempfile, urllib.request, asyncio, time, threading, signal
 from pathlib import Path
 from urllib.parse import quote
 
@@ -311,9 +311,28 @@ def clean_quality_key(quality: str) -> str:
 from urllib.parse import quote
 
 def run_process(cmd: list, timeout: int = 60) -> subprocess.CompletedProcess:
-    """Run external command with nice priority on Linux to protect Uvicorn/SSH."""
+    """Run external command with nice priority on Linux in its own process group to protect Uvicorn/SSH and ensure clean termination."""
     full_cmd = ["nice", "-n", "10"] + cmd if os.name != "nt" else cmd
-    return subprocess.run(full_cmd, capture_output=True, text=True, timeout=timeout)
+    if os.name != "nt":
+        try:
+            proc = subprocess.Popen(
+                full_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                preexec_fn=os.setsid
+            )
+            stdout, stderr = proc.communicate(timeout=timeout)
+            return subprocess.CompletedProcess(full_cmd, proc.returncode, stdout, stderr)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except Exception:
+                pass
+            proc.communicate()
+            raise
+    else:
+        return subprocess.run(full_cmd, capture_output=True, text=True, timeout=timeout)
 
 def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: str = "") -> list:
     cmd = [
@@ -488,44 +507,41 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         section_spec = f"*{start_hms}-{end_hms}"
         section_target = str(out_path if (not is_audio or ext == "m4a") else raw_path)
 
-        # ATTEMPT 1: Fast section download with cookies and target resolution
+        # ATTEMPT 1: Fast section stream-copy with cookies and target resolution (zero re-encoding!)
         cmd_dl_section = build_ytdlp_cmd([
             "--download-sections", section_spec,
-            "--force-keyframes-at-cuts",
             "-N", "1",
             "-f", fmt,
             *merge_fmt_args,
             "-o", section_target,
             url,
         ], use_cookies=True, player_client="")
-        r_dl = run_process(cmd_dl_section, timeout=90)
+        r_dl = run_process(cmd_dl_section, timeout=60)
 
-        # ATTEMPT 2: Fallback section download with height-matching format with cookies
+        # ATTEMPT 2: Fallback section stream-copy with height-matching format with cookies
         target_check = out_path if (not is_audio or ext == "m4a") else raw_path
         if not target_check.exists() or target_check.stat().st_size == 0:
             cmd_dl_best = build_ytdlp_cmd([
                 "--download-sections", section_spec,
-                "--force-keyframes-at-cuts",
                 "-N", "1",
                 "-f", fallback_fmt,
                 *merge_fmt_args,
                 "-o", section_target,
                 url,
             ], use_cookies=True, player_client="")
-            r_dl = run_process(cmd_dl_best, timeout=90)
+            r_dl = run_process(cmd_dl_best, timeout=60)
 
         # ATTEMPT 3: Section download fallback without cookies
         if not target_check.exists() or target_check.stat().st_size == 0:
             cmd_dl_anon = build_ytdlp_cmd([
                 "--download-sections", section_spec,
-                "--force-keyframes-at-cuts",
                 "-N", "1",
                 "-f", fallback_fmt,
                 *merge_fmt_args,
                 "-o", section_target,
                 url,
             ], use_cookies=False, player_client="")
-            r_dl = run_process(cmd_dl_anon, timeout=90)
+            r_dl = run_process(cmd_dl_anon, timeout=60)
 
         # Step 2: Audio Conversion / Local FFmpeg cut if needed
         if (not out_path.exists() or out_path.stat().st_size == 0) and raw_path.exists() and raw_path.stat().st_size > 0:
