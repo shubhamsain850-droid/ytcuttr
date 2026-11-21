@@ -446,6 +446,43 @@
     .status-badge.error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
     .status-badge.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; }
 
+    /* ── TOAST NOTIFICATIONS (Centered & Mobile Safe) ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+      z-index: 9999;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: calc(100vw - 32px);
+      width: max-content;
+      word-break: break-word;
+      white-space: normal;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .toast.error {
+      background: #dc2626;
+      color: #fff;
+    }
+
     /* ── EMPTY STATE ── */
     .empty-state {
       display: none;
@@ -2430,6 +2467,7 @@
     let videoDurationSec = 180;
     let currentStartSec = 0;
     let currentEndSec = 30;
+    let userAdjustedAudio = false;
     let scrubberInitialized = false;
     let activePointerDrag = null;
 
@@ -2689,6 +2727,7 @@
     }
 
     function setStartSeconds(sec) {
+      userAdjustedAudio = true;
       const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
       sec = Math.max(0, Math.min(sec, maxTotal - 1));
       if (sec >= currentEndSec) {
@@ -2700,6 +2739,7 @@
     }
 
     function setEndSeconds(sec) {
+      userAdjustedAudio = true;
       const maxTotal = videoDurationSec > 0 ? videoDurationSec : 180;
       sec = Math.max(1, Math.min(sec, maxTotal));
       if (sec <= currentStartSec) {
@@ -2777,6 +2817,22 @@
 
     function hideStatus() {
       document.getElementById('status-badge').className = 'status-badge';
+    }
+
+    function showToast(msg, isError = false) {
+      let toast = document.getElementById('toast-msg');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-msg';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.toggle('error', isError);
+      toast.classList.add('visible');
+      setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 4000);
     }
 
     function switchMode(mode) {
@@ -2865,15 +2921,22 @@
               if (tEl) tEl.textContent = apiData.title;
             }
             if (apiData.duration) {
-              videoDurationSec = apiData.duration;
-              activeVideoData.durationSec = apiData.duration;
+              const dur = apiData.duration;
+              videoDurationSec = dur;
+              activeVideoData.durationSec = dur;
               const durBadge = document.getElementById('video-duration-tag');
               if (durBadge) durBadge.textContent = formatSecondsToHms(videoDurationSec);
               updateTimelineTicks(videoDurationSec);
               
-              currentStartSec = 0;
-              currentEndSec = videoDurationSec;
+              if (userAdjustedAudio) {
+                currentStartSec = Math.max(0, Math.min(currentStartSec, dur - 1));
+                currentEndSec = Math.max(currentStartSec + 1, Math.min(currentEndSec, dur));
+              } else {
+                currentStartSec = 0;
+                currentEndSec = dur;
+              }
               document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+              document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
               updateTimelineHandles(currentStartSec, currentEndSec, videoDurationSec);
             }
           }
@@ -2988,8 +3051,15 @@
             if (durBadge) durBadge.textContent = formatSecondsToHms(dur);
             updateTimelineTicks(dur);
             
-            currentEndSec = dur;
+            if (userAdjustedAudio) {
+              currentStartSec = Math.max(0, Math.min(currentStartSec, dur - 1));
+              currentEndSec = Math.max(currentStartSec + 1, Math.min(currentEndSec, dur));
+            } else {
+              currentStartSec = 0;
+              currentEndSec = dur;
+            }
             document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
+            document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
             updateTimelineHandles(currentStartSec, currentEndSec, dur);
           }
           return true;
@@ -3203,9 +3273,32 @@
       }
 
       if (isClip && (currentEndSec - currentStartSec) > 300) {
+        clearInterval(progressTimer);
         showStatus('Clip duration exceeds 5 minute limit. Please adjust start and end timestamps.', 'error');
+        showToast('Clip duration exceeds 5 minute limit.', true);
         allRows.forEach(r => r.classList.remove('dimmed'));
         btnEl.classList.remove('loading');
+        btnEl.disabled = false;
+        btnEl.innerHTML = originalHtml;
+        return;
+      }
+
+      // 100 MB Limit Safety Check
+      const durSec = isClip ? (currentEndSec - currentStartSec) : (videoDurationSec || 60);
+      let estAudioMb = 0;
+      if (qualityKey === 'wav') estAudioMb = durSec * 0.176;
+      else if (qualityKey === 'flac') estAudioMb = durSec * 0.085;
+      else if (qualityKey === '320k' || qualityKey === '256k') estAudioMb = durSec * 0.040;
+      else estAudioMb = durSec * 0.025; // m4a, 192k, 128k
+
+      if (estAudioMb > 100) {
+        clearInterval(progressTimer);
+        const warnMsg = `⚠️ 100 MB Limit Exceeded: Estimated audio file size is ~${Math.round(estAudioMb)} MB (limit: 100 MB). Please choose a compressed format (such as MP3 320k or M4A) or shorten your audio clip.`;
+        showStatus(warnMsg, 'error');
+        showToast(warnMsg, true);
+        allRows.forEach(r => r.classList.remove('dimmed'));
+        btnEl.classList.remove('loading');
+        btnEl.disabled = false;
         btnEl.innerHTML = originalHtml;
         return;
       }

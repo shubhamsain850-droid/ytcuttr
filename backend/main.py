@@ -250,8 +250,14 @@ MAX_FILE_SIZE_LIMIT = "500M"      # Hard limit: abort download if stream > 500 M
 def estimate_clip_mb(duration_sec: int, quality: str) -> float:
     """Estimate clip file size in MB based on duration and format quality."""
     q = quality.lower()
-    if any(k in q for k in ["audio", "mp3", "wav", "flac", "m4a", "320k", "256k", "192k", "128k"]):
-        return duration_sec * 0.04
+    if "wav" in q:
+        return duration_sec * 0.176
+    elif "flac" in q:
+        return duration_sec * 0.085
+    elif any(k in q for k in ["320k", "256k"]):
+        return duration_sec * 0.040
+    elif any(k in q for k in ["audio", "mp3", "m4a", "192k", "128k"]):
+        return duration_sec * 0.025
     elif "2160" in q or "4k" in q:
         return duration_sec * 1.5
     elif "1440" in q or "2k" in q:
@@ -839,7 +845,7 @@ def _run_download(job_id: str, url: str, quality: str):
             jobs[job_id]["status"] = "done"
             jobs[job_id]["completed_at"] = time.time()
             jobs[job_id]["file"] = str(out_path)
-            jobs[job_id]["filename"] = f"ytcuttr_{'audio' if is_audio else 'video'}.{ext}"
+            jobs[job_id]["filename"] = f"ytcuttr_{q_key}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
             if res_str:
                 jobs[job_id]["resolution"] = res_str
@@ -996,6 +1002,10 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
             except Exception:
                 pass
 
+    is_short = ("/shorts/" in req.url.lower() or "shorts" in req.url.lower())
+    if is_short and (video_dur == 0 or video_dur > 180):
+        video_dur = 60
+
     if video_dur > MAX_FULL_VIDEO_SECONDS:
         dur_hms = to_hms(video_dur)
         raise HTTPException(
@@ -1004,7 +1014,7 @@ async def download_video(req: DownloadRequest, request: Request, bg: BackgroundT
         )
 
     client_ip = get_client_ip(request)
-    clip_dur = video_dur if video_dur > 0 else 600
+    clip_dur = video_dur if video_dur > 0 else (60 if is_short else 180)
     est_mb = estimate_clip_mb(clip_dur, req.quality)
     is_under_100mb = (est_mb < 100.0)
 

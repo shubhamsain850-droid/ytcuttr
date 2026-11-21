@@ -448,6 +448,43 @@
       color: #dc2626;
     }
 
+    /* ── TOAST NOTIFICATIONS (Centered & Mobile Safe) ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+      z-index: 9999;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: calc(100vw - 32px);
+      width: max-content;
+      word-break: break-word;
+      white-space: normal;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .toast.error {
+      background: #dc2626;
+      color: #fff;
+    }
+
     .status-spinner {
       width: 16px;
       height: 16px;
@@ -807,6 +844,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
 
     .badge-tag {
@@ -1612,6 +1650,22 @@
       document.getElementById('status-badge').className = 'status-badge';
     }
 
+    function showToast(msg, isError = false) {
+      let toast = document.getElementById('toast-msg');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-msg';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.toggle('error', isError);
+      toast.classList.add('visible');
+      setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 4000);
+    }
+
     // Fetch Short Metadata & Formats (Instant Zero-Delay UI)
     async function handleFetch() {
       const input = document.getElementById('shorts-url-input');
@@ -1898,8 +1952,7 @@
 
             // 6. Direct automatic trigger
             const fileUrl = `${API}/download-file/${job_id}`;
-            const ext = qualityKey === 'audio' ? 'm4a' : 'mp4';
-            const fileName = job.filename || `ytcuttr_short_${qualityKey}.${ext}`;
+            const fileName = job.filename || (qualityKey === 'audio' ? 'ytcuttr_audio.mp3' : `ytcuttr_short_${qualityKey}.mp4`);
 
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -1910,6 +1963,8 @@
             setTimeout(() => {
               document.body.removeChild(a);
             }, 500);
+
+            showToast('Download started successfully!');
 
             // Reset after 3 seconds
             setTimeout(() => {
@@ -1935,6 +1990,7 @@
         btnEl.style.removeProperty('--progress');
         btnEl.className = 'dl-btn btn-error';
         btnEl.innerHTML = `<span>⚠️ Retry</span>`;
+        showToast(err.message || 'Download failed. Please try again.', true);
         setTimeout(() => {
           btnEl.className = 'dl-btn';
           btnEl.disabled = false;

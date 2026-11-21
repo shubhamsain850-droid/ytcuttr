@@ -2557,6 +2557,7 @@ footer a { color: var(--red); text-decoration: none; }
           this.videoDurationSeconds = 600;
           this.isDurationEstimated = true;
         }
+        this.userAdjusted = false;
         this.startSeconds = 0;
         this.endSeconds = this.videoDurationSeconds;
         this.syncAll(true);
@@ -2565,16 +2566,29 @@ footer a { color: var(--red); text-decoration: none; }
 
       updateVideoDuration(newDuration) {
         const d = Math.max(1, Math.round(Number(newDuration) || 0));
+        if (d <= 1) return;
+        if (this.videoDurationSeconds === d && !this.isDurationEstimated) return;
+
+        const oldDur = this.videoDurationSeconds;
         this.videoDurationSeconds = d;
         this.isDurationEstimated = false;
 
-        this.startSeconds = 0;
-        this.endSeconds = d;
+        if (this.userAdjusted) {
+          // Preserve user-selected timestamps!
+          this.startSeconds = Math.max(0, Math.min(this.startSeconds, d - 1));
+          this.endSeconds = Math.max(this.startSeconds + 1, Math.min(this.endSeconds, d));
+        } else {
+          // User hasn't touched the handles; keep start at 0 and end at full duration
+          this.startSeconds = 0;
+          this.endSeconds = d;
+        }
+
         this.syncAll(true);
         updateTimelineTicks(this.videoDurationSeconds);
       },
 
       setStart(sec, syncInputField = true) {
+        this.userAdjusted = true;
         sec = Math.round(Number(sec) || 0);
         sec = Math.max(0, Math.min(sec, this.videoDurationSeconds - 1));
 
@@ -2593,6 +2607,7 @@ footer a { color: var(--red); text-decoration: none; }
       },
 
       setEnd(sec, syncInputField = true) {
+        this.userAdjusted = true;
         sec = Math.round(Number(sec) || 0);
         sec = Math.max(1, Math.min(sec, this.videoDurationSeconds));
 
@@ -3220,6 +3235,9 @@ footer a { color: var(--red); text-decoration: none; }
       try {
         const dur = Math.round(ytPlayer.getDuration() || 0);
         if (dur > 1) {
+          if (dur === ClipState.videoDurationSeconds && !ClipState.isDurationEstimated) {
+            return true;
+          }
           if (currentVideoData) {
             currentVideoData.duration = dur;
           }
