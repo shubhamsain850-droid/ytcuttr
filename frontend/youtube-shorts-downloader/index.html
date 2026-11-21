@@ -1740,7 +1740,9 @@
     // Helper: Extract 11-char Video ID
     function extractVideoId(url) {
       if (!url) return null;
-      const m = url.match(/(?:shorts\/|v=|youtu\.be\/|\/embed\/|\/v\/|live\/)([A-Za-z0-9_-]{11})/);
+      const trimmed = url.trim();
+      if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return trimmed;
+      const m = trimmed.match(/(?:shorts\/|v[=\/]|youtu\.be\/|\/embed\/|\/v\/|live\/)([A-Za-z0-9_-]{11})/);
       return m ? m[1] : null;
     }
 
@@ -1781,9 +1783,16 @@
     function handleFetch() {
       const input = document.getElementById('shorts-url-input');
       const rawUrl = (input ? input.value : '').trim();
-      const videoId = extractVideoId(rawUrl);
+      if (!rawUrl) {
+        showStatus('Please enter a YouTube Video, Shorts or Live link.', 'error');
+        return;
+      }
 
-      if (!videoId) {
+      const videoId = extractVideoId(rawUrl);
+      // Canonical watch URL guarantees embed.dlsrv.online never fails d(n) URL validation
+      const targetQuery = videoId ? `https://www.youtube.com/watch?v=${videoId}` : rawUrl;
+
+      if (!videoId && (rawUrl.startsWith('http://') || rawUrl.startsWith('https://'))) {
         showStatus('Please enter a valid YouTube Video or Shorts link.', 'error');
         return;
       }
@@ -1805,7 +1814,7 @@
 
       // Update Clip Cutter Shortcut link with URL preloaded
       const btnTrim = document.getElementById('btn-switch-trim');
-      if (btnTrim) btnTrim.href = `/?url=${encodeURIComponent(rawUrl)}`;
+      if (btnTrim) btnTrim.href = `/?url=${encodeURIComponent(targetQuery)}`;
 
       // Show workspace & cloud iframe
       const workspace = document.getElementById('shorts-workspace');
@@ -1816,7 +1825,7 @@
       if (loader) loader.style.display = 'flex';
       if (frame) {
         frame.style.display = 'none';
-        frame.src = `https://embed.dlsrv.online/v1/search?query=${encodeURIComponent(rawUrl)}`;
+        frame.src = `https://embed.dlsrv.online/v1/search?query=${encodeURIComponent(targetQuery)}`;
       }
 
       // Smooth scroll to workspace on mobile
