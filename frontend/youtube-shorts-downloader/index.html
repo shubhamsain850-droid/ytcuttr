@@ -1441,189 +1441,27 @@
       }
     }
 
-    /* ── ADBLOCKER WARNING & TIP STYLES ── */
+    /* ── COMPACT ADBLOCKER NOTICE (SHOWN ONLY IF DETECTED) ── */
     .url-input-tip {
-      display: flex;
+      display: none;
       align-items: center;
       gap: 8px;
-      margin-top: 14px;
-      padding: 10px 14px;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
+      margin-top: 10px;
+      padding: 8px 14px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
       border-radius: var(--radius-sm);
       font-size: 13px;
-      color: #92400e;
+      color: #b91c1c;
       line-height: 1.4;
-      transition: all 0.25s ease;
+      animation: fadeIn 0.25s ease;
+    }
+    .url-input-tip.visible {
+      display: flex;
     }
     .url-input-tip .tip-icon {
-      font-size: 16px;
+      font-size: 15px;
       flex-shrink: 0;
-    }
-    .url-input-tip.highlight {
-      background: #fef2f2;
-      border-color: #fecaca;
-      color: #b91c1c;
-      animation: pulseAlert 2s infinite ease-in-out;
-    }
-
-    .adblock-alert-box {
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-      border: 1px solid #fde68a;
-      border-left: 5px solid #d97706;
-      border-radius: var(--radius-sm);
-      padding: 18px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.08);
-      transition: all 0.3s ease;
-    }
-    .adblock-alert-box.detected {
-      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-      border-color: #fecaca;
-      border-left-color: #dc2626;
-      box-shadow: 0 6px 20px rgba(220, 38, 38, 0.15);
-      animation: pulseAlert 2.5s infinite ease-in-out;
-    }
-
-    @keyframes pulseAlert {
-      0%, 100% { box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12); }
-      50% { box-shadow: 0 8px 24px rgba(220, 38, 38, 0.28); }
-    }
-
-    .adblock-alert-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-    .adblock-alert-icon {
-      font-size: 26px;
-      line-height: 1;
-    }
-    .adblock-alert-title-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .adblock-badge {
-      display: inline-block;
-      font-size: 10.5px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #b45309;
-      background: #fef3c7;
-      border: 1px solid #fde68a;
-      padding: 2px 7px;
-      border-radius: 4px;
-      width: fit-content;
-    }
-    .adblock-alert-box.detected .adblock-badge {
-      color: #b91c1c;
-      background: #fee2e2;
-      border-color: #fca5a5;
-    }
-    .adblock-title {
-      font-family: var(--display);
-      font-size: 16.5px;
-      font-weight: 800;
-      color: #78350f;
-      margin: 0;
-      line-height: 1.3;
-    }
-    .adblock-alert-box.detected .adblock-title {
-      color: #991b1b;
-    }
-    .adblock-desc {
-      font-size: 13.5px;
-      color: #92400e;
-      line-height: 1.5;
-      margin: 0 0 14px 0;
-    }
-    .adblock-alert-box.detected .adblock-desc {
-      color: #7f1d1d;
-    }
-    .adblock-desc code.err-code {
-      background: rgba(0, 0, 0, 0.07);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 12.5px;
-    }
-
-    .adblock-steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    .adblock-step {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(4px);
-      padding: 9px 12px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #451a03;
-      border: 1px solid rgba(217, 119, 6, 0.15);
-    }
-    .adblock-step .step-num {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      background: #d97706;
-      color: #ffffff;
-      border-radius: 50%;
-      font-size: 11px;
-      font-weight: 800;
-      flex-shrink: 0;
-    }
-    .adblock-alert-box.detected .adblock-step .step-num {
-      background: #dc2626;
-    }
-
-    .adblock-reload-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 18px;
-      background: #d97706;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
-      transition: var(--transition);
-    }
-    .adblock-alert-box.detected .adblock-reload-btn {
-      background: #dc2626;
-      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
-    }
-    .adblock-reload-btn:hover {
-      background: #b45309;
-      transform: translateY(-1px);
-    }
-    .adblock-alert-box.detected .adblock-reload-btn:hover {
-      background: #b91c1c;
-    }
-
-    @media (max-width: 768px) {
-      .adblock-steps {
-        grid-template-columns: 1fr;
-        gap: 6px;
-      }
-      .adblock-reload-btn {
-        width: 100%;
-        justify-content: center;
-      }
     }
 
     /* ── CLOUD EMBED CONTAINER (YT1s STYLE - 0% VPS LOAD) ── */
@@ -1746,10 +1584,10 @@
           <span id="status-message">Fetching Short details...</span>
         </div>
 
-        <!-- AdBlocker Tip under URL input -->
+        <!-- Compact AdBlocker Tip under URL input (Shown ONLY if AdBlocker is detected) -->
         <div class="url-input-tip" id="url-input-tip">
           <span class="tip-icon">⚠️</span>
-          <span><strong>AdBlocker Notice:</strong> Please pause AdBlocker on this page — cloud download servers block downloads (Status Code 403) if AdBlock is active.</span>
+          <span><strong>Notice:</strong> Please pause your AdBlocker on this page if you experience download errors (Status Code 403).</span>
         </div>
       </section>
 
@@ -1773,42 +1611,6 @@
               <span>✂️ Trim with Clip Cutter</span>
             </a>
           </div>
-        </div>
-
-        <!-- ADBLOCKER CRITICAL WARNING BANNER -->
-        <div class="adblock-alert-box" id="adblock-alert-box">
-          <div class="adblock-alert-header">
-            <span class="adblock-alert-icon">🛡️</span>
-            <div class="adblock-alert-title-wrap">
-              <span class="adblock-badge">CRITICAL REQUIREMENT</span>
-              <h3 class="adblock-title">Please Turn OFF AdBlocker for Video Downloads</h3>
-            </div>
-          </div>
-          <p class="adblock-desc">
-            The cloud download engine requires AdBlocker to be <strong>paused or disabled</strong> on this site. If AdBlocker is active, downloads will fail with <code class="err-code">Status Code 403 / Download Failed</code>.
-          </p>
-          <div class="adblock-steps">
-            <div class="adblock-step">
-              <span class="step-num">1</span>
-              <span>Click your AdBlock icon in your browser toolbar</span>
-            </div>
-            <div class="adblock-step">
-              <span class="step-num">2</span>
-              <span>Select <strong>"Pause on this site"</strong> or toggle OFF</span>
-            </div>
-            <div class="adblock-step">
-              <span class="step-num">3</span>
-              <span>Click the button below to refresh &amp; start download</span>
-            </div>
-          </div>
-          <button type="button" class="adblock-reload-btn" onclick="location.reload()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <polyline points="1 20 1 14 7 14"></polyline>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-            </svg>
-            <span>I Have Disabled AdBlocker (Refresh Page)</span>
-          </button>
         </div>
 
         <!-- CLOUD DOWNLOAD ENGINE (ALL FORMATS - 0% VPS LOAD - YT1S ENGINE) -->
@@ -2065,18 +1867,9 @@
 
     function markAdBlockerDetected() {
       isAdBlockerActive = true;
-      const box = document.getElementById('adblock-alert-box');
       const tip = document.getElementById('url-input-tip');
-      if (box) {
-        box.classList.add('detected');
-        const badge = box.querySelector('.adblock-badge');
-        if (badge) badge.textContent = '⚠️ ADBLOCKER ACTIVE — ACTION REQUIRED';
-        const title = box.querySelector('.adblock-title');
-        if (title) title.textContent = 'AdBlocker is ON — Please Pause It To Enable Downloads';
-      }
       if (tip) {
-        tip.classList.add('highlight');
-        tip.innerHTML = '<span class="tip-icon">🚫</span><span><strong>AdBlocker Detected:</strong> Please pause AdBlocker on YTCuttr — downloads will fail with Error 403 until AdBlock is turned off.</span>';
+        tip.classList.add('visible');
       }
     }
 
