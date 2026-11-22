@@ -349,6 +349,32 @@ INDIAN_PROXIES: list[str] = [
 ]
 LAST_PROXY_FETCH = 0
 
+MIN_VALID_MEDIA_BYTES = 40 * 1024  # 40 KB: real video/audio is always > 40KB, broken/header stubs are ~262 bytes
+
+def is_valid_media_file(p: Path, is_audio: bool = False) -> bool:
+    """Checks that a media file exists, has a legitimate non-empty size (>40KB), and is not a corrupted stub."""
+    if not p.exists() or not p.is_file():
+        return False
+    size = p.stat().st_size
+    if size < MIN_VALID_MEDIA_BYTES:
+        return False
+    try:
+        stream_spec = "a:0" if is_audio else "v:0"
+        probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", stream_spec, "-show_entries", "stream=codec_name", "-of", "csv=p=0", str(p)],
+            capture_output=True, text=True, timeout=5
+        )
+        if probe.returncode == 0 and probe.stdout.strip():
+            return True
+        probe_fmt = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(p)],
+            capture_output=True, text=True, timeout=5
+        )
+        dur = float(probe_fmt.stdout.strip() or 0)
+        return dur > 0.1
+    except Exception:
+        return size >= 100 * 1024
+
 def get_indian_proxies() -> list[str]:
     global INDIAN_PROXIES, LAST_PROXY_FETCH
     now = time.time()
@@ -363,15 +389,7 @@ def get_indian_proxies() -> list[str]:
         url = 'https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&country=in'
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         scraped = urllib.request.urlopen(req, timeout=5).read().decode('utf-8').splitlines()
-        clean = []
-        for p in scraped:
-            p = p.strip()
-            if not p:
-                continue
-            if p.startswith("http://") or p.startswith("https://"):
-                clean.append(p)
-            elif "://" not in p:
-                clean.append(f"http://{p}")
+        clean = [f"http://{p.strip()}" if not p.strip().startswith("http") else p.strip() for p in scraped if p.strip()]
         INDIAN_PROXIES = base + [p for p in clean if p not in base][:20]
         LAST_PROXY_FETCH = now
     except Exception:
@@ -539,11 +557,10 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         except ValueError:
             target_height = 720
 
-    fallback_fmt = "ba[ext=m4a]/ba/best" if is_audio else f"bv*[height<={target_height}]+ba/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best"
     out_path = out_dir / f"clip.{ext}"
     raw_path = out_dir / f"raw.{'m4a' if is_audio else 'mp4'}"
 
-    # Format & Sorting: supports both landscape and vertical/portrait videos accurately
+    # Format & Sorting: strictly enforce resolution and fast h264/aac copy
     sort_args = []
     if is_audio:
         fmt = "ba[ext=m4a]/ba/best"
@@ -560,8 +577,9 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
 
         section_spec = f"*{start_hms}-{end_hms}"
         section_target = str(out_path if (not is_audio or ext == "m4a") else raw_path)
+        target_check = out_path if (not is_audio or ext == "m4a") else raw_path
 
-        # ATTEMPT 1: Fast section stream-copy with cookies and target resolution (zero re-encoding!)
+        # ATTEMPT 1: Fast section stream-copy with cookies and exact target resolution
         cmd_dl_section = build_ytdlp_cmd([
             "--download-sections", section_spec,
             "-N", "1",
@@ -572,73 +590,42 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             url,
         ], use_cookies=True, player_client="")
         r_dl = run_process(cmd_dl_section, timeout=60)
+        if not is_valid_media_file(target_check, is_audio):
+            target_check.unlink(missing_ok=True)
 
         # ATTEMPT 2: Fallback section stream-copy with target resolution with cookies
-        target_check = out_path if (not is_audio or ext == "m4a") else raw_path
-        if not target_check.exists() or target_check.stat().st_size == 0:
+        if not is_valid_media_file(target_check, is_audio):
             cmd_dl_best = build_ytdlp_cmd([
                 "--download-sections", section_spec,
                 "-N", "1",
-                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                *sort_args,
                 "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", section_target,
                 url,
             ], use_cookies=True, player_client="")
             r_dl = run_process(cmd_dl_best, timeout=60)
+            if not is_valid_media_file(target_check, is_audio):
+                target_check.unlink(missing_ok=True)
 
         # ATTEMPT 3: Section download fallback without cookies
-        if not target_check.exists() or target_check.stat().st_size == 0:
+        if not is_valid_media_file(target_check, is_audio):
             cmd_dl_anon = build_ytdlp_cmd([
                 "--download-sections", section_spec,
                 "-N", "1",
-                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                *sort_args,
                 "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", section_target,
                 url,
             ], use_cookies=False, player_client="")
             r_dl = run_process(cmd_dl_anon, timeout=60)
-        # ATTEMPT 4 (Geo-Bypass Fallback): If video is region-locked, download via Indian proxy pool with full env inheritance!
-        if (not target_check.exists() or target_check.stat().st_size == 0) and r_dl and ("not made this video available in your country" in (r_dl.stderr or "") or "available in" in (r_dl.stderr or "") or "geo" in (r_dl.stderr or "").lower()):
-            in_proxies = get_indian_proxies()
-            for p in in_proxies[:10]:
-                try:
-                    proxy_env = os.environ.copy()
-                    proxy_env["http_proxy"] = p
-                    proxy_env["https_proxy"] = p
-                    proxy_env["HTTP_PROXY"] = p
-                    proxy_env["HTTPS_PROXY"] = p
-                    cmd_dl_proxy = build_ytdlp_cmd([
-                        "--proxy", p,
-                        "--socket-timeout", "6",
-                        "--download-sections", section_spec,
-                        "-N", "1",
-                        *(["-S", f"res:{target_height}"] if not is_audio else []),
-                        "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
-                        *merge_fmt_args,
-                        "-o", section_target,
-                        url,
-                    ], use_cookies=True, player_client="")
-                    r_dl = run_process(cmd_dl_proxy, timeout=40, env=proxy_env)
-                    if target_check.exists() and target_check.stat().st_size > 0:
-                        break
-                    found_any = False
-                    for candidate in out_dir.iterdir():
-                        if candidate.is_file() and candidate.stat().st_size > 0 and not candidate.name.endswith(".part"):
-                            if candidate != target_check:
-                                shutil.move(str(candidate), str(target_check))
-                            found_any = True
-                            break
-                    if found_any and target_check.exists() and target_check.stat().st_size > 0:
-                        break
-                except Exception:
-                    continue
+            if not is_valid_media_file(target_check, is_audio):
+                target_check.unlink(missing_ok=True)
 
         # Step 2: Audio Conversion / Local FFmpeg cut if needed
-        if (not out_path.exists() or out_path.stat().st_size == 0) and raw_path.exists() and raw_path.stat().st_size > 0:
+        if not is_valid_media_file(out_path, is_audio) and is_valid_media_file(raw_path, is_audio):
             jobs[job_id]["status"] = "processing"
-            # Check if raw_path is already the trimmed section
             raw_dur = 0
             try:
                 probe_res = run_process(
@@ -649,7 +636,6 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             except Exception:
                 pass
 
-            # If raw_dur is close to clip length, it was already trimmed by section downloader
             is_pretrimmed = (0 < raw_dur <= (clip_len + 8))
             trim_args = [] if is_pretrimmed else ["-ss", start_hms, "-to", end_hms]
 
@@ -665,7 +651,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             elif ext == "m4a":
                 cmd_cut = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "copy", "-avoid_negative_ts", "make_zero", str(out_path)]
                 run_process(cmd_cut, timeout=20)
-                if not out_path.exists() or out_path.stat().st_size == 0:
+                if not is_valid_media_file(out_path, is_audio):
                     cmd_cut_aac = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "aac", "-b:a", "256k", str(out_path)]
                     run_process(cmd_cut_aac, timeout=30)
             else:
@@ -678,8 +664,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                     str(out_path),
                 ]
                 run_process(cmd_cut, timeout=25)
-                # If stream-copy produced an empty/failed file, transcode accurately at high visual quality (CRF 18)
-                if not out_path.exists() or out_path.stat().st_size == 0:
+                if not is_valid_media_file(out_path, is_audio):
                     cmd_cut_hq = [
                         "ffmpeg", "-y", "-threads", "1",
                         *trim_args,
@@ -700,7 +685,7 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 pass
 
         elapsed = round(time.time() - t_start, 2)
-        if out_path.exists() and out_path.stat().st_size > 0:
+        if is_valid_media_file(out_path, is_audio):
             res_str = ""
             if not is_audio:
                 try:
@@ -722,11 +707,13 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             err = r_dl.stderr[-500:] if (r_dl and r_dl.stderr) else "Unknown download failure"
             jobs[job_id]["status"] = "error"
             if "not made this video available in your country" in err or "geo" in err.lower():
-                jobs[job_id]["error"] = "⚠️ This video has regional copyright restrictions set by the uploader (licensed only in certain countries). Please use our 'Full Video & Shorts' tool to download via multi-region cloud servers."
+                jobs[job_id]["error"] = "⚠️ Regional restrictions: The uploader has restricted this video to specific countries (e.g., India). Our international servers cannot access it directly."
             elif "Private video" in err:
                 jobs[job_id]["error"] = "⚠️ This video is private and cannot be downloaded."
             elif "Sign in to confirm your age" in err:
                 jobs[job_id]["error"] = "⚠️ This video is age-restricted by YouTube."
+            elif "Sign in to confirm you’re not a bot" in err:
+                jobs[job_id]["error"] = "⚠️ YouTube bot protection triggered. Please retry in a few seconds."
             else:
                 jobs[job_id]["error"] = f"Clip generation failed: {err}"
             jobs[job_id]["debug"] = {
@@ -742,7 +729,6 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         shutil.rmtree(out_dir, ignore_errors=True)
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = f"Server error: {str(e)}"
-
 
 def _run_download(job_id: str, url: str, quality: str):
     t_start = time.time()
@@ -767,7 +753,7 @@ def _run_download(job_id: str, url: str, quality: str):
 
     fallback_fmt = "ba[ext=m4a]/ba/best" if is_audio else f"bv*[height<={target_height}]+ba/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best"
 
-    # Format & Sorting: supports both landscape and vertical/portrait videos accurately
+    # Format & Sorting: strictly enforce resolution and fast h264/aac copy
     sort_args = []
     if is_audio:
         fmt = "ba[ext=m4a]/ba/best"
@@ -795,7 +781,7 @@ def _run_download(job_id: str, url: str, quality: str):
         r = None
         target_check = raw_path if is_audio else out_path
 
-        # Attempt 1: Direct native download with cookies and target resolution
+        # Attempt 1: Direct native download with cookies and exact target resolution
         cmd = build_ytdlp_cmd([
             "-N", "8",
             "--concurrent-fragments", "8",
@@ -806,9 +792,11 @@ def _run_download(job_id: str, url: str, quality: str):
             url,
         ], use_cookies=True, player_client="")
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        if not is_valid_media_file(target_check, is_audio):
+            target_check.unlink(missing_ok=True)
 
         # Attempt 2: Using cached info.json if available
-        if (not target_check.exists() or target_check.stat().st_size == 0) and info_json_file.exists() and info_json_file.stat().st_size > 1000:
+        if not is_valid_media_file(target_check, is_audio) and info_json_file.exists() and info_json_file.stat().st_size > 1000:
             cmd_cached = build_ytdlp_cmd([
                 "--load-info-json", str(info_json_file),
                 "-N", "8",
@@ -817,82 +805,58 @@ def _run_download(job_id: str, url: str, quality: str):
                 "-f", fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
+                url,
             ], use_cookies=True, player_client="")
             r = subprocess.run(cmd_cached, capture_output=True, text=True, timeout=240)
+            if not is_valid_media_file(target_check, is_audio):
+                target_check.unlink(missing_ok=True)
 
         # Attempt 3: Fallback on height-matching fallback with cookies
-        if not target_check.exists() or target_check.stat().st_size == 0:
+        if not is_valid_media_file(target_check, is_audio):
             fallback_cmd = build_ytdlp_cmd([
                 "-N", "2",
                 "--concurrent-fragments", "2",
-                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                *sort_args,
                 "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
             ], use_cookies=True, player_client="")
             r = run_process(fallback_cmd, timeout=300)
+            if not is_valid_media_file(target_check, is_audio):
+                target_check.unlink(missing_ok=True)
 
         # Attempt 4: Fallback with target resolution without cookies
-        if not target_check.exists() or target_check.stat().st_size == 0:
+        if not is_valid_media_file(target_check, is_audio):
             fallback_anon = build_ytdlp_cmd([
                 "-N", "2",
                 "--concurrent-fragments", "2",
-                *(["-S", f"res:{target_height}"] if not is_audio else []),
+                *sort_args,
                 "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
             ], use_cookies=False, player_client="")
             r = run_process(fallback_anon, timeout=300)
+            if not is_valid_media_file(target_check, is_audio):
+                target_check.unlink(missing_ok=True)
 
         # Attempt 5: Fallback on height-matching fallback without cookies
-        if not target_check.exists() or target_check.stat().st_size == 0:
+        if not is_valid_media_file(target_check, is_audio):
             fallback_safe = build_ytdlp_cmd([
                 "-N", "1",
+                *sort_args,
                 "-f", fallback_fmt,
                 *merge_fmt_args,
                 "-o", str(raw_path if is_audio else out_path),
                 url,
             ], use_cookies=False, player_client="")
             r = run_process(fallback_safe, timeout=300)
-        # Attempt 6 (Geo-Bypass Fallback): If video is region-locked, download via Indian proxy pool with full env inheritance!
-        if (not target_check.exists() or target_check.stat().st_size == 0) and r and ("not made this video available in your country" in (r.stderr or "") or "available in" in (r.stderr or "") or "geo" in (r.stderr or "").lower()):
-            in_proxies = get_indian_proxies()
-            for p in in_proxies[:10]:
-                try:
-                    proxy_env = os.environ.copy()
-                    proxy_env["http_proxy"] = p
-                    proxy_env["https_proxy"] = p
-                    proxy_env["HTTP_PROXY"] = p
-                    proxy_env["HTTPS_PROXY"] = p
-                    fallback_proxy = build_ytdlp_cmd([
-                        "--proxy", p,
-                        "--socket-timeout", "6",
-                        "-N", "1",
-                        *(["-S", f"res:{target_height}"] if not is_audio else []),
-                        "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
-                        *merge_fmt_args,
-                        "-o", str(raw_path if is_audio else out_path),
-                        url,
-                    ], use_cookies=True, player_client="")
-                    r = run_process(fallback_proxy, timeout=50, env=proxy_env)
-                    if target_check.exists() and target_check.stat().st_size > 0:
-                        break
-                    found_any = False
-                    for candidate in out_dir.iterdir():
-                        if candidate.is_file() and candidate.stat().st_size > 0 and not candidate.name.endswith(".part"):
-                            if candidate != target_check:
-                                shutil.move(str(candidate), str(target_check))
-                            found_any = True
-                            break
-                    if found_any and target_check.exists() and target_check.stat().st_size > 0:
-                        break
-                except Exception:
-                    continue
+            if not is_valid_media_file(target_check, is_audio):
+                target_check.unlink(missing_ok=True)
 
         # If audio, convert/extract cleanly with FFmpeg
-        if is_audio and raw_path.exists() and raw_path.stat().st_size > 0:
+        if is_audio and is_valid_media_file(raw_path, is_audio):
             jobs[job_id]["status"] = "processing"
             if is_wav:
                 cmd_conv = [
@@ -932,7 +896,7 @@ def _run_download(job_id: str, url: str, quality: str):
                     str(out_path),
                 ]
                 subprocess.run(cmd_conv, capture_output=True, text=True, timeout=30)
-                if not out_path.exists() or out_path.stat().st_size == 0:
+                if not is_valid_media_file(out_path, is_audio):
                     cmd_conv_aac = [
                         "ffmpeg", "-y",
                         "-i", str(raw_path),
@@ -948,7 +912,7 @@ def _run_download(job_id: str, url: str, quality: str):
                 pass
 
         elapsed = round(time.time() - t_start, 2)
-        if out_path.exists() and out_path.stat().st_size > 0:
+        if is_valid_media_file(out_path, is_audio):
             res_str = ""
             if not is_audio:
                 try:
@@ -970,11 +934,13 @@ def _run_download(job_id: str, url: str, quality: str):
             err = r.stderr[-500:] if (r and r.stderr) else "Download failed"
             jobs[job_id]["status"] = "error"
             if "not made this video available in your country" in err or "geo" in err.lower():
-                jobs[job_id]["error"] = "⚠️ This video has regional copyright restrictions set by the uploader (licensed only in certain countries). Please use our 'Full Video & Shorts' tool to download via multi-region cloud servers."
+                jobs[job_id]["error"] = "⚠️ Regional restrictions: The uploader has restricted this video to specific countries (e.g., India). Our international servers cannot access it directly."
             elif "Private video" in err:
                 jobs[job_id]["error"] = "⚠️ This video is private and cannot be downloaded."
             elif "Sign in to confirm your age" in err:
                 jobs[job_id]["error"] = "⚠️ This video is age-restricted by YouTube."
+            elif "Sign in to confirm you’re not a bot" in err:
+                jobs[job_id]["error"] = "⚠️ YouTube bot protection triggered. Please retry in a few seconds."
             else:
                 jobs[job_id]["error"] = f"Download failed: {err}"
             jobs[job_id]["time_taken"] = elapsed
@@ -987,7 +953,6 @@ def _run_download(job_id: str, url: str, quality: str):
         shutil.rmtree(out_dir, ignore_errors=True)
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)
-
 
 def _queue_worker(job_id: str, run_func, *args):
     """FIFO Queue Worker: waits until an active slot (< 5) is available and this job is at the head."""
@@ -1219,8 +1184,8 @@ async def get_file(job_id: str, bg: BackgroundTasks):
         raise HTTPException(404, detail="File not ready")
 
     file_path = Path(job["file"])
-    if not file_path.exists():
-        raise HTTPException(404, detail="File not found")
+    if not file_path.exists() or file_path.stat().st_size < MIN_VALID_MEDIA_BYTES:
+        raise HTTPException(404, detail="File corrupted or incomplete")
 
     bg.add_task(delayed_cleanup, job_id, 30)
     file_size = file_path.stat().st_size
