@@ -363,7 +363,15 @@ def get_indian_proxies() -> list[str]:
         url = 'https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&country=in'
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         scraped = urllib.request.urlopen(req, timeout=5).read().decode('utf-8').splitlines()
-        clean = [f"http://{p.strip()}" if not p.strip().startswith("http") else p.strip() for p in scraped if p.strip()]
+        clean = []
+        for p in scraped:
+            p = p.strip()
+            if not p:
+                continue
+            if p.startswith("http://") or p.startswith("https://"):
+                clean.append(p)
+            elif "://" not in p:
+                clean.append(f"http://{p}")
         INDIAN_PROXIES = base + [p for p in clean if p not in base][:20]
         LAST_PROXY_FETCH = now
     except Exception:

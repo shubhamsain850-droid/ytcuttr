@@ -3198,6 +3198,25 @@ footer a { color: var(--red); text-decoration: none; }
       const clearBtn = document.getElementById('url-clear-btn');
       if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
       syncNavLinksWithUrl();
+
+      // Ensure any floating Adsterra Social Bar ad stays cleanly at bottom-right and never overlaps the header
+      function relocateSocialBar() {
+        document.querySelectorAll('iframe').forEach(el => {
+          if (el.id === 'player-frame' || el.classList.contains('player-iframe')) return;
+          const pos = el.style.position || window.getComputedStyle(el).position;
+          if (pos === 'fixed') {
+            el.style.setProperty('top', 'auto', 'important');
+            el.style.setProperty('bottom', '16px', 'important');
+            el.style.setProperty('right', '16px', 'important');
+            el.style.setProperty('z-index', '9999', 'important');
+          }
+        });
+      }
+      try {
+        new MutationObserver(relocateSocialBar).observe(document.documentElement, { childList: true, subtree: true });
+        window.addEventListener('load', relocateSocialBar);
+        setInterval(relocateSocialBar, 800);
+      } catch(e) {}
     }
 
     function clearUrlInput() {
@@ -3453,6 +3472,25 @@ footer a { color: var(--red); text-decoration: none; }
 
       // Synchronize top navigation buttons with active video URL
       syncNavLinksWithUrl();
+
+      // Ensure any floating Adsterra Social Bar ad stays cleanly at bottom-right and never overlaps the header
+      function relocateSocialBar() {
+        document.querySelectorAll('iframe').forEach(el => {
+          if (el.id === 'player-frame' || el.classList.contains('player-iframe')) return;
+          const pos = el.style.position || window.getComputedStyle(el).position;
+          if (pos === 'fixed') {
+            el.style.setProperty('top', 'auto', 'important');
+            el.style.setProperty('bottom', '16px', 'important');
+            el.style.setProperty('right', '16px', 'important');
+            el.style.setProperty('z-index', '9999', 'important');
+          }
+        });
+      }
+      try {
+        new MutationObserver(relocateSocialBar).observe(document.documentElement, { childList: true, subtree: true });
+        window.addEventListener('load', relocateSocialBar);
+        setInterval(relocateSocialBar, 800);
+      } catch(e) {}
 
       // Smooth scroll on mobile
       if (window.innerWidth < 768) {
@@ -3962,6 +4000,25 @@ footer a { color: var(--red); text-decoration: none; }
       initTimelineScrubber();
       syncNavLinksWithUrl();
 
+      // Ensure any floating Adsterra Social Bar ad stays cleanly at bottom-right and never overlaps the header
+      function relocateSocialBar() {
+        document.querySelectorAll('iframe').forEach(el => {
+          if (el.id === 'player-frame' || el.classList.contains('player-iframe')) return;
+          const pos = el.style.position || window.getComputedStyle(el).position;
+          if (pos === 'fixed') {
+            el.style.setProperty('top', 'auto', 'important');
+            el.style.setProperty('bottom', '16px', 'important');
+            el.style.setProperty('right', '16px', 'important');
+            el.style.setProperty('z-index', '9999', 'important');
+          }
+        });
+      }
+      try {
+        new MutationObserver(relocateSocialBar).observe(document.documentElement, { childList: true, subtree: true });
+        window.addEventListener('load', relocateSocialBar);
+        setInterval(relocateSocialBar, 800);
+      } catch(e) {}
+
       const params = new URLSearchParams(window.location.search);
       const u = params.get('url') || params.get('v') || params.get('q');
       if (u) {
@@ -3971,6 +4028,25 @@ footer a { color: var(--red); text-decoration: none; }
           handleUrlInputChange();
           handleFetchClick();
           syncNavLinksWithUrl();
+
+      // Ensure any floating Adsterra Social Bar ad stays cleanly at bottom-right and never overlaps the header
+      function relocateSocialBar() {
+        document.querySelectorAll('iframe').forEach(el => {
+          if (el.id === 'player-frame' || el.classList.contains('player-iframe')) return;
+          const pos = el.style.position || window.getComputedStyle(el).position;
+          if (pos === 'fixed') {
+            el.style.setProperty('top', 'auto', 'important');
+            el.style.setProperty('bottom', '16px', 'important');
+            el.style.setProperty('right', '16px', 'important');
+            el.style.setProperty('z-index', '9999', 'important');
+          }
+        });
+      }
+      try {
+        new MutationObserver(relocateSocialBar).observe(document.documentElement, { childList: true, subtree: true });
+        window.addEventListener('load', relocateSocialBar);
+        setInterval(relocateSocialBar, 800);
+      } catch(e) {}
         }
       }
     });
