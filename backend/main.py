@@ -316,9 +316,10 @@ def clean_quality_key(quality: str) -> str:
 
 from urllib.parse import quote
 
-def run_process(cmd: list, timeout: int = 60) -> subprocess.CompletedProcess:
+def run_process(cmd: list, timeout: int = 60, env: dict = None) -> subprocess.CompletedProcess:
     """Run external command with nice priority on Linux in its own process group to protect Uvicorn/SSH and ensure clean termination."""
     full_cmd = ["nice", "-n", "10"] + cmd if os.name != "nt" else cmd
+    run_env = env if env is not None else os.environ.copy()
     if os.name != "nt":
         try:
             proc = subprocess.Popen(
@@ -326,6 +327,7 @@ def run_process(cmd: list, timeout: int = 60) -> subprocess.CompletedProcess:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                env=run_env,
                 preexec_fn=os.setsid
             )
             stdout, stderr = proc.communicate(timeout=timeout)
@@ -338,7 +340,28 @@ def run_process(cmd: list, timeout: int = 60) -> subprocess.CompletedProcess:
             proc.communicate()
             raise
     else:
-        return subprocess.run(full_cmd, capture_output=True, text=True, timeout=timeout)
+        return subprocess.run(full_cmd, capture_output=True, text=True, timeout=timeout, env=run_env)
+
+INDIAN_PROXIES: list[str] = ["http://45.194.3.108:8080", "http://45.194.90.194:8080", "http://154.201.127.230:8080"]
+LAST_PROXY_FETCH = 0
+
+def get_indian_proxies() -> list[str]:
+    global INDIAN_PROXIES, LAST_PROXY_FETCH
+    now = time.time()
+    if INDIAN_PROXIES and (now - LAST_PROXY_FETCH < 3600):
+        return INDIAN_PROXIES
+    try:
+        url = 'https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&proxy_format=protocolipport&format=text&country=in'
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        content = urllib.request.urlopen(req, timeout=8).read().decode('utf-8')
+        proxies = [p.strip() for p in content.splitlines() if p.strip()]
+        if proxies:
+            INDIAN_PROXIES = proxies
+            LAST_PROXY_FETCH = now
+            return proxies
+    except Exception as e:
+        pass
+    return INDIAN_PROXIES
 
 def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: str = "") -> list:
     cmd = [
@@ -561,6 +584,40 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 url,
             ], use_cookies=False, player_client="")
             r_dl = run_process(cmd_dl_anon, timeout=60)
+        # ATTEMPT 4 (Geo-Bypass Fallback): If video is region-locked, download via Indian proxy pool with full env inheritance!
+        if (not target_check.exists() or target_check.stat().st_size == 0) and r_dl and ("not made this video available in your country" in (r_dl.stderr or "") or "available in" in (r_dl.stderr or "") or "geo" in (r_dl.stderr or "").lower()):
+            in_proxies = get_indian_proxies()
+            for p in in_proxies[:10]:
+                try:
+                    proxy_env = os.environ.copy()
+                    proxy_env["http_proxy"] = p
+                    proxy_env["https_proxy"] = p
+                    proxy_env["HTTP_PROXY"] = p
+                    proxy_env["HTTPS_PROXY"] = p
+                    cmd_dl_proxy = build_ytdlp_cmd([
+                        "--proxy", p,
+                        "--download-sections", section_spec,
+                        "-N", "1",
+                        *(["-S", f"res:{target_height}"] if not is_audio else []),
+                        "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
+                        *merge_fmt_args,
+                        "-o", section_target,
+                        url,
+                    ], use_cookies=True, player_client="")
+                    r_dl = run_process(cmd_dl_proxy, timeout=75, env=proxy_env)
+                    if target_check.exists() and target_check.stat().st_size > 0:
+                        break
+                    found_any = False
+                    for candidate in out_dir.iterdir():
+                        if candidate.is_file() and candidate.stat().st_size > 0 and not candidate.name.endswith(".part"):
+                            if candidate != target_check:
+                                shutil.move(str(candidate), str(target_check))
+                            found_any = True
+                            break
+                    if found_any and target_check.exists() and target_check.stat().st_size > 0:
+                        break
+                except Exception:
+                    continue
 
         # Step 2: Audio Conversion / Local FFmpeg cut if needed
         if (not out_path.exists() or out_path.stat().st_size == 0) and raw_path.exists() and raw_path.stat().st_size > 0:
@@ -783,6 +840,39 @@ def _run_download(job_id: str, url: str, quality: str):
                 url,
             ], use_cookies=False, player_client="")
             r = run_process(fallback_safe, timeout=300)
+        # Attempt 6 (Geo-Bypass Fallback): If video is region-locked, download via Indian proxy pool with full env inheritance!
+        if (not target_check.exists() or target_check.stat().st_size == 0) and r and ("not made this video available in your country" in (r.stderr or "") or "available in" in (r.stderr or "") or "geo" in (r.stderr or "").lower()):
+            in_proxies = get_indian_proxies()
+            for p in in_proxies[:10]:
+                try:
+                    proxy_env = os.environ.copy()
+                    proxy_env["http_proxy"] = p
+                    proxy_env["https_proxy"] = p
+                    proxy_env["HTTP_PROXY"] = p
+                    proxy_env["HTTPS_PROXY"] = p
+                    fallback_proxy = build_ytdlp_cmd([
+                        "--proxy", p,
+                        "-N", "1",
+                        *(["-S", f"res:{target_height}"] if not is_audio else []),
+                        "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
+                        *merge_fmt_args,
+                        "-o", str(raw_path if is_audio else out_path),
+                        url,
+                    ], use_cookies=True, player_client="")
+                    r = run_process(fallback_proxy, timeout=120, env=proxy_env)
+                    if target_check.exists() and target_check.stat().st_size > 0:
+                        break
+                    found_any = False
+                    for candidate in out_dir.iterdir():
+                        if candidate.is_file() and candidate.stat().st_size > 0 and not candidate.name.endswith(".part"):
+                            if candidate != target_check:
+                                shutil.move(str(candidate), str(target_check))
+                            found_any = True
+                            break
+                    if found_any and target_check.exists() and target_check.stat().st_size > 0:
+                        break
+                except Exception:
+                    continue
 
         # If audio, convert/extract cleanly with FFmpeg
         if is_audio and raw_path.exists() and raw_path.stat().st_size > 0:

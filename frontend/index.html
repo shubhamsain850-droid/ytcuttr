@@ -379,13 +379,18 @@
       text-decoration: none;
     }
 
-    /* Prevent any floating Adsterra Social Bar ad from overlapping the navigation buttons */
+    /* Move ANY floating ad iframe (Adsterra Social Bar) cleanly to bottom-right so it never touches top navbar */
+    iframe[style*="fixed"]:not(#player-frame),
+    iframe[src*="about:blank"],
     div[class*="container-"],
     div[id*="social-bar"],
     div[class*="social-bar"],
     div[class*="sb-"],
     div[id*="sb-"] {
-      top: 74px !important;
+      top: auto !important;
+      bottom: 16px !important;
+      right: 16px !important;
+      z-index: 9999 !important;
     }
 
     .nav-btn:hover {
@@ -3969,6 +3974,31 @@ footer a { color: var(--red); text-decoration: none; }
         }
       }
     });
+
+    // ── ADSTERRA SOCIAL BAR RELOCATION (Ensures Floating Ads Stay At Bottom-Right & Never Overlap Header Nav) ──
+    function relocateSocialBar() {
+      try {
+        const candidates = document.querySelectorAll('iframe, div[style*="fixed"], div[id*="sb-"], div[class*="sb-"], div[id*="social"], div[class*="social"], div[class*="container-"]');
+        candidates.forEach(el => {
+          if (el.id === 'player-frame' || el.classList.contains('player-iframe')) return;
+          if (el.closest('.header') || el.closest('#cutter-tool') || el.closest('.container') || el.classList.contains('header-inner') || el.classList.contains('nav-btn')) return;
+
+          const pos = el.style.position || window.getComputedStyle(el).position;
+          if (pos === 'fixed') {
+            el.style.setProperty('top', 'auto', 'important');
+            el.style.setProperty('bottom', '16px', 'important');
+            el.style.setProperty('right', '16px', 'important');
+            el.style.setProperty('z-index', '9999', 'important');
+          }
+        });
+      } catch(e) {}
+    }
+    try {
+      new MutationObserver(relocateSocialBar).observe(document.documentElement, { childList: true, subtree: true });
+      window.addEventListener('load', relocateSocialBar);
+      setInterval(relocateSocialBar, 500);
+    } catch(e) {}
+
   </script>
 
   <!-- ADSTERRA SOCIAL BAR -->
