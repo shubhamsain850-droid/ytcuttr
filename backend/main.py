@@ -346,6 +346,8 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: s
         "-4",
         "--no-playlist",
         "--no-warnings",
+        "--geo-bypass",
+        "--geo-bypass-country", "IN",
         "--js-runtimes", "node",
         "--cache-dir", str(CACHE_DIR),
         "--no-check-formats",
@@ -644,9 +646,16 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             if res_str:
                 jobs[job_id]["resolution"] = res_str
         else:
-            err = r_dl.stderr[-400:] if (r_dl and r_dl.stderr) else "Unknown download failure"
+            err = r_dl.stderr[-500:] if (r_dl and r_dl.stderr) else "Unknown download failure"
             jobs[job_id]["status"] = "error"
-            jobs[job_id]["error"] = f"Clip generation failed: {err}"
+            if "not made this video available in your country" in err or "geo" in err.lower():
+                jobs[job_id]["error"] = "⚠️ This video has regional copyright restrictions set by the uploader (licensed only in certain countries). Please use our 'Full Video & Shorts' tool to download via multi-region cloud servers."
+            elif "Private video" in err:
+                jobs[job_id]["error"] = "⚠️ This video is private and cannot be downloaded."
+            elif "Sign in to confirm your age" in err:
+                jobs[job_id]["error"] = "⚠️ This video is age-restricted by YouTube."
+            else:
+                jobs[job_id]["error"] = f"Clip generation failed: {err}"
             jobs[job_id]["debug"] = {
                 "r_dl_code": r_dl.returncode if r_dl else -1,
                 "r_dl_stderr": err,
@@ -851,8 +860,16 @@ def _run_download(job_id: str, url: str, quality: str):
             if res_str:
                 jobs[job_id]["resolution"] = res_str
         else:
+            err = r.stderr[-500:] if (r and r.stderr) else "Download failed"
             jobs[job_id]["status"] = "error"
-            jobs[job_id]["error"] = r.stderr[-400:] if (r and r.stderr) else "Download failed"
+            if "not made this video available in your country" in err or "geo" in err.lower():
+                jobs[job_id]["error"] = "⚠️ This video has regional copyright restrictions set by the uploader (licensed only in certain countries). Please use our 'Full Video & Shorts' tool to download via multi-region cloud servers."
+            elif "Private video" in err:
+                jobs[job_id]["error"] = "⚠️ This video is private and cannot be downloaded."
+            elif "Sign in to confirm your age" in err:
+                jobs[job_id]["error"] = "⚠️ This video is age-restricted by YouTube."
+            else:
+                jobs[job_id]["error"] = f"Download failed: {err}"
             jobs[job_id]["time_taken"] = elapsed
             shutil.rmtree(out_dir, ignore_errors=True)
     except subprocess.TimeoutExpired:

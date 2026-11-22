@@ -308,7 +308,7 @@
       justify-content: space-between;
       position: sticky;
       top: 0;
-      z-index: 1000 !important;
+      z-index: 2147483640 !important;
       pointer-events: auto !important;
       transition: var(--transition);
     }
@@ -321,6 +321,8 @@
       align-items: center;
       justify-content: space-between;
       pointer-events: auto !important;
+      position: relative;
+      z-index: 2147483642 !important;
     }
 
     .logo {
@@ -352,7 +354,7 @@
       gap: 8px;
       pointer-events: auto !important;
       position: relative;
-      z-index: 1001 !important;
+      z-index: 2147483645 !important;
     }
 
     .nav-btn {
@@ -373,8 +375,17 @@
       cursor: pointer !important;
       pointer-events: auto !important;
       position: relative;
-      z-index: 1002 !important;
+      z-index: 2147483646 !important;
       text-decoration: none;
+    }
+
+    /* Prevent any floating Adsterra Social Bar ad from overlapping the navigation buttons */
+    div[class*="container-"],
+    div[id*="social-bar"],
+    div[class*="social-bar"],
+    div[class*="sb-"],
+    div[id*="sb-"] {
+      top: 74px !important;
     }
 
     .nav-btn:hover {
@@ -3876,7 +3887,11 @@ footer a { color: var(--red); text-decoration: none; }
             hideProcessingBox();
             resetPrimaryButton();
             let msg = job.error || "Processing error on server. Please try again.";
-            if (msg.includes("403") || msg.includes("Forbidden")) {
+            if (msg.includes("not made this video available in your country") || msg.toLowerCase().includes("geo") || msg.includes("proxy server")) {
+              const u = getActiveVideoUrl();
+              const fullUrl = u ? `/youtube-shorts-downloader?url=${encodeURIComponent(u)}` : '/youtube-shorts-downloader';
+              msg = `⚠️ Regional restrictions: Uploader restricted this video to specific countries. <a href="${fullUrl}" style="color:#fff;text-decoration:underline;font-weight:700;margin-left:6px;">Try Full Video &amp; Shorts Downloader &rarr;</a>`;
+            } else if (msg.includes("403") || msg.includes("Forbidden")) {
               msg = "YouTube stream temporarily restricted. Please retry or choose another quality.";
             }
             showToast(msg, true);
@@ -3919,12 +3934,14 @@ footer a { color: var(--red); text-decoration: none; }
     let toastTimeout = null;
     function showToast(msg, isError = false) {
       const t = document.getElementById('toast');
-      t.textContent = msg;
+      if (!t) return;
+      t.innerHTML = msg;
+      t.style.pointerEvents = 'auto';
       t.className = 'toast show ' + (isError ? 'error' : 'success');
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(() => {
         t.className = 'toast';
-      }, 3800);
+      }, isError ? 6500 : 3800);
     }
 
     // ── FAQ ACCORDION TOGGLE ──────────────────────────────────
