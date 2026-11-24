@@ -2439,26 +2439,13 @@
             <!-- QUALITY & FORMAT SELECTION -->
             <div class="res-section">
               <div class="res-header">
-                <span>Select Format &amp; Quality</span>
-                <span id="selected-format-label" style="font-size: 12px; color: var(--muted); font-weight: 600;">MP4
-                  Video &amp; Studio Audio</span>
+                <span>Select Video Quality</span>
+                <span id="selected-format-label" style="font-size: 12px; color: var(--muted); font-weight: 600;">MP4 Video</span>
               </div>
 
               <!-- Video Resolutions -->
-              <div class="format-category-title"
-                style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted, #64748b); margin: 6px 0 6px;">
-                🎬 Video Quality (MP4)</div>
               <div class="res-pills-grid" id="resolution-grid" role="radiogroup" aria-label="Available Video Qualities">
                 <!-- Dynamically populated video pills -->
-              </div>
-
-              <!-- Audio Formats -->
-              <div class="format-category-title"
-                style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted, #64748b); margin: 14px 0 6px;">
-                🎵 Audio Formats</div>
-              <div class="res-pills-grid" id="audio-formats-grid" role="radiogroup"
-                aria-label="Available Audio Formats">
-                <!-- Dynamically populated audio pills: MP3 320k, MP3 128k, WAV, FLAC, M4A -->
               </div>
             </div>
 
@@ -3624,12 +3611,7 @@
         if (!btnText || !btn) return;
         btn.classList.remove('warning-mode');
 
-        const isAudio = ['320k', '128k', 'wav', 'flac', 'm4a', 'audio'].some(a => (selectedQuality || '').toLowerCase().includes(a));
-        if (isAudio) {
-          btnText.textContent = `⬇ Download Audio Clip (${(selectedQuality || 'MP3').toUpperCase()})`;
-        } else {
-          btnText.textContent = `⬇ Download Video Clip (${selectedQuality || '720p'})`;
-        }
+        btnText.textContent = `⬇ Download Video Clip (${selectedQuality || '720p'})`;
         btn.disabled = !ClipState.validate().valid;
       }
 
@@ -3988,20 +3970,10 @@
       }
       window.previewSelectedClip = previewSelectedClip;
 
-      // ── QUALITY & AUDIO FORMATS PICKER ───────────────────────
-      const AUDIO_FORMATS = [
-        { key: '320k', label: 'MP3 (320k)', tag: 'Ultra HQ' },
-        { key: '128k', label: 'MP3 (128k)', tag: 'Standard' },
-        { key: 'wav', label: 'WAV', tag: 'Studio Lossless' },
-        { key: 'flac', label: 'FLAC', tag: 'Master Lossless' },
-        { key: 'm4a', label: 'M4A', tag: 'Original AAC' },
-      ];
-
+      // ── QUALITY PICKER ───────────────────────────────────────
       function renderResolutionPills() {
         const vGrid = document.getElementById('resolution-grid');
-        const aGrid = document.getElementById('audio-formats-grid');
         if (vGrid) vGrid.innerHTML = '';
-        if (aGrid) aGrid.innerHTML = '';
 
         if (!currentVideoData) return;
 
@@ -4015,7 +3987,7 @@
         if (defIdx === -1) defIdx = 0;
         selectedQuality = rawRes[defIdx];
 
-        // 1. Video Pills
+        // Video Pills
         rawRes.forEach(res => {
           const isSelected = (res === selectedQuality);
           const pill = document.createElement('button');
@@ -4035,27 +4007,12 @@
           if (vGrid) vGrid.appendChild(pill);
         });
 
-        // 2. Audio Pills
-        if (aGrid) {
-          AUDIO_FORMATS.forEach(af => {
-            const pill = document.createElement('button');
-            pill.type = 'button';
-            pill.className = 'res-pill audio-pill';
-            pill.setAttribute('role', 'radio');
-            pill.setAttribute('aria-checked', 'false');
-            pill.setAttribute('data-quality', af.key);
-            pill.innerHTML = `<span>${af.label}</span><span style="font-size: 10px; opacity: 0.8; margin-left: 4px;">(${af.tag})</span>`;
-            pill.onclick = () => selectAnyQuality(af.key, pill);
-            aGrid.appendChild(pill);
-          });
-        }
-
         updatePrimaryButtonText();
       }
 
       function selectAnyQuality(res, el) {
         selectedQuality = res;
-        document.querySelectorAll('#resolution-grid .res-pill, #audio-formats-grid .res-pill').forEach(b => {
+        document.querySelectorAll('#resolution-grid .res-pill').forEach(b => {
           b.classList.remove('active');
           b.setAttribute('aria-checked', 'false');
         });
@@ -4097,8 +4054,7 @@
         btn.classList.add('processing');
 
         const isClip = true;
-        const isAudio = ['320k', '128k', 'wav', 'flac', 'm4a', 'audio'].some(a => (selectedQuality || '').toLowerCase().includes(a));
-        showProcessingBox(isAudio ? 'Processing audio clip in cloud...' : 'Cutting video clip in cloud...');
+        showProcessingBox('Cutting video clip in cloud...');
 
         try {
           const payload = {
