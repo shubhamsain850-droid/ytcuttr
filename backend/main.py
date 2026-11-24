@@ -428,17 +428,21 @@ def fetch_oembed(url: str) -> dict | None:
             title = data.get("title", "Unknown Title")
             thumb = data.get("thumbnail_url", "")
 
-            # Fast duration probe (approxDurationMs from watch page header)
+            # Fast duration probe from watch HTML
             dur = 0
             vid = get_video_id(url)
             try:
                 watch_url = f"https://www.youtube.com/watch?v={vid}"
                 w_req = urllib.request.Request(watch_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-                with urllib.request.urlopen(w_req, timeout=3) as w_resp:
-                    html_chunk = w_resp.read(500000).decode("utf-8", errors="ignore")
-                    m = re.search(r'approxDurationMs["\']?\s*:\s*["\']?(\d+)', html_chunk)
-                    if m:
-                        dur = int(m.group(1)) // 1000
+                with urllib.request.urlopen(w_req, timeout=4) as w_resp:
+                    html = w_resp.read().decode("utf-8", errors="ignore")
+                    m = re.search(r'"lengthSeconds"\s*:\s*"(\d+)"', html)
+                    if not m:
+                        m = re.search(r'"approxDurationMs"\s*:\s*"(\d+)"', html)
+                        if m:
+                            dur = int(m.group(1)) // 1000
+                    else:
+                        dur = int(m.group(1))
             except Exception:
                 pass
 
