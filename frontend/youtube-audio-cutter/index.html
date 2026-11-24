@@ -1934,6 +1934,7 @@
               autocorrect="off"
               spellcheck="false"
               oninput="handleInput()"
+              onpaste="setTimeout(handleFetch, 50)"
               onkeydown="if(event.key === 'Enter') handleFetch()"
             />
             <button type="button" class="url-clear-btn" id="url-clear-btn" aria-label="Clear URL" onclick="clearUrl()">
@@ -2549,7 +2550,10 @@
     // Helper: Extract 11-char Video ID
     function extractVideoId(url) {
       if (!url) return null;
-      const m = url.match(/(?:shorts\/|v=|youtu\.be\/|\/embed\/|\/v\/|live\/)([A-Za-z0-9_-]{11})/);
+      const clean = url.trim();
+      if (/^[0-9A-Za-z_-]{11}$/.test(clean)) return clean;
+      const reg = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/|live\/))([\w-]{11})/i;
+      const m = clean.match(reg);
       return m ? m[1] : null;
     }
 
@@ -3000,6 +3004,10 @@
     async function handleFetch() {
       const input = document.getElementById('audio-url-input');
       const rawUrl = input.value.trim();
+      if (!rawUrl) {
+        showStatus('Please enter a YouTube video or song link.', 'error');
+        return;
+      }
       const videoId = extractVideoId(rawUrl);
 
       if (!videoId) {
@@ -3011,15 +3019,16 @@
 
       const fetchBtn = document.getElementById('fetch-btn');
       if (fetchBtn) {
-        fetchBtn.innerHTML = '<span>⚡ Loaded!</span>';
-        setTimeout(() => {
-          fetchBtn.innerHTML = '<span>Get Audio</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
-        }, 1200);
+        fetchBtn.disabled = true;
+        fetchBtn.innerHTML = '<span class="btn-spinner"></span> <span>Loading...</span>';
       }
+      showStatus('Fetching audio track...', 'info', true);
+
+      const standardUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
       // Initial video state
       activeVideoData = {
-        url: rawUrl,
+        url: standardUrl,
         videoId: videoId,
         title: 'YouTube Audio Track',
         durationSec: 180
@@ -3029,53 +3038,55 @@
       // Instantly render UI
       renderAudioWorkspace(activeVideoData);
 
-      // Fast oEmbed for Title
-      fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
-        .then(r => r.ok ? r.json() : null)
-        .then(meta => {
-          if (meta && meta.title) {
-            activeVideoData.title = meta.title;
-            const tEl = document.getElementById('video-title');
-            if (tEl) tEl.textContent = meta.title;
-          }
-        })
-        .catch(() => {});
+      try {
+        const resp = await fetch(`${API}/info`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: standardUrl }),
+          signal: AbortSignal.timeout(15000)
+        });
 
-      // Call Backend /info to warmup backend cache
-      fetch(`${API}/info`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: rawUrl })
-      }).then(r => r.ok ? r.json() : null)
-        .then(apiData => {
-          if (apiData) {
-            if (apiData.title) {
-              activeVideoData.title = apiData.title;
-              const tEl = document.getElementById('video-title');
-              if (tEl) tEl.textContent = apiData.title;
-            }
-            if (apiData.duration) {
-              const dur = apiData.duration;
-              videoDurationSec = dur;
-              activeVideoData.durationSec = dur;
-              const durBadge = document.getElementById('video-duration-tag');
-              if (durBadge) durBadge.textContent = formatSecondsToHms(videoDurationSec);
-              updateTimelineTicks(videoDurationSec);
-              
-              if (userAdjustedAudio) {
-                currentStartSec = Math.max(0, Math.min(currentStartSec, dur - 1));
-                currentEndSec = Math.max(currentStartSec + 1, Math.min(currentEndSec, dur));
-              } else {
-                currentStartSec = 0;
-                currentEndSec = dur;
-              }
+        let apiData = null;
+        const cType = resp.headers.get("content-type") || "";
+        if (cType.includes("application/json")) {
+          try { apiData = await resp.json(); } catch(e) {}
+        }
+
+        if (resp.ok && apiData) {
+          if (apiData.title) {
+            activeVideoData.title = apiData.title;
+            const tEl = document.getElementById('video-title');
+            if (tEl) tEl.textContent = apiData.title;
+          }
+          if (apiData.duration && apiData.duration > 0) {
+            const dur = apiData.duration;
+            videoDurationSec = dur;
+            activeVideoData.durationSec = dur;
+            const durBadge = document.getElementById('video-duration-tag');
+            if (durBadge) durBadge.textContent = formatSecondsToHms(dur);
+            updateTimelineTicks(dur);
+
+            if (!userAdjustedAudio) {
+              currentStartSec = 0;
+              currentEndSec = Math.min(dur, 60);
               document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
               document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
-              updateTimelineHandles(currentStartSec, currentEndSec, videoDurationSec);
+              updateTimelineHandles(currentStartSec, currentEndSec, dur);
             }
           }
-        })
-        .catch(() => {});
+          hideStatus();
+        } else if (!resp.ok) {
+          showStatus(apiData && apiData.detail ? apiData.detail : 'Could not fetch audio metadata. Please try again.', 'error');
+        }
+      } catch (err) {
+        console.warn('API /info warning:', err);
+        hideStatus();
+      } finally {
+        if (fetchBtn) {
+          fetchBtn.disabled = false;
+          fetchBtn.innerHTML = '<span>Get Audio</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        }
+      }
     }
 
         // ── YOUTUBE IFRAME PLAYER API INTEGRATION (Exact Duration & Millisecond Preview) ──
@@ -3190,7 +3201,7 @@
               currentEndSec = Math.max(currentStartSec + 1, Math.min(currentEndSec, dur));
             } else {
               currentStartSec = 0;
-              currentEndSec = dur;
+              currentEndSec = Math.min(dur, 60);
             }
             document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
             document.getElementById('start-time-input').value = formatSecondsToHms(currentStartSec);
@@ -3411,22 +3422,29 @@
       if (banner) banner.classList.remove('visible');
 
       if (!isClip && activeVideoData && activeVideoData.durationSec > 1800) {
+        clearInterval(progressTimer);
+        btnEl.style.removeProperty('--progress');
+        btnEl.className = 'dl-btn';
+        btnEl.disabled = false;
+        btnEl.innerHTML = originalBtnHtml;
+        document.querySelectorAll('.quality-row').forEach(r => r.classList.remove('dimmed'));
+        isProcessing = false;
         showStatus('Full audio track download is limited to videos under 30 minutes. Switched to Cut Audio for clips up to 5 minutes!', 'error');
+        showToast('Full audio track is limited to 30 mins. Switched to Cut Audio.', true);
         switchMode('cut');
-        allRows.forEach(r => r.classList.remove('dimmed'));
-        btnEl.classList.remove('loading');
-        btnEl.innerHTML = originalHtml;
         return;
       }
 
       if (isClip && (currentEndSec - currentStartSec) > 300) {
         clearInterval(progressTimer);
+        btnEl.style.removeProperty('--progress');
+        btnEl.className = 'dl-btn';
+        btnEl.disabled = false;
+        btnEl.innerHTML = originalBtnHtml;
+        document.querySelectorAll('.quality-row').forEach(r => r.classList.remove('dimmed'));
+        isProcessing = false;
         showStatus('Clip duration exceeds 5 minute limit. Please adjust start and end timestamps.', 'error');
         showToast('Clip duration exceeds 5 minute limit.', true);
-        allRows.forEach(r => r.classList.remove('dimmed'));
-        btnEl.classList.remove('loading');
-        btnEl.disabled = false;
-        btnEl.innerHTML = originalHtml;
         return;
       }
 
@@ -3440,13 +3458,15 @@
 
       if (estAudioMb > 100) {
         clearInterval(progressTimer);
+        btnEl.style.removeProperty('--progress');
+        btnEl.className = 'dl-btn';
+        btnEl.disabled = false;
+        btnEl.innerHTML = originalBtnHtml;
+        document.querySelectorAll('.quality-row').forEach(r => r.classList.remove('dimmed'));
+        isProcessing = false;
         const warnMsg = `⚠️ 100 MB Limit Exceeded: Estimated audio file size is ~${Math.round(estAudioMb)} MB (limit: 100 MB). Please choose a compressed format (such as MP3 320k or M4A) or shorten your audio clip.`;
         showStatus(warnMsg, 'error');
         showToast(warnMsg, true);
-        allRows.forEach(r => r.classList.remove('dimmed'));
-        btnEl.classList.remove('loading');
-        btnEl.disabled = false;
-        btnEl.innerHTML = originalHtml;
         return;
       }
 
@@ -3568,10 +3588,11 @@
         clearInterval(progressTimer);
         btnEl.style.removeProperty('--progress');
         showStatus(err.message || 'Error occurred while processing audio.', 'error');
+        showToast(err.message || 'Error occurred while processing audio.', true);
         btnEl.className = 'dl-btn';
         btnEl.disabled = false;
         btnEl.innerHTML = originalBtnHtml;
-        document.querySelectorAll(`#${containerId} .quality-row`).forEach(r => r.classList.remove('dimmed'));
+        document.querySelectorAll('.quality-row').forEach(r => r.classList.remove('dimmed'));
         isProcessing = false;
       }
     }
@@ -3605,7 +3626,10 @@
   <!-- ADSTERRA POPUNDER -->
   <script data-cfasync="false" src="https://abscloud.org/1/a548c5e899b8c7538836fb3a936e3b1c"></script>
   <!-- SITE MAINTENANCE OVERLAY -->
-  <script src="/maintenance.js" defer>    // Relocate floating ads to bottom-right
+  <script src="/maintenance.js" defer></script>
+
+  <script>
+    // Relocate floating ads to bottom-right
     function relocateSocialBar() {
       try {
         const candidates = document.querySelectorAll('iframe, div[style*="fixed"], div[id*="sb-"], div[class*="sb-"], div[id*="social"], div[class*="social"], div[class*="container-"]');

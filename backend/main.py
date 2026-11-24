@@ -419,16 +419,33 @@ def build_ytdlp_cmd(extra: list = [], use_cookies: bool = True, player_client: s
     return cmd + extra
 
 def fetch_oembed(url: str) -> dict | None:
-    """Fast video metadata via YouTube oEmbed (instant 50ms, zero bot-checks)."""
+    """Fast video metadata via YouTube oEmbed + fast duration extraction."""
     try:
         oembed_url = f"https://www.youtube.com/oembed?url={quote(url)}&format=json"
         req = urllib.request.Request(oembed_url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=5) as resp:
             data = json.loads(resp.read().decode())
+            title = data.get("title", "Unknown Title")
+            thumb = data.get("thumbnail_url", "")
+
+            # Fast duration probe (approxDurationMs from watch page header)
+            dur = 0
+            vid = get_video_id(url)
+            try:
+                watch_url = f"https://www.youtube.com/watch?v={vid}"
+                w_req = urllib.request.Request(watch_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+                with urllib.request.urlopen(w_req, timeout=3) as w_resp:
+                    html_chunk = w_resp.read(500000).decode("utf-8", errors="ignore")
+                    m = re.search(r'approxDurationMs["\']?\s*:\s*["\']?(\d+)', html_chunk)
+                    if m:
+                        dur = int(m.group(1)) // 1000
+            except Exception:
+                pass
+
             return {
-                "title":       data.get("title", "Unknown Title"),
-                "thumbnail":   data.get("thumbnail_url", ""),
-                "duration":    0,
+                "title":       title,
+                "thumbnail":   thumb,
+                "duration":    dur,
                 "resolutions": ["1080p", "720p", "480p", "360p", "Audio only"],
             }
     except Exception:
@@ -576,8 +593,8 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
         r_dl = None
 
         section_spec = f"*{start_hms}-{end_hms}"
-        section_target = str(out_path if (not is_audio or ext == "m4a") else raw_path)
-        target_check = out_path if (not is_audio or ext == "m4a") else raw_path
+        section_target = str(out_path if not is_audio else raw_path)
+        target_check = out_path if not is_audio else raw_path
 
         # ATTEMPT 1: Fast section stream-copy with cookies and exact target resolution
         cmd_dl_section = build_ytdlp_cmd([
@@ -649,11 +666,8 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
                 cmd_cut = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "libmp3lame", "-b:a", q_key, str(out_path)]
                 run_process(cmd_cut, timeout=30)
             elif ext == "m4a":
-                cmd_cut = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "copy", "-avoid_negative_ts", "make_zero", str(out_path)]
-                run_process(cmd_cut, timeout=20)
-                if not is_valid_media_file(out_path, is_audio):
-                    cmd_cut_aac = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "aac", "-b:a", "256k", str(out_path)]
-                    run_process(cmd_cut_aac, timeout=30)
+                cmd_cut_aac = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "aac", "-b:a", "256k", str(out_path)]
+                run_process(cmd_cut_aac, timeout=30)
             else:
                 cmd_cut = [
                     "ffmpeg", "-y", "-threads", "1",
@@ -888,24 +902,15 @@ def _run_download(job_id: str, url: str, quality: str):
                 ]
                 subprocess.run(cmd_conv, capture_output=True, text=True, timeout=60)
             elif ext == "m4a":
-                cmd_conv = [
+                cmd_conv_aac = [
                     "ffmpeg", "-y",
                     "-i", str(raw_path),
                     "-vn",
-                    "-c:a", "copy",
+                    "-c:a", "aac",
+                    "-b:a", "256k",
                     str(out_path),
                 ]
-                subprocess.run(cmd_conv, capture_output=True, text=True, timeout=30)
-                if not is_valid_media_file(out_path, is_audio):
-                    cmd_conv_aac = [
-                        "ffmpeg", "-y",
-                        "-i", str(raw_path),
-                        "-vn",
-                        "-c:a", "aac",
-                        "-b:a", "256k",
-                        str(out_path),
-                    ]
-                    subprocess.run(cmd_conv_aac, capture_output=True, text=True, timeout=60)
+                subprocess.run(cmd_conv_aac, capture_output=True, text=True, timeout=60)
             try:
                 raw_path.unlink(missing_ok=True)
             except Exception:
