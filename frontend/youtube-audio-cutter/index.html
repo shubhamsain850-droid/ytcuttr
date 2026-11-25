@@ -520,6 +520,7 @@
     .status-badge.visible { display: flex; }
     .status-badge.error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
     .status-badge.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; }
+    .status-badge.info .btn-spinner { border-color: rgba(37, 99, 235, 0.25); border-top-color: #2563eb; flex-shrink: 0; }
 
     /* ── TOAST NOTIFICATIONS (Centered & Mobile Safe) ── */
     .toast {
@@ -2544,8 +2545,6 @@
     let currentStartSec = 0;
     let currentEndSec = 30;
     let userAdjustedAudio = false;
-    let scrubberInitialized = false;
-    let activePointerDrag = null;
 
     // Helper: Extract 11-char Video ID
     function extractVideoId(url) {
@@ -3026,12 +3025,16 @@
 
       const standardUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
+      // Reset per-video state so fresh URL initializes cleanly
+      userAdjustedAudio = false;
+      videoDurationSec = 0;
+
       // Initial video state
       activeVideoData = {
         url: standardUrl,
         videoId: videoId,
         title: 'YouTube Audio Track',
-        durationSec: 180
+        durationSec: 0
       };
       syncNavLinksWithUrl();
 
@@ -3235,20 +3238,23 @@
       const thumb = document.getElementById('video-thumb');
       thumb.src = `https://i.ytimg.com/vi/${data.videoId}/mqdefault.jpg`;
 
-      // Set Title
+      // Set Title & reset duration tag until verified
       document.getElementById('video-title').textContent = data.title;
+      const durBadge = document.getElementById('video-duration-tag');
+      if (durBadge) durBadge.textContent = data.durationSec > 0 ? formatSecondsToHms(data.durationSec) : 'Loading...';
 
       // Mount Official YouTube Player with exact duration & seek capability
       initYouTubePlayer(data.videoId);
 
-      // Reset timestamps & slider
+      // Reset timestamps & slider (default 00:00:00 -> 00:01:00)
+      const sliderDur = data.durationSec > 0 ? data.durationSec : 180;
       initTimelineScrubber();
-      updateTimelineTicks(data.durationSec || 180);
+      updateTimelineTicks(sliderDur);
       currentStartSec = 0;
-      currentEndSec = data.durationSec || 180;
+      currentEndSec = Math.min(sliderDur, 60);
       document.getElementById('start-time-input').value = '00:00:00';
       document.getElementById('end-time-input').value = formatSecondsToHms(currentEndSec);
-      updateTimelineHandles(currentStartSec, currentEndSec, data.durationSec || 180);
+      updateTimelineHandles(currentStartSec, currentEndSec, sliderDur);
 
       // Scroll to workspace on mobile
       if (window.innerWidth < 768) {
@@ -3366,6 +3372,8 @@
 
         const sSec = parseHmsToSeconds(startHms);
         const eSec = parseHmsToSeconds(endHms);
+        currentStartSec = sSec;
+        currentEndSec = eSec;
 
         if (eSec <= sSec) {
           showStatus('End time must be greater than start time.', 'error');
