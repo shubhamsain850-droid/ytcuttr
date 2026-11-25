@@ -13,7 +13,7 @@ jobs:
       - name: Ping YTCuttr API Health
         run: |
           echo "🤖 Pinging YTCuttr backend..."
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://ytcuttr.onrender.com/health)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://api.ytcuttr.com/health)
           echo "Response status: $STATUS"
           if [ "$STATUS" = "200" ]; then
             echo "✅ Server is ALIVE!"
