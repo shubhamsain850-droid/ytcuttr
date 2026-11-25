@@ -3634,12 +3634,11 @@ footer a { color: var(--red); text-decoration: none; }
       }, 120);
 
       const MAX_WAIT_SECONDS = 180;
-      let elapsed = 0;
+      const pollStartMs = Date.now();
 
       const checkStatus = async () => {
         if (isCompleted) return;
-        elapsed += 2;
-        if (elapsed >= MAX_WAIT_SECONDS) {
+        if (((Date.now() - pollStartMs) / 1000) >= MAX_WAIT_SECONDS) {
           clearInterval(pollInterval);
           clearInterval(procTimerInterval);
           clearInterval(procProgressInterval);
@@ -3722,8 +3721,8 @@ footer a { color: var(--red); text-decoration: none; }
       setTimeout(() => {
         if (isCompleted) return;
         checkStatus();
-        pollInterval = setInterval(checkStatus, 1800);
-      }, 1600);
+        pollInterval = setInterval(checkStatus, 700);
+      }, 600);
     }
 
     function showProcessingBox(title) {

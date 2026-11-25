@@ -32,11 +32,14 @@ def startup_clean():
             shutil.rmtree(CACHE_DIR, ignore_errors=True)
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
     except Exception as e:
-        logger.error(f"Startup clean error: {e}")
+        print(f"Startup clean error: {e}")
 
 jobs: dict = {}
 INFO_CACHE: dict = {}
-INFO_CACHE_TTL = 3600  # 1 hour cache
+INFO_CACHE_TTL = 3600  # 1 hour oEmbed cache
+INFO_JSON_TTL = 1800   # 30 min pre-fetched stream URL cache (safely under YouTube's ~6h URL expiry)
+INFO_PREFETCH_LOCK = threading.Lock()
+INFO_PREFETCH_EVENTS: dict[str, threading.Event] = {}
 
 # Concurrency & Smart Queue Manager (3 concurrent conversion slots; fast-track for <100MB)
 MAX_CONCURRENT_JOBS = 3
@@ -67,11 +70,12 @@ def _sweeper_worker():
                     except Exception:
                         pass
 
-            # 2. Clean yt-dlp cache / temp files older than 5 minutes
+            # 2. Clean yt-dlp cache / temp files (.info.json kept for INFO_JSON_TTL; other cache files 300s)
             if CACHE_DIR.exists():
                 for item in list(CACHE_DIR.iterdir()):
                     try:
-                        if now - item.stat().st_mtime > 300:
+                        ttl = INFO_JSON_TTL if item.name.endswith(".info.json") else 300
+                        if now - item.stat().st_mtime > ttl:
                             if item.is_dir():
                                 shutil.rmtree(item, ignore_errors=True)
                             else:
@@ -502,7 +506,7 @@ async def version():
                 sec_files.append({"name": f.name, "size": f.stat().st_size})
 
     return {
-        "version": "4.3-instant-oembed-fast",
+        "version": "4.4-hls-prefetch-fast",
         "has_cookies": bool(cf),
         "cookie_source": source,
         "cookie_size": size,
@@ -518,30 +522,175 @@ async def health():
 async def health_head():
     return Response(status_code=200)
 
+def _is_fresh_info_json(info_json_file: Path) -> bool:
+    """Return True when cached yt-dlp info.json exists, is non-trivial, and within INFO_JSON_TTL."""
+    try:
+        if not info_json_file.exists() or info_json_file.stat().st_size <= 1000:
+            return False
+        return (time.time() - info_json_file.stat().st_mtime) < INFO_JSON_TTL
+    except Exception:
+        return False
+
+def _write_info_json_atomic(info_json_file: Path, raw_json: str) -> bool:
+    """Validate JSON contains stream formats and atomically write info.json."""
+    try:
+        data = json.loads(raw_json)
+        if not isinstance(data, dict) or not data.get("formats"):
+            return False
+        tmp_path = info_json_file.with_suffix(".json.tmp")
+        tmp_path.write_text(raw_json, encoding="utf-8")
+        tmp_path.replace(info_json_file)
+        return True
+    except Exception:
+        return False
+
+def _prefetch_info_json_worker(vid: str, url: str, ev: threading.Event):
+    """Background worker to pre-resolve yt-dlp stream metadata while the user adjusts timestamps."""
+    info_json_file = CACHE_DIR / f"{vid}.info.json"
+    try:
+        for use_cookies in (True, False):
+            cmd = build_ytdlp_cmd(["-J", url], use_cookies=use_cookies, player_client="")
+            res = run_process(cmd, timeout=45)
+            if res.returncode == 0 and res.stdout.strip().startswith("{"):
+                if _write_info_json_atomic(info_json_file, res.stdout):
+                    return
+    except Exception:
+        pass
+    finally:
+        ev.set()
+        with INFO_PREFETCH_LOCK:
+            if INFO_PREFETCH_EVENTS.get(vid) is ev:
+                INFO_PREFETCH_EVENTS.pop(vid, None)
+
+def _trigger_info_prefetch(vid: str, url: str):
+    """Start non-blocking info.json prefetch if not already cached or in progress."""
+    if not vid:
+        return
+    info_json_file = CACHE_DIR / f"{vid}.info.json"
+    if _is_fresh_info_json(info_json_file):
+        return
+    with INFO_PREFETCH_LOCK:
+        if vid in INFO_PREFETCH_EVENTS:
+            return
+        ev = threading.Event()
+        INFO_PREFETCH_EVENTS[vid] = ev
+    threading.Thread(
+        target=_prefetch_info_json_worker,
+        args=(vid, url, ev),
+        daemon=True,
+        name=f"Prefetch-{vid}",
+    ).start()
+
+def _wait_for_fresh_info_json(vid: str, timeout: float = 8.0) -> Path | None:
+    """Return cached info.json if fresh, waiting briefly if an in-flight prefetch is already resolving it."""
+    info_json_file = CACHE_DIR / f"{vid}.info.json"
+    if _is_fresh_info_json(info_json_file):
+        return info_json_file
+    with INFO_PREFETCH_LOCK:
+        ev = INFO_PREFETCH_EVENTS.get(vid)
+    if ev is not None:
+        ev.wait(timeout=timeout)
+        if _is_fresh_info_json(info_json_file):
+            return info_json_file
+    return None
+
+def _find_downloaded_file(out_dir: Path, stem_prefix: str, is_audio: bool) -> Path | None:
+    """Locate a valid downloaded file matching `<stem_prefix>.*` inside out_dir."""
+    for p in sorted(out_dir.glob(f"{stem_prefix}.*")):
+        if p.name.endswith(".part") or p.name.endswith(".ytdl"):
+            continue
+        if is_valid_media_file(p, is_audio):
+            return p
+    return None
+
+def _probe_media_meta(file_path: Path, is_audio: bool) -> dict:
+    """Probe output file resolution, codecs, and audio bitrate via ffprobe."""
+    meta = {}
+    try:
+        entries = "stream=codec_type,codec_name,width,height,bit_rate"
+        ff = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", entries, "-of", "json", str(file_path)],
+            capture_output=True, text=True, timeout=5
+        )
+        if ff.returncode != 0:
+            return meta
+        info = json.loads(ff.stdout or "{}")
+        for st in info.get("streams", []):
+            ctype = st.get("codec_type")
+            if ctype == "video" and not is_audio:
+                w, h = st.get("width"), st.get("height")
+                if w and h:
+                    meta["resolution"] = f"{w}x{h}"
+                if st.get("codec_name"):
+                    meta["vcodec"] = st["codec_name"]
+            elif ctype == "audio":
+                if st.get("codec_name"):
+                    meta["acodec"] = st["codec_name"]
+                if st.get("bit_rate"):
+                    try:
+                        meta["audio_kbps"] = round(int(st["bit_rate"]) / 1000)
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+    return meta
+
+def _convert_audio_file(raw_path: Path, out_path: Path, q_key: str, ext: str, trim_args: list = []):
+    """Convert or lossless-remux extracted audio/HLS container into the requested target audio format."""
+    if q_key == "wav":
+        cmd = ["ffmpeg", "-y", "-threads", "2", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "pcm_s16le", "-ar", "44100", str(out_path)]
+        run_process(cmd, timeout=60)
+    elif q_key == "flac":
+        cmd = ["ffmpeg", "-y", "-threads", "2", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "flac", str(out_path)]
+        run_process(cmd, timeout=60)
+    elif q_key in ("320k", "256k", "192k", "128k"):
+        cmd = ["ffmpeg", "-y", "-threads", "2", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "libmp3lame", "-b:a", q_key, str(out_path)]
+        run_process(cmd, timeout=60)
+    elif ext == "m4a":
+        # Zero-transcode stream copy when input audio is already AAC; otherwise encode AAC 256k
+        is_aac = False
+        try:
+            pr = subprocess.run(
+                ["ffprobe", "-v", "error", "-select_streams", "a:0", "-show_entries", "stream=codec_name", "-of", "csv=p=0", str(raw_path)],
+                capture_output=True, text=True, timeout=5
+            )
+            is_aac = (pr.returncode == 0 and pr.stdout.strip().lower() == "aac")
+        except Exception:
+            pass
+        if is_aac and not trim_args:
+            cmd = ["ffmpeg", "-y", "-i", str(raw_path), "-vn", "-c:a", "copy", "-movflags", "+faststart", str(out_path)]
+            run_process(cmd, timeout=30)
+        if not is_valid_media_file(out_path, True):
+            cmd = ["ffmpeg", "-y", "-threads", "2", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "aac", "-b:a", "256k", str(out_path)]
+            run_process(cmd, timeout=60)
+
 @app.post("/info")
 def get_video_info(req: InfoRequest):
-    """Fast non-blocking info endpoint: returns instant oEmbed in 50ms, falls back to yt-dlp."""
+    """Fast non-blocking info endpoint: returns instant oEmbed in 50ms, pre-fetches stream metadata in background."""
     vid = get_video_id(req.url)
     info_json_file = CACHE_DIR / f"{vid}.info.json"
     now = time.time()
 
-    # 1. Cache hit: instant 1ms response
+    # 1. Cache hit: instant 1ms response (ensure stream info.json is also warm)
     if vid in INFO_CACHE:
         cached_time, cached_data = INFO_CACHE[vid]
         if (now - cached_time) < INFO_CACHE_TTL:
+            _trigger_info_prefetch(vid, req.url)
             return cached_data
 
-    # 2. Fast oEmbed check (50ms response! Instant video display!)
+    # 2. Fast oEmbed check + background yt-dlp -J prefetch
     oembed_data = fetch_oembed(req.url)
     if oembed_data:
         INFO_CACHE[vid] = (now, oembed_data)
+        _trigger_info_prefetch(vid, req.url)
         return oembed_data
 
     # 3. Fallback to lightweight yt-dlp only if oEmbed fails
-    cmd = build_ytdlp_cmd(["--dump-json", req.url], player_client="")
+    cmd = build_ytdlp_cmd(["-J", req.url], player_client="")
     try:
-        result = run_process(cmd, timeout=8)
+        result = run_process(cmd, timeout=15)
         if result.returncode == 0 and result.stdout.strip():
+            _write_info_json_atomic(info_json_file, result.stdout)
             data = json.loads(result.stdout)
             duration = int(data.get("duration") or 0)
             res_dict = {
@@ -579,148 +728,105 @@ def _run_clip(job_id: str, url: str, start_hms: str, end_hms: str, quality: str)
             target_height = 720
 
     out_path = out_dir / f"clip.{ext}"
-    raw_path = out_dir / f"raw.{'m4a' if is_audio else 'mp4'}"
+    # Audio clips write to raw.<ext> so HLS AAC-in-MP4 (format 93) or DASH m4a/webm never hit container mismatches
+    dl_output = str(out_dir / "raw.%(ext)s") if is_audio else str(out_path)
 
-    # Format & Sorting: strictly enforce resolution and fast h264/aac copy
-    sort_args = []
+    # Prefer unthrottled HLS (proto:m3u8) after exact resolution match so 360p-1080p cut in ~1.5-3s without downgrading 1440p/4K;
+    # for audio clips prefer HLS AAC-LC formats (93/94/...) over throttled DASH 140 (~14x faster, identical mp4a.40.2 audio)
     if is_audio:
-        fmt = "ba[ext=m4a]/ba/best"
+        fmt = "93/94/95/96/300/301/b[protocol^=m3u8][acodec^=mp4a.40.2]/ba[ext=m4a]/ba/b"
+        sort_args = []
     else:
         fmt = "bv*+ba/b"
-        sort_args = ["-S", f"res:{target_height},vcodec:h264,acodec:m4a"]
+        sort_args = ["-S", f"res:{target_height},proto:m3u8,vcodec:h264,acodec:m4a"]
 
     vid = get_video_id(url)
-    info_json_file = CACHE_DIR / f"{vid}.info.json"
+    section_spec = f"*{start_hms}-{end_hms}"
 
     try:
         jobs[job_id]["status"] = "downloading"
         r_dl = None
+        dl_file: Path | None = None
 
-        section_spec = f"*{start_hms}-{end_hms}"
-        section_target = str(out_path if not is_audio else raw_path)
-        target_check = out_path if not is_audio else raw_path
-
-        # ATTEMPT 1: Fast section stream-copy with cookies and exact target resolution
-        cmd_dl_section = build_ytdlp_cmd([
+        base_section_args = [
             "--download-sections", section_spec,
             "-N", "1",
             *sort_args,
             "-f", fmt,
             *merge_fmt_args,
-            "-o", section_target,
-            url,
-        ], use_cookies=True, player_client="")
-        r_dl = run_process(cmd_dl_section, timeout=60)
-        if not is_valid_media_file(target_check, is_audio):
-            target_check.unlink(missing_ok=True)
+            "-o", dl_output,
+        ]
 
-        # ATTEMPT 2: Fallback section stream-copy with target resolution with cookies
-        if not is_valid_media_file(target_check, is_audio):
-            cmd_dl_best = build_ytdlp_cmd([
+        # Attempt 1: Pre-cached info.json (0s extraction, 0s ad-sleep when >=5s old)
+        cached_info = _wait_for_fresh_info_json(vid, timeout=8.0)
+        if cached_info is not None:
+            cmd_cached = [
+                "yt-dlp", "--no-playlist", "--no-warnings", "--no-check-formats",
+                "--max-filesize", MAX_FILE_SIZE_LIMIT,
+                "--load-info-json", str(cached_info),
+                *base_section_args,
+            ]
+            r_dl = run_process(cmd_cached, timeout=60)
+            dl_file = _find_downloaded_file(out_dir, "clip" if not is_audio else "raw", is_audio)
+            if not dl_file:
+                for leftover in out_dir.glob("*"):
+                    leftover.unlink(missing_ok=True)
+                cached_info.unlink(missing_ok=True)
+
+        # Attempt 2: Fresh extraction with cookies (provides HLS m3u8 streams)
+        if not dl_file:
+            cmd_cookies = build_ytdlp_cmd([*base_section_args, url], use_cookies=True, player_client="")
+            r_dl = run_process(cmd_cookies, timeout=60)
+            dl_file = _find_downloaded_file(out_dir, "clip" if not is_audio else "raw", is_audio)
+            if not dl_file:
+                for leftover in out_dir.glob("*"):
+                    leftover.unlink(missing_ok=True)
+
+        # Attempt 3: Fresh extraction without cookies fallback
+        if not dl_file:
+            fallback_fmt = "ba[ext=m4a]/ba/b" if is_audio else "bv*+ba/b"
+            cmd_anon = build_ytdlp_cmd([
                 "--download-sections", section_spec,
                 "-N", "1",
-                *sort_args,
-                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
+                *([] if is_audio else ["-S", f"res:{target_height},vcodec:h264,acodec:m4a"]),
+                "-f", fallback_fmt,
                 *merge_fmt_args,
-                "-o", section_target,
-                url,
-            ], use_cookies=True, player_client="")
-            r_dl = run_process(cmd_dl_best, timeout=60)
-            if not is_valid_media_file(target_check, is_audio):
-                target_check.unlink(missing_ok=True)
-
-        # ATTEMPT 3: Section download fallback without cookies
-        if not is_valid_media_file(target_check, is_audio):
-            cmd_dl_anon = build_ytdlp_cmd([
-                "--download-sections", section_spec,
-                "-N", "1",
-                *sort_args,
-                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
-                *merge_fmt_args,
-                "-o", section_target,
+                "-o", dl_output,
                 url,
             ], use_cookies=False, player_client="")
-            r_dl = run_process(cmd_dl_anon, timeout=60)
-            if not is_valid_media_file(target_check, is_audio):
-                target_check.unlink(missing_ok=True)
+            r_dl = run_process(cmd_anon, timeout=60)
+            dl_file = _find_downloaded_file(out_dir, "clip" if not is_audio else "raw", is_audio)
 
-        # Step 2: Audio Conversion / Local FFmpeg cut if needed
-        if not is_valid_media_file(out_path, is_audio) and is_valid_media_file(raw_path, is_audio):
+        # Step 2: Audio conversion / extraction when raw container was downloaded
+        if is_audio and dl_file and dl_file != out_path:
             jobs[job_id]["status"] = "processing"
-            raw_dur = 0
+            raw_dur = 0.0
             try:
                 probe_res = run_process(
-                    ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(raw_path)],
+                    ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", str(dl_file)],
                     timeout=5
                 )
                 raw_dur = float(probe_res.stdout.strip() or 0)
             except Exception:
                 pass
-
             is_pretrimmed = (0 < raw_dur <= (clip_len + 8))
             trim_args = [] if is_pretrimmed else ["-ss", start_hms, "-to", end_hms]
-
-            if is_wav:
-                cmd_cut = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "pcm_s16le", "-ar", "44100", str(out_path)]
-                run_process(cmd_cut, timeout=30)
-            elif is_flac:
-                cmd_cut = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "flac", str(out_path)]
-                run_process(cmd_cut, timeout=30)
-            elif is_mp3:
-                cmd_cut = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "libmp3lame", "-b:a", q_key, str(out_path)]
-                run_process(cmd_cut, timeout=30)
-            elif ext == "m4a":
-                cmd_cut_aac = ["ffmpeg", "-y", "-threads", "1", *trim_args, "-i", str(raw_path), "-vn", "-c:a", "aac", "-b:a", "256k", str(out_path)]
-                run_process(cmd_cut_aac, timeout=30)
-            else:
-                cmd_cut = [
-                    "ffmpeg", "-y", "-threads", "1",
-                    *trim_args,
-                    "-i", str(raw_path),
-                    "-c", "copy",
-                    "-avoid_negative_ts", "make_zero",
-                    str(out_path),
-                ]
-                run_process(cmd_cut, timeout=25)
-                if not is_valid_media_file(out_path, is_audio):
-                    cmd_cut_hq = [
-                        "ffmpeg", "-y", "-threads", "1",
-                        *trim_args,
-                        "-i", str(raw_path),
-                        "-c:v", "libx264",
-                        "-preset", "veryfast",
-                        "-crf", "18",
-                        "-c:a", "aac",
-                        "-b:a", "192k",
-                        "-avoid_negative_ts", "make_zero",
-                        str(out_path),
-                    ]
-                    run_process(cmd_cut_hq, timeout=60)
-
+            _convert_audio_file(dl_file, out_path, q_key, ext, trim_args)
             try:
-                raw_path.unlink(missing_ok=True)
+                dl_file.unlink(missing_ok=True)
             except Exception:
                 pass
 
         elapsed = round(time.time() - t_start, 2)
         if is_valid_media_file(out_path, is_audio):
-            res_str = ""
-            if not is_audio:
-                try:
-                    ff = subprocess.run(
-                        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", str(out_path)],
-                        capture_output=True, text=True, timeout=5
-                    )
-                    res_str = ff.stdout.strip()
-                except Exception:
-                    pass
+            media_meta = _probe_media_meta(out_path, is_audio)
             jobs[job_id]["status"] = "done"
             jobs[job_id]["completed_at"] = time.time()
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_{'audio' if is_audio else 'clip'}_{start_hms.replace(':','-')}_{end_hms.replace(':','-')}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
-            if res_str:
-                jobs[job_id]["resolution"] = res_str
+            jobs[job_id]["quality_requested"] = q_key
+            jobs[job_id].update(media_meta)
         else:
             err = r_dl.stderr[-500:] if (r_dl and r_dl.stderr) else "Unknown download failure"
             jobs[job_id]["status"] = "error"
@@ -760,7 +866,7 @@ def _run_download(job_id: str, url: str, quality: str):
     ext = "wav" if is_wav else ("flac" if is_flac else ("mp3" if is_mp3 else ("m4a" if is_audio else "mp4")))
 
     out_path = out_dir / f"video.{ext}"
-    raw_path = out_dir / f"raw.{'m4a' if is_audio else 'mp4'}"
+    dl_output = str(out_dir / "raw.%(ext)s") if is_audio else str(out_path)
     merge_fmt_args = [] if is_audio else ["--merge-output-format", "mp4"]
     target_height = 720
     if q_key.endswith("p"):
@@ -770,14 +876,8 @@ def _run_download(job_id: str, url: str, quality: str):
             target_height = 720
 
     fallback_fmt = "ba[ext=m4a]/ba/best" if is_audio else f"bv*[height<={target_height}]+ba/bestvideo[height<={target_height}]+bestaudio/best[height<={target_height}]/best"
-
-    # Format & Sorting: strictly enforce resolution and fast h264/aac copy
-    sort_args = []
-    if is_audio:
-        fmt = "ba[ext=m4a]/ba/best"
-    else:
-        fmt = "bv*+ba/b"
-        sort_args = ["-S", f"res:{target_height},vcodec:h264,acodec:m4a"]
+    sort_args = [] if is_audio else ["-S", f"res:{target_height},vcodec:h264,acodec:m4a"]
+    fmt = "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b"
 
     vid = get_video_id(url)
     info_json_file = CACHE_DIR / f"{vid}.info.json"
@@ -789,7 +889,7 @@ def _run_download(job_id: str, url: str, quality: str):
             cdur = int(cdata.get("duration") or 0)
             if cdur > MAX_FULL_VIDEO_SECONDS:
                 jobs[job_id]["status"] = "error"
-                jobs[job_id]["error"] = f"Full video download is limited to videos under 30 minutes to preserve server resources. Please use the Clip Cutter tab for clips up to 10 minutes."
+                jobs[job_id]["error"] = "Full video download is limited to videos under 30 minutes to preserve server resources. Please use the Clip Cutter tab for clips up to 10 minutes."
                 return
         except Exception:
             pass
@@ -797,148 +897,64 @@ def _run_download(job_id: str, url: str, quality: str):
     try:
         jobs[job_id]["status"] = "downloading"
         r = None
-        target_check = raw_path if is_audio else out_path
+        dl_file: Path | None = None
+        stem = "raw" if is_audio else "video"
 
-        # Attempt 1: Direct native download with cookies and exact target resolution
-        cmd = build_ytdlp_cmd([
-            "-N", "8",
-            "--concurrent-fragments", "8",
-            *sort_args,
-            "-f", fmt,
-            *merge_fmt_args,
-            "-o", str(raw_path if is_audio else out_path),
-            url,
-        ], use_cookies=True, player_client="")
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-        if not is_valid_media_file(target_check, is_audio):
-            target_check.unlink(missing_ok=True)
+        base_dl_args = ["-N", "8", "--concurrent-fragments", "8", *sort_args, "-f", fmt, *merge_fmt_args, "-o", dl_output]
 
-        # Attempt 2: Using cached info.json if available
-        if not is_valid_media_file(target_check, is_audio) and info_json_file.exists() and info_json_file.stat().st_size > 1000:
-            cmd_cached = build_ytdlp_cmd([
-                "--load-info-json", str(info_json_file),
-                "-N", "8",
-                "--concurrent-fragments", "8",
-                *sort_args,
-                "-f", fmt,
-                *merge_fmt_args,
-                "-o", str(raw_path if is_audio else out_path),
-                url,
-            ], use_cookies=True, player_client="")
-            r = subprocess.run(cmd_cached, capture_output=True, text=True, timeout=240)
-            if not is_valid_media_file(target_check, is_audio):
-                target_check.unlink(missing_ok=True)
+        # Attempt 1: Pre-cached info.json with -N 8 parallel fragment download
+        cached_info = _wait_for_fresh_info_json(vid, timeout=8.0)
+        if cached_info is not None:
+            cmd_cached = [
+                "yt-dlp", "--no-playlist", "--no-warnings", "--no-check-formats",
+                "--max-filesize", MAX_FILE_SIZE_LIMIT,
+                "--load-info-json", str(cached_info),
+                *base_dl_args,
+            ]
+            r = run_process(cmd_cached, timeout=240)
+            dl_file = _find_downloaded_file(out_dir, stem, is_audio)
+            if not dl_file:
+                for leftover in out_dir.glob("*"):
+                    leftover.unlink(missing_ok=True)
+                cached_info.unlink(missing_ok=True)
 
-        # Attempt 3: Fallback on height-matching fallback with cookies
-        if not is_valid_media_file(target_check, is_audio):
-            fallback_cmd = build_ytdlp_cmd([
-                "-N", "2",
-                "--concurrent-fragments", "2",
-                *sort_args,
-                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
-                *merge_fmt_args,
-                "-o", str(raw_path if is_audio else out_path),
-                url,
-            ], use_cookies=True, player_client="")
-            r = run_process(fallback_cmd, timeout=300)
-            if not is_valid_media_file(target_check, is_audio):
-                target_check.unlink(missing_ok=True)
+        # Attempt 2: Direct native download with cookies
+        if not dl_file:
+            cmd = build_ytdlp_cmd([*base_dl_args, url], use_cookies=True, player_client="")
+            r = run_process(cmd, timeout=300)
+            dl_file = _find_downloaded_file(out_dir, stem, is_audio)
+            if not dl_file:
+                for leftover in out_dir.glob("*"):
+                    leftover.unlink(missing_ok=True)
 
-        # Attempt 4: Fallback with target resolution without cookies
-        if not is_valid_media_file(target_check, is_audio):
+        # Attempt 3: Fallback without cookies
+        if not dl_file:
             fallback_anon = build_ytdlp_cmd([
-                "-N", "2",
-                "--concurrent-fragments", "2",
-                *sort_args,
-                "-f", "ba[ext=m4a]/ba/best" if is_audio else "bv*+ba/b",
-                *merge_fmt_args,
-                "-o", str(raw_path if is_audio else out_path),
-                url,
+                "-N", "4", "--concurrent-fragments", "4",
+                *sort_args, "-f", fallback_fmt, *merge_fmt_args, "-o", dl_output, url,
             ], use_cookies=False, player_client="")
             r = run_process(fallback_anon, timeout=300)
-            if not is_valid_media_file(target_check, is_audio):
-                target_check.unlink(missing_ok=True)
+            dl_file = _find_downloaded_file(out_dir, stem, is_audio)
 
-        # Attempt 5: Fallback on height-matching fallback without cookies
-        if not is_valid_media_file(target_check, is_audio):
-            fallback_safe = build_ytdlp_cmd([
-                "-N", "1",
-                *sort_args,
-                "-f", fallback_fmt,
-                *merge_fmt_args,
-                "-o", str(raw_path if is_audio else out_path),
-                url,
-            ], use_cookies=False, player_client="")
-            r = run_process(fallback_safe, timeout=300)
-            if not is_valid_media_file(target_check, is_audio):
-                target_check.unlink(missing_ok=True)
-
-        # If audio, convert/extract cleanly with FFmpeg
-        if is_audio and is_valid_media_file(raw_path, is_audio):
+        # If audio, convert/stream-copy cleanly with FFmpeg
+        if is_audio and dl_file and dl_file != out_path:
             jobs[job_id]["status"] = "processing"
-            if is_wav:
-                cmd_conv = [
-                    "ffmpeg", "-y", "-threads", "1",
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "pcm_s16le",
-                    "-ar", "44100",
-                    str(out_path),
-                ]
-                run_process(cmd_conv, timeout=60)
-            elif is_flac:
-                cmd_conv = [
-                    "ffmpeg", "-y", "-threads", "1",
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "flac",
-                    str(out_path),
-                ]
-                run_process(cmd_conv, timeout=60)
-            elif is_mp3:
-                cmd_conv = [
-                    "ffmpeg", "-y", "-threads", "1",
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "libmp3lame",
-                    "-b:a", q_key,
-                    str(out_path),
-                ]
-                subprocess.run(cmd_conv, capture_output=True, text=True, timeout=60)
-            elif ext == "m4a":
-                cmd_conv_aac = [
-                    "ffmpeg", "-y",
-                    "-i", str(raw_path),
-                    "-vn",
-                    "-c:a", "aac",
-                    "-b:a", "256k",
-                    str(out_path),
-                ]
-                subprocess.run(cmd_conv_aac, capture_output=True, text=True, timeout=60)
+            _convert_audio_file(dl_file, out_path, q_key, ext, [])
             try:
-                raw_path.unlink(missing_ok=True)
+                dl_file.unlink(missing_ok=True)
             except Exception:
                 pass
 
         elapsed = round(time.time() - t_start, 2)
         if is_valid_media_file(out_path, is_audio):
-            res_str = ""
-            if not is_audio:
-                try:
-                    ff = subprocess.run(
-                        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", str(out_path)],
-                        capture_output=True, text=True, timeout=5
-                    )
-                    res_str = ff.stdout.strip()
-                except Exception:
-                    pass
+            media_meta = _probe_media_meta(out_path, is_audio)
             jobs[job_id]["status"] = "done"
             jobs[job_id]["completed_at"] = time.time()
             jobs[job_id]["file"] = str(out_path)
             jobs[job_id]["filename"] = f"ytcuttr_{q_key}.{ext}"
             jobs[job_id]["time_taken"] = elapsed
-            if res_str:
-                jobs[job_id]["resolution"] = res_str
+            jobs[job_id]["quality_requested"] = q_key
+            jobs[job_id].update(media_meta)
         else:
             err = r.stderr[-500:] if (r and r.stderr) else "Download failed"
             jobs[job_id]["status"] = "error"

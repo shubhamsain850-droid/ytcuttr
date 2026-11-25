@@ -3519,12 +3519,12 @@
 
         // Poll status
         let attempts = 0;
-        const maxAttempts = 120;
+        const maxAttempts = 240;
         let completed = false;
 
         while (attempts < maxAttempts && !completed) {
           attempts++;
-          await new Promise(r => setTimeout(r, 1200));
+          await new Promise(r => setTimeout(r, attempts === 1 ? 500 : 700));
 
           const statResp = await fetch(`${API}/status/${job_id}`);
           if (!statResp.ok) continue;
