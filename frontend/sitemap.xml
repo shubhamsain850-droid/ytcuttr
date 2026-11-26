@@ -2,67 +2,109 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ytcuttr.com/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/youtube-audio-cutter/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/4k-youtube-video-cutter/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/youtube-shorts-downloader/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/youtube-timestamp-link-generator/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/ytcutter-alternative/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/blog/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/blog/clipscutter-vs-ytcuttr/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/blog/how-to-cut-youtube-video-by-timestamp/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/blog/download-youtube-video-section-without-yt-dlp-ffmpeg/</loc>
-    <lastmod>2026-11-14</lastmod>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ytcuttr.com/blog/how-to-clip-youtube-live-stream/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ytcuttr.com/blog/turn-youtube-video-into-shorts-reels/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ytcuttr.com/blog/youtube-clips-for-reaction-videos-fair-use/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ytcuttr.com/blog/extract-audio-sample-youtube-wav-mp3/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ytcuttr.com/blog/cut-youtube-video-for-powerpoint-google-slides/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ytcuttr.com/blog/best-free-youtube-video-cutters-no-watermark/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ytcuttr.com/blog/youtube-clip-button-missing-or-60-second-limit/</loc>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://ytcuttr.com/about</loc>
-    <lastmod>2026-07-11</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -74,7 +116,7 @@
   </url>
   <url>
     <loc>https://ytcuttr.com/terms</loc>
-    <lastmod>2026-07-11</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

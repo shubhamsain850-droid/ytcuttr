@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>YouTube Audio Cutter &amp; Downloader - Cut Clips or Full Track (MP3, WAV) | YTCuttr</title>
   <meta name="description" content="Download full audio tracks or cut specific clips with exact timestamps from YouTube. Export in Studio WAV, 320kbps MP3, Lossless FLAC, and Native M4A free. High-fidelity audio sample cutter for music producers, creators, and editors." />
-  <meta name="keywords" content="youtube audio cutter, youtube audio downloader, download full audio from youtube, cut audio from youtube, cut youtube audio, youtube to mp3 320kbps, youtube to wav, youtube to flac, youtube mp3 trimmer, download youtube audio specific time, extract audio from youtube, youtube sample cutter, safe youtube to wav, extract studio audio from youtube clip, youtube to wav 24 bit online, cut audio from youtube with exact start and end time, youtube audio trimmer 320kbps, youtube sample cutter for music producers, youtube to flac lossless master, safe youtube to mp3 2026, yt1s mp3 alternative, rip audio clip from youtube, high fidelity youtube audio trimmer" />
+  <meta name="keywords" content="youtube audio cutter, cut audio from youtube, youtube to wav, youtube to mp3 320kbps, youtube to flac" />
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#e63030">
   <link rel="canonical" href="https://ytcuttr.com/youtube-audio-cutter/">
@@ -14,14 +15,16 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ytcuttr.com/youtube-audio-cutter/">
   <meta property="og:title" content="YouTube Audio Cutter &amp; Downloader - Cut Clips or Full Audio | YTCuttr" />
-  <meta property="og:description" content="Download full audio tracks or trim custom audio clips by timestamp from YouTube into Studio WAV, 320kbps MP3, FLAC, and M4A." />
+  <meta property="og:description"
+    content="Download full audio tracks or trim custom audio clips by timestamp from YouTube into Studio WAV, 320kbps MP3, FLAC, and M4A." />
   <meta property="og:image" content="https://ytcuttr.com/img/feat_audio.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://ytcuttr.com/youtube-audio-cutter/">
   <meta property="twitter:title" content="YouTube Audio Cutter — Cut & Extract Audio From YouTube Free | YTCuttr">
-  <meta property="twitter:description" content="Cut and download audio from any YouTube video free with exact timestamps or download full audio track in original high quality.">
+  <meta property="twitter:description"
+    content="Cut and download audio from any YouTube video free with exact timestamps or download full audio track in original high quality.">
   <meta property="twitter:image" content="https://ytcuttr.com/img/feat_audio.png">
 
   <!-- Favicon -->
@@ -31,9 +34,11 @@
   <!-- Google Fonts Preconnect & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
+    rel="stylesheet">
 
-    <!-- WebApplication Schema -->
+  <!-- WebApplication Schema -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -184,39 +189,45 @@
 
   <style>
     /* ── BASE TOKENS ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --red:          #e63030;
-      --red-hover:    #d02525;
-      --red-subtle:   #fef2f2;
-      --red-border:   #fecaca;
-      --red-glow:     rgba(230, 48, 48, 0.28);
-      --purple:       #7c3aed;
-      --purple-subtle:#f5f3ff;
-      --purple-border:#ddd6fe;
-      --bg:           #f8fafc;
-      --white:        #ffffff;
-      --card-bg:      #ffffff;
-      --border:       #e2e8f0;
+      --red: #e63030;
+      --red-hover: #d02525;
+      --red-subtle: #fef2f2;
+      --red-border: #fecaca;
+      --red-glow: rgba(230, 48, 48, 0.28);
+      --purple: #7c3aed;
+      --purple-subtle: #f5f3ff;
+      --purple-border: #ddd6fe;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
       --border-focus: #94a3b8;
-      --text:         #0f172a;
-      --text-soft:    #334155;
-      --muted:        #64748b;
-      --subtle:       #f1f5f9;
-      --success:      #16a34a;
-      --success-bg:   #f0fdf4;
-      --success-bdr:  #bbf7d0;
-      --sans:         'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --display:      'Plus Jakarta Sans', var(--sans);
-      --mono:         'JetBrains Mono', monospace;
-      --radius:       16px;
-      --radius-sm:    10px;
-      --radius-pill:  9999px;
-      --shadow-sm:    0 1px 2px rgba(15, 23, 42, 0.05);
-      --shadow-md:    0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-      --shadow-lg:    0 12px 32px -4px rgba(15, 23, 42, 0.10), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
-      --transition:   all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --text: #0f172a;
+      --text-soft: #334155;
+      --muted: #64748b;
+      --subtle: #f1f5f9;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --success-bdr: #bbf7d0;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --display: 'Plus Jakarta Sans', var(--sans);
+      --mono: 'JetBrains Mono', monospace;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-pill: 9999px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.10), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     html {
@@ -234,8 +245,15 @@
       width: 100%;
     }
 
-    a { color: inherit; text-decoration: none; }
-    button, input { font-family: inherit; }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
 
     /* ── STICKY NAVIGATION ── */
     nav {
@@ -274,7 +292,9 @@
       flex-shrink: 0;
     }
 
-    .logo span { color: var(--red); }
+    .logo span {
+      color: var(--red);
+    }
 
     .nav-links {
       display: flex;
@@ -354,7 +374,8 @@
       margin: 0 auto;
     }
 
-    .hero-badge, .hero-pills {
+    .hero-badge,
+    .hero-pills {
       display: none;
     }
 
@@ -382,7 +403,8 @@
       max-width: 640px;
       margin: 0 auto 8px;
     }
-      box-shadow: var(--shadow-sm);
+
+    box-shadow: var(--shadow-sm);
     }
 
     /* ── WORKSPACE TOOL CONTAINER ── */
@@ -467,8 +489,14 @@
       justify-content: center;
     }
 
-    .url-clear-btn:hover { color: var(--text); background: var(--border); }
-    .url-clear-btn.visible { display: flex; }
+    .url-clear-btn:hover {
+      color: var(--text);
+      background: var(--border);
+    }
+
+    .url-clear-btn.visible {
+      display: flex;
+    }
 
     .fetch-btn {
       height: 46px;
@@ -517,10 +545,27 @@
       gap: 8px;
     }
 
-    .status-badge.visible { display: flex; }
-    .status-badge.error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
-    .status-badge.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; }
-    .status-badge.info .btn-spinner { border-color: rgba(37, 99, 235, 0.25); border-top-color: #2563eb; flex-shrink: 0; }
+    .status-badge.visible {
+      display: flex;
+    }
+
+    .status-badge.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+    }
+
+    .status-badge.info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #2563eb;
+    }
+
+    .status-badge.info .btn-spinner {
+      border-color: rgba(37, 99, 235, 0.25);
+      border-top-color: #2563eb;
+      flex-shrink: 0;
+    }
 
     /* ── TOAST NOTIFICATIONS (Centered & Mobile Safe) ── */
     .toast {
@@ -534,7 +579,7 @@
       border-radius: var(--radius-sm);
       font-size: 14px;
       font-weight: 600;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
       z-index: 9999;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
       opacity: 0;
@@ -549,11 +594,13 @@
       box-sizing: border-box;
       text-align: center;
     }
+
     .toast.visible {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
       pointer-events: auto;
     }
+
     .toast.error {
       background: #dc2626;
       color: #fff;
@@ -724,7 +771,7 @@
       border: 1px solid var(--border);
       background: #000000;
       position: relative;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
     }
 
     .preview-player-box iframe {
@@ -838,7 +885,9 @@
       border-radius: 5px 2px 2px 5px;
       z-index: 15;
     }
-    #handle-start:hover, #handle-start.dragging {
+
+    #handle-start:hover,
+    #handle-start.dragging {
       background: #1d4ed8;
       box-shadow: 0 4px 14px rgba(37, 99, 235, 0.6);
     }
@@ -848,7 +897,9 @@
       border-radius: 2px 5px 5px 2px;
       z-index: 14;
     }
-    #handle-end:hover, #handle-end.dragging {
+
+    #handle-end:hover,
+    #handle-end.dragging {
       background: #b91c1c;
       box-shadow: 0 4px 14px rgba(185, 28, 28, 0.6);
     }
@@ -1133,11 +1184,32 @@
       border-radius: 4px;
       letter-spacing: 0.3px;
     }
-    .badge-tag.ultra { background: #dcfce7; color: #15803d; }
-    .badge-tag.hq { background: #dbeafe; color: #1d4ed8; }
-    .badge-tag.standard { background: #f1f5f9; color: #334155; }
-    .badge-tag.sd { background: #f8fafc; color: #64748b; border: 1px solid var(--border); }
-    .badge-tag.audio { background: #f3e8ff; color: #7e22ce; }
+
+    .badge-tag.ultra {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .badge-tag.hq {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge-tag.standard {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .badge-tag.sd {
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid var(--border);
+    }
+
+    .badge-tag.audio {
+      background: #f3e8ff;
+      color: #7e22ce;
+    }
 
     .q-desc {
       font-size: 12px;
@@ -1198,7 +1270,7 @@
       z-index: 0;
     }
 
-    .dl-btn.btn-loading > * {
+    .dl-btn.btn-loading>* {
       position: relative;
       z-index: 1;
     }
@@ -1239,12 +1311,17 @@
       gap: 12px;
       flex-wrap: wrap;
     }
-    .download-success-banner.visible { display: flex; }
+
+    .download-success-banner.visible {
+      display: flex;
+    }
+
     .download-success-text {
       font-size: 13.5px;
       font-weight: 600;
       color: var(--success);
     }
+
     .download-direct-link {
       background: var(--success);
       color: var(--white) !important;
@@ -1364,7 +1441,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* ── HOW IT WORKS SECTION ── */
@@ -1557,7 +1636,9 @@
       transition: var(--transition);
     }
 
-    .faq-item:hover { border-color: var(--border-focus); }
+    .faq-item:hover {
+      border-color: var(--border-focus);
+    }
 
     .faq-q {
       padding: 16px 20px;
@@ -1592,7 +1673,9 @@
       line-height: 1.6;
     }
 
-    .faq-item.open .faq-a { display: block; }
+    .faq-item.open .faq-a {
+      display: block;
+    }
 
     /* ── FOOTER ── */
     footer {
@@ -1614,8 +1697,14 @@
       color: var(--muted);
     }
 
-    .footer-links a:hover { color: var(--red); }
-    .footer-copy { font-size: 12.5px; color: #94a3b8; }
+    .footer-links a:hover {
+      color: var(--red);
+    }
+
+    .footer-copy {
+      font-size: 12.5px;
+      color: #94a3b8;
+    }
 
     /* ── MOBILE RESPONSIVENESS & ZERO OVERFLOW ── */
     @media (max-width: 768px) {
@@ -1624,128 +1713,158 @@
         width: 100%;
         box-sizing: border-box;
       }
+
       .logo {
         font-size: 19px;
       }
+
       .nav-links {
         gap: 6px;
       }
+
       .nav-links .nav-btn.active {
-        display: none !important; /* Hide duplicate active pill on mobile to prevent navbar overflow */
+        display: none !important;
+        /* Hide duplicate active pill on mobile to prevent navbar overflow */
       }
+
       .nav-btn {
         padding: 6px 12px;
         font-size: 12.5px;
         gap: 4px;
       }
+
       .hero {
         padding: 20px 14px 12px;
       }
+
       .hero-badge {
         font-size: 11px;
         padding: 3px 9px;
         margin-bottom: 8px;
       }
+
       .hero h1 {
         font-size: 23px;
         line-height: 1.22;
         margin-bottom: 8px;
       }
+
       .hero-lead {
         font-size: 13.5px;
         line-height: 1.45;
         margin-bottom: 8px;
       }
+
       .hero-pills {
         display: none;
       }
+
       .workspace-wrap {
         padding: 0 12px 36px;
         width: 100%;
         box-sizing: border-box;
         overflow: hidden;
       }
+
       .tool-card {
         border-radius: 14px;
         width: 100%;
         box-sizing: border-box;
         overflow: hidden;
       }
+
       .url-section {
         padding: 12px 14px;
       }
+
       .url-input-container {
         flex-direction: row;
         gap: 8px;
         max-width: 100%;
       }
+
       .url-input-wrapper {
         flex: 1;
         min-width: 0;
       }
+
       .url-input {
         height: 44px;
         font-size: 13.5px;
         padding: 0 32px 0 36px;
       }
+
       .fetch-btn {
         width: auto;
         height: 44px;
         font-size: 13.5px;
         padding: 0 16px;
       }
+
       .audio-workspace {
         padding: 14px 12px;
       }
+
       .video-header-card {
         padding: 10px 12px;
         gap: 12px;
         margin-bottom: 16px;
       }
+
       .video-thumb {
         width: 72px;
         height: 42px;
       }
+
       .video-info-title {
         font-size: 13.5px;
       }
+
       .mode-tab {
         padding: 10px 8px;
         font-size: 13px;
         gap: 4px;
       }
+
       .timestamps-grid {
         grid-template-columns: 1fr;
         gap: 12px;
         margin-bottom: 16px;
       }
+
       .ts-card {
         padding: 12px;
       }
+
       .preview-player-box {
         max-width: 240px !important;
         margin: 0 auto 10px !important;
         border-radius: 8px;
       }
+
       .ts-input {
         height: 44px;
         font-size: 17px;
       }
+
       .clip-summary-bar {
         padding: 10px 12px;
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
       }
+
       .qualities-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
         margin-bottom: 12px;
       }
+
       .qualities-badge {
         display: none !important;
       }
+
       .quality-row {
         padding: 10px 12px;
         gap: 8px;
@@ -1753,24 +1872,30 @@
         width: 100%;
         box-sizing: border-box;
       }
+
       .q-left {
         gap: 8px;
         min-width: 0;
       }
+
       .q-icon {
         font-size: 16px;
       }
+
       .q-label {
         font-size: 13.5px;
         gap: 4px;
       }
+
       .badge-tag {
         font-size: 9.5px;
         padding: 1px 5px;
       }
+
       .q-desc {
         font-size: 11px;
       }
+
       .dl-btn {
         height: 38px;
         min-width: 96px;
@@ -1780,19 +1905,24 @@
         gap: 4px;
         flex-shrink: 0;
       }
-      .steps-grid, .features-grid {
+
+      .steps-grid,
+      .features-grid {
         grid-template-columns: 1fr;
         gap: 14px;
       }
+
       .banner-inner {
         flex-direction: column;
         padding: 24px 20px;
         text-align: center;
       }
+
       .banner-btn-group {
         justify-content: center;
         width: 100%;
       }
+
       .banner-btn {
         width: 100%;
         justify-content: center;
@@ -1810,6 +1940,7 @@
       width: 100%;
       clear: both;
     }
+
     .ad-label {
       font-size: 10px;
       font-weight: 700;
@@ -1819,6 +1950,7 @@
       margin-bottom: 6px;
       user-select: none;
     }
+
     .ad-frame-728 {
       display: flex;
       justify-content: center;
@@ -1829,6 +1961,7 @@
       overflow: hidden;
       border-radius: 8px;
     }
+
     .ad-frame-300 {
       display: flex;
       justify-content: center;
@@ -1839,14 +1972,19 @@
       border-radius: 8px;
       overflow: hidden;
     }
+
     @media (max-width: 740px) {
-      .ad-wrapper { margin: 16px auto; }
+      .ad-wrapper {
+        margin: 16px auto;
+      }
+
       .ad-frame-728-inner {
         transform: scale(0.48);
         transform-origin: top center;
         margin-bottom: -46px;
       }
     }
+
     @media (min-width: 480px) and (max-width: 740px) {
       .ad-frame-728-inner {
         transform: scale(0.65);
@@ -1856,6 +1994,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- STICKY NAVBAR -->
@@ -1865,15 +2004,19 @@
         YT<span>Cuttr</span>
       </a>
       <div class="nav-links">
-        <a href="/" class="nav-btn" id="nav-btn-clip" aria-label="Switch to Clip Cutter" onclick="handleNavClick(event, '/')">
+        <a href="/" class="nav-btn" id="nav-btn-clip" aria-label="Switch to Clip Cutter"
+          onclick="handleNavClick(event, '/')">
           <span>✂️</span>
           <span>Clip Cutter</span>
         </a>
-        <a href="/youtube-shorts-downloader" class="nav-btn" id="nav-btn-full" aria-label="Switch to Full Video & Shorts Downloader" onclick="handleNavClick(event, '/youtube-shorts-downloader')">
+        <a href="/youtube-shorts-downloader" class="nav-btn" id="nav-btn-full"
+          aria-label="Switch to Full Video & Shorts Downloader"
+          onclick="handleNavClick(event, '/youtube-shorts-downloader')">
           <span>⚡</span>
           <span>Full Video &amp; Shorts</span>
         </a>
-        <a href="/youtube-audio-cutter" class="nav-btn active" id="nav-btn-audio" aria-label="YouTube Audio Cutter (Active)" onclick="handleNavClick(event, '/youtube-audio-cutter')">
+        <a href="/youtube-audio-cutter" class="nav-btn active" id="nav-btn-audio"
+          aria-label="YouTube Audio Cutter (Active)" onclick="handleNavClick(event, '/youtube-audio-cutter')">
           <span>🎵</span>
           <span>Audio Cutter</span>
         </a>
@@ -1884,11 +2027,19 @@
   <!-- HERO SECTION -->
   <header class="hero">
     <h1>YouTube Audio Cutter <span>&amp; Downloader</span></h1>
-    <p class="hero-lead">Download complete audio tracks or cut specific clips with exact timestamps. Export in Studio WAV (FL Studio &amp; Ableton), 320kbps MP3, Lossless FLAC, and Native M4A.</p>
-    <div style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
-      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;">✂️ Cut Specific Audio Clips</span>
-      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">🎵 Full Track Downloader</span>
-      <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">🎚️ Studio WAV, 320k MP3 &amp; FLAC</span>
+    <p class="hero-lead">Download complete audio tracks or cut specific clips with exact timestamps. Export in Studio
+      WAV (FL Studio &amp; Ableton), 320kbps MP3, Lossless FLAC, and Native M4A.</p>
+    <div
+      style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+      <span
+        style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe;">✂️
+        Cut Specific Audio Clips</span>
+      <span
+        style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">🎵
+        Full Track Downloader</span>
+      <span
+        style="display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">🎚️
+        Studio WAV, 320k MP3 &amp; FLAC</span>
     </div>
   </header>
 
@@ -1899,11 +2050,11 @@
       <div class="ad-frame-728-inner">
         <script>
           atOptions = {
-            'key' : 'b62a06f523dae80ff5f9af3320b0e090',
-            'format' : 'iframe',
-            'height' : 90,
-            'width' : 728,
-            'params' : {}
+            'key': 'b62a06f523dae80ff5f9af3320b0e090',
+            'format': 'iframe',
+            'height': 90,
+            'width': 728,
+            'params': {}
           };
         </script>
         <script src="https://bauval.org/22/b62a06f523dae80ff5f9af3320b0e090"></script>
@@ -1920,26 +2071,19 @@
         <div class="url-input-container">
           <div class="url-input-wrapper">
             <div class="url-input-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
             </div>
-            <input
-              type="url"
-              id="audio-url-input"
-              class="url-input"
-              placeholder="Paste YouTube video or song link..."
-              aria-label="YouTube Video URL"
-              autocomplete="off"
-              autocorrect="off"
-              spellcheck="false"
-              oninput="handleInput()"
-              onpaste="setTimeout(handleFetch, 50)"
-              onkeydown="if(event.key === 'Enter') handleFetch()"
-            />
+            <input type="url" id="audio-url-input" class="url-input" placeholder="Paste YouTube video or song link..."
+              aria-label="YouTube Video URL" autocomplete="off" autocorrect="off" spellcheck="false"
+              oninput="handleInput()" onpaste="setTimeout(handleFetch, 50)"
+              onkeydown="if(event.key === 'Enter') handleFetch()" />
             <button type="button" class="url-clear-btn" id="url-clear-btn" aria-label="Clear URL" onclick="clearUrl()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
@@ -1947,7 +2091,8 @@
           </div>
           <button type="button" class="fetch-btn" id="fetch-btn" onclick="handleFetch()">
             <span>Get Audio</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
@@ -1981,11 +2126,13 @@
         <!-- 2 DISTINCT OPTIONS SWITCHER -->
         <div class="mode-switcher-wrap">
           <div class="mode-switcher" role="tablist">
-            <button type="button" class="mode-tab active" id="tab-cut" role="tab" aria-selected="true" onclick="switchMode('cut')">
+            <button type="button" class="mode-tab active" id="tab-cut" role="tab" aria-selected="true"
+              onclick="switchMode('cut')">
               <span>✂️</span>
               <span>Cut Audio</span>
             </button>
-            <button type="button" class="mode-tab" id="tab-full" role="tab" aria-selected="false" onclick="switchMode('full')">
+            <button type="button" class="mode-tab" id="tab-full" role="tab" aria-selected="false"
+              onclick="switchMode('full')">
               <span>🎵</span>
               <span>Full Track</span>
             </button>
@@ -2014,11 +2161,19 @@
             <div class="timeline-scrubber" id="timeline-scrubber" aria-label="Audio Timeline Scrubber">
               <div class="timeline-rail" id="timeline-rail">
                 <div class="timeline-segment" id="timeline-segment"></div>
-                <div class="timeline-handle" id="handle-start" role="slider" tabindex="0" aria-label="Start Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                  <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none"><path d="M2 2L6 6L2 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div class="timeline-handle" id="handle-start" role="slider" tabindex="0" aria-label="Start Time"
+                  aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none">
+                    <path d="M2 2L6 6L2 10" stroke="white" stroke-width="2.2" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
                 </div>
-                <div class="timeline-handle" id="handle-end" role="slider" tabindex="0" aria-label="End Time" aria-valuemin="0" aria-valuemax="100" aria-valuenow="30">
-                  <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none"><path d="M6 2L2 6L6 10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div class="timeline-handle" id="handle-end" role="slider" tabindex="0" aria-label="End Time"
+                  aria-valuemin="0" aria-valuemax="100" aria-valuenow="30">
+                  <svg class="handle-arrow-icon" viewBox="0 0 8 12" fill="none">
+                    <path d="M6 2L2 6L6 10" stroke="white" stroke-width="2.2" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
                 </div>
               </div>
             </div>
@@ -2037,22 +2192,15 @@
             <div class="ts-card">
               <div class="ts-header">
                 <span class="ts-label">Start Time</span>
-                <button type="button" class="ts-use-btn" onclick="useCurrentPlayerTime('start')" title="Set start time to current player timestamp">
+                <button type="button" class="ts-use-btn" onclick="useCurrentPlayerTime('start')"
+                  title="Set start time to current player timestamp">
                   📍 Use Current Time
                 </button>
               </div>
               <div class="ts-input-wrap">
-                <input
-                  type="text"
-                  id="start-time-input"
-                  class="ts-input"
-                  value="00:00:00"
-                  maxlength="8"
-                  placeholder="00:00:00"
-                  aria-label="Start time in HH:MM:SS"
-                  onchange="validateAndRecalc(true)"
-                  onkeyup="if(event.key==='Enter') validateAndRecalc(true); else validateAndRecalc(false);"
-                />
+                <input type="text" id="start-time-input" class="ts-input" value="00:00:00" maxlength="8"
+                  placeholder="00:00:00" aria-label="Start time in HH:MM:SS" onchange="validateAndRecalc(true)"
+                  onkeyup="if(event.key==='Enter') validateAndRecalc(true); else validateAndRecalc(false);" />
               </div>
               <div class="nudge-group">
                 <button type="button" class="nudge-btn" onclick="nudgeTime('start', -5)">-5s</button>
@@ -2066,22 +2214,15 @@
             <div class="ts-card">
               <div class="ts-header">
                 <span class="ts-label">End Time</span>
-                <button type="button" class="ts-use-btn" onclick="useCurrentPlayerTime('end')" title="Set end time to current player timestamp">
+                <button type="button" class="ts-use-btn" onclick="useCurrentPlayerTime('end')"
+                  title="Set end time to current player timestamp">
                   📍 Use Current Time
                 </button>
               </div>
               <div class="ts-input-wrap">
-                <input
-                  type="text"
-                  id="end-time-input"
-                  class="ts-input"
-                  value="00:00:30"
-                  maxlength="8"
-                  placeholder="00:00:30"
-                  aria-label="End time in HH:MM:SS"
-                  onchange="validateAndRecalc()"
-                  onkeyup="validateAndRecalc()"
-                />
+                <input type="text" id="end-time-input" class="ts-input" value="00:00:30" maxlength="8"
+                  placeholder="00:00:30" aria-label="End time in HH:MM:SS" onchange="validateAndRecalc()"
+                  onkeyup="validateAndRecalc()" />
               </div>
               <div class="nudge-group">
                 <button type="button" class="nudge-btn" onclick="nudgeTime('end', -5)">-5s</button>
@@ -2101,7 +2242,9 @@
             </div>
             <div class="summary-item">
               <span>🎵 Output Audio Format:</span>
-              <span class="summary-badge" style="color: var(--purple); background: var(--purple-subtle); border-color: var(--purple-border);">HQ M4A (Original AAC)</span>
+              <span class="summary-badge"
+                style="color: var(--purple); background: var(--purple-subtle); border-color: var(--purple-border);">HQ
+                M4A (Original AAC)</span>
             </div>
           </div>
 
@@ -2120,11 +2263,14 @@
               <div class="quality-row" id="qrow-clip-wav" style="border-left: 3px solid #4f46e5;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #1e1b4b;">WAV <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #e0e7ff; color: #3730a3;">Studio Master</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #1e1b4b;">WAV <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #e0e7ff; color: #3730a3;">Studio
+                        Master</span></div>
                     <div class="q-desc">Uncompressed 16-bit PCM • Best for FL Studio, Ableton &amp; DAWs</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #4f46e5;" onclick="downloadAudio('clip', 'wav', this)">
+                <button type="button" class="dl-btn" style="background: #4f46e5;"
+                  onclick="downloadAudio('clip', 'wav', this)">
                   <span>Download WAV</span>
                 </button>
               </div>
@@ -2133,11 +2279,14 @@
               <div class="quality-row featured" id="qrow-clip-320k" style="border-left: 3px solid #16a34a;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #14532d;">MP3 (320 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #dcfce7; color: #166534;">Ultra HQ</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #14532d;">MP3 (320 kbps) <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #dcfce7; color: #166534;">Ultra
+                        HQ</span></div>
                     <div class="q-desc">Maximum MP3 quality • Universal for phones, cars &amp; DJs</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #16a34a;" onclick="downloadAudio('clip', '320k', this)">
+                <button type="button" class="dl-btn" style="background: #16a34a;"
+                  onclick="downloadAudio('clip', '320k', this)">
                   <span>Download MP3</span>
                 </button>
               </div>
@@ -2146,11 +2295,14 @@
               <div class="quality-row" id="qrow-clip-flac" style="border-left: 3px solid #059669;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #064e3b;">FLAC <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #ccfbf1; color: #115e59;">Lossless</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #064e3b;">FLAC <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #ccfbf1; color: #115e59;">Lossless</span>
+                    </div>
                     <div class="q-desc">Bit-perfect audio quality • 50% smaller file size than WAV</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #059669;" onclick="downloadAudio('clip', 'flac', this)">
+                <button type="button" class="dl-btn" style="background: #059669;"
+                  onclick="downloadAudio('clip', 'flac', this)">
                   <span>Download FLAC</span>
                 </button>
               </div>
@@ -2159,11 +2311,14 @@
               <div class="quality-row" id="qrow-clip-m4a" style="border-left: 3px solid #d97706;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #7c2d12;">M4A (Original AAC) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #fef3c7; color: #92400e;">Fastest</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #7c2d12;">M4A (Original AAC) <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #fef3c7; color: #92400e;">Fastest</span>
+                    </div>
                     <div class="q-desc">Native YouTube stream • 1-second cloud extraction, zero transcoding</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #d97706;" onclick="downloadAudio('clip', 'm4a', this)">
+                <button type="button" class="dl-btn" style="background: #d97706;"
+                  onclick="downloadAudio('clip', 'm4a', this)">
                   <span>Download M4A</span>
                 </button>
               </div>
@@ -2172,11 +2327,14 @@
               <div class="quality-row" id="qrow-clip-128k" style="border-left: 3px solid #64748b;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #334155;">MP3 (128 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #f1f5f9; color: #475569;">Lightweight</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #334155;">MP3 (128 kbps) <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #f1f5f9; color: #475569;">Lightweight</span>
+                    </div>
                     <div class="q-desc">Small file size • Quick download for mobile data</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #64748b;" onclick="downloadAudio('clip', '128k', this)">
+                <button type="button" class="dl-btn" style="background: #64748b;"
+                  onclick="downloadAudio('clip', '128k', this)">
                   <span>Download MP3</span>
                 </button>
               </div>
@@ -2185,7 +2343,8 @@
             <!-- Direct link fallback banner -->
             <div class="download-success-banner" id="clip-success-banner">
               <span class="download-success-text" id="clip-success-text">✅ Clip ready! Download started.</span>
-              <a href="#" id="clip-direct-link" class="download-direct-link" download target="_blank">⬇️ Click to Save Audio</a>
+              <a href="#" id="clip-direct-link" class="download-direct-link" download target="_blank">⬇️ Click to Save
+                Audio</a>
             </div>
           </div>
 
@@ -2193,12 +2352,15 @@
 
         <!-- OPTION 2 PANEL: FULL AUDIO TRACK -->
         <div class="mode-panel" id="panel-full">
-          <div class="full-audio-card" style="padding: 16px 20px; margin-bottom: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-align: left;">
+          <div class="full-audio-card"
+            style="padding: 16px 20px; margin-bottom: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-align: left;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
               <span style="font-size: 20px;">🎵</span>
-              <h3 style="font-size: 16.5px; font-weight: 700; margin: 0; color: var(--text);">Download Full Audio Track (Start to Finish)</h3>
+              <h3 style="font-size: 16.5px; font-weight: 700; margin: 0; color: var(--text);">Download Full Audio Track
+                (Start to Finish)</h3>
             </div>
-            <p style="font-size: 13px; color: var(--muted); margin: 0; line-height: 1.45;">Save the entire song, podcast, or lecture without trimming. Select your format below:</p>
+            <p style="font-size: 13px; color: var(--muted); margin: 0; line-height: 1.45;">Save the entire song,
+              podcast, or lecture without trimming. Select your format below:</p>
           </div>
           <!-- AUDIO QUALITIES DOWNLOAD LIST FOR FULL TRACK -->
           <div class="audio-qualities-section" style="margin-top: 0;">
@@ -2215,11 +2377,14 @@
               <div class="quality-row" id="qrow-full-wav" style="border-left: 3px solid #4f46e5;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #1e1b4b;">WAV <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #e0e7ff; color: #3730a3;">Studio Master</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #1e1b4b;">WAV <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #e0e7ff; color: #3730a3;">Studio
+                        Master</span></div>
                     <div class="q-desc">Full Track • Uncompressed 16-bit PCM • FL Studio &amp; Ableton ready</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #4f46e5;" onclick="downloadAudio('full', 'wav', this)">
+                <button type="button" class="dl-btn" style="background: #4f46e5;"
+                  onclick="downloadAudio('full', 'wav', this)">
                   <span>Download WAV</span>
                 </button>
               </div>
@@ -2228,11 +2393,14 @@
               <div class="quality-row featured" id="qrow-full-320k" style="border-left: 3px solid #16a34a;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #14532d;">MP3 (320 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #dcfce7; color: #166534;">Ultra HQ</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #14532d;">MP3 (320 kbps) <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #dcfce7; color: #166534;">Ultra
+                        HQ</span></div>
                     <div class="q-desc">Full Track • Maximum MP3 quality • Universal for phones &amp; cars</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #16a34a;" onclick="downloadAudio('full', '320k', this)">
+                <button type="button" class="dl-btn" style="background: #16a34a;"
+                  onclick="downloadAudio('full', '320k', this)">
                   <span>Download MP3</span>
                 </button>
               </div>
@@ -2241,11 +2409,14 @@
               <div class="quality-row" id="qrow-full-flac" style="border-left: 3px solid #059669;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #064e3b;">FLAC <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #ccfbf1; color: #115e59;">Lossless</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #064e3b;">FLAC <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #ccfbf1; color: #115e59;">Lossless</span>
+                    </div>
                     <div class="q-desc">Full Track • Bit-perfect lossless studio audio • 50% size of WAV</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #059669;" onclick="downloadAudio('full', 'flac', this)">
+                <button type="button" class="dl-btn" style="background: #059669;"
+                  onclick="downloadAudio('full', 'flac', this)">
                   <span>Download FLAC</span>
                 </button>
               </div>
@@ -2254,11 +2425,14 @@
               <div class="quality-row" id="qrow-full-m4a" style="border-left: 3px solid #d97706;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #7c2d12;">M4A (Original AAC) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #fef3c7; color: #92400e;">Fastest</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #7c2d12;">M4A (Original AAC) <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #fef3c7; color: #92400e;">Fastest</span>
+                    </div>
                     <div class="q-desc">Full Track • Original YouTube audio stream without re-encoding</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #d97706;" onclick="downloadAudio('full', 'm4a', this)">
+                <button type="button" class="dl-btn" style="background: #d97706;"
+                  onclick="downloadAudio('full', 'm4a', this)">
                   <span>Download M4A</span>
                 </button>
               </div>
@@ -2267,11 +2441,14 @@
               <div class="quality-row" id="qrow-full-128k" style="border-left: 3px solid #64748b;">
                 <div class="q-left">
                   <div class="q-meta">
-                    <div class="q-label" style="font-weight: 700; color: #334155;">MP3 (128 kbps) <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #f1f5f9; color: #475569;">Lightweight</span></div>
+                    <div class="q-label" style="font-weight: 700; color: #334155;">MP3 (128 kbps) <span
+                        style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 4px; background: #f1f5f9; color: #475569;">Lightweight</span>
+                    </div>
                     <div class="q-desc">Full Track • Smallest file size • Quick download</div>
                   </div>
                 </div>
-                <button type="button" class="dl-btn" style="background: #64748b;" onclick="downloadAudio('full', '128k', this)">
+                <button type="button" class="dl-btn" style="background: #64748b;"
+                  onclick="downloadAudio('full', '128k', this)">
                   <span>Download MP3</span>
                 </button>
               </div>
@@ -2280,7 +2457,8 @@
             <!-- Direct link fallback banner -->
             <div class="download-success-banner" id="full-success-banner">
               <span class="download-success-text" id="full-success-text">✅ Audio ready! Download started.</span>
-              <a href="#" id="full-direct-link" class="download-direct-link" download target="_blank">⬇️ Click to Save Audio</a>
+              <a href="#" id="full-direct-link" class="download-direct-link" download target="_blank">⬇️ Click to Save
+                Audio</a>
             </div>
           </div>
         </div>
@@ -2295,11 +2473,11 @@
       <div class="ad-frame-300">
         <script>
           atOptions = {
-            'key' : 'fab6d918cf32219eadc0ed6d39b3006d',
-            'format' : 'iframe',
-            'height' : 250,
-            'width' : 300,
-            'params' : {}
+            'key': 'fab6d918cf32219eadc0ed6d39b3006d',
+            'format': 'iframe',
+            'height': 250,
+            'width': 300,
+            'params': {}
           };
         </script>
         <script src="https://bauval.org/22/fab6d918cf32219eadc0ed6d39b3006d"></script>
@@ -2315,79 +2493,116 @@
       <div class="step-card">
         <div class="step-num">1</div>
         <h3>Paste YouTube Link</h3>
-        <p>Copy the link of any YouTube video, song, or Short and paste it into the search box above, then click &ldquo;Get Audio&rdquo;.</p>
+        <p>Copy the link of any YouTube video, song, or Short and paste it into the search box above, then click
+          &ldquo;Get Audio&rdquo;.</p>
       </div>
       <div class="step-card">
         <div class="step-num">2</div>
         <h3>Select Option &amp; Set Time</h3>
-        <p>Choose &ldquo;Cut Audio&rdquo; to set custom Start and End timestamps, or select &ldquo;Full Audio Track&rdquo; to download the complete audio.</p>
+        <p>Choose &ldquo;Cut Audio&rdquo; to set custom Start and End timestamps, or select &ldquo;Full Audio
+          Track&rdquo; to download the complete audio.</p>
       </div>
       <div class="step-card">
         <div class="step-num">3</div>
         <h3>Download Audio</h3>
-        <p>Click the download button. YTCuttr processes the audio file instantly in the cloud and saves it straight to your device.</p>
+        <p>Click the download button. YTCuttr processes the audio file instantly in the cloud and saves it straight to
+          your device.</p>
       </div>
     </div>
   </section>
 
-    <!-- SEMANTIC AUDIO FORMAT COMPARISON SECTION (FROM DEEP SEO REPORT) -->
+  <!-- SEMANTIC AUDIO FORMAT COMPARISON SECTION (FROM DEEP SEO REPORT) -->
   <section class="format-guide-section" style="max-width: 960px; margin: 40px auto; padding: 0 16px;">
-    <div style="background: var(--card-bg, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: 16px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;">
-        <h3 style="font-size: 17px; font-weight: 800; color: var(--text, #0f172a); margin: 0 0 6px;">Two Ways to Save Audio: Full Track or Custom Trimmed Clip</h3>
+    <div
+      style="background: var(--card-bg, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: 16px; padding: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+      <div
+        style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;">
+        <h3 style="font-size: 17px; font-weight: 800; color: var(--text, #0f172a); margin: 0 0 6px;">Two Ways to Save
+          Audio: Full Track or Custom Trimmed Clip</h3>
         <p style="font-size: 13.5px; color: var(--muted, #64748b); line-height: 1.5; margin: 0;">
-          Whether you want to <strong>download a complete 2-hour podcast or song</strong> in one click, or <strong>cut an exact 15-second audio sample</strong> using millisecond timestamps, YTCuttr gives you full control with zero quality loss.
+          Whether you want to <strong>download a complete 2-hour podcast or song</strong> in one click, or <strong>cut
+            an exact 15-second audio sample</strong> using millisecond timestamps, YTCuttr gives you full control with
+          zero quality loss.
         </p>
       </div>
-      <h2 style="font-size: 22px; font-weight: 800; color: var(--text, #0f172a); margin-bottom: 8px;">Which Audio Format Should You Choose?</h2>
-      <p style="color: var(--muted, #64748b); font-size: 14.5px; margin-bottom: 24px;">Compare bitrates, compatibility, and ideal use cases to select the perfect format for your project:</p>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px;">
+      <h2 style="font-size: 22px; font-weight: 800; color: var(--text, #0f172a); margin-bottom: 8px;">Which Audio Format
+        Should You Choose?</h2>
+      <p style="color: var(--muted, #64748b); font-size: 14.5px; margin-bottom: 24px;">Compare bitrates, compatibility,
+        and ideal use cases to select the perfect format for your project:</p>
+
+      <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px;">
         <!-- WAV -->
         <div style="border: 1px solid #c7d2fe; border-radius: 12px; padding: 18px; background: #f5f3ff;">
-          <div style="font-size: 13px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Studio Standard</div>
+          <div
+            style="font-size: 13px; font-weight: 800; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+            Studio Standard</div>
           <h3 style="font-size: 18px; font-weight: 800; color: #1e1b4b; margin: 0 0 6px;">WAV (PCM)</h3>
-          <p style="font-size: 13px; color: #4338ca; font-weight: 600; margin-bottom: 10px;">1,411 kbps • 16-bit 44.1kHz</p>
-          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Music production in FL Studio, Ableton, Logic, and video editing in Premiere Pro. 100% uncompressed master audio with zero loss.</p>
+          <p style="font-size: 13px; color: #4338ca; font-weight: 600; margin-bottom: 10px;">1,411 kbps • 16-bit 44.1kHz
+          </p>
+          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Music
+            production in FL Studio, Ableton, Logic, and video editing in Premiere Pro. 100% uncompressed master audio
+            with zero loss.</p>
         </div>
 
         <!-- FLAC -->
         <div style="border: 1px solid #a7f3d0; border-radius: 12px; padding: 18px; background: #ecfdf5;">
-          <div style="font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Lossless Audio</div>
+          <div
+            style="font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+            Lossless Audio</div>
           <h3 style="font-size: 18px; font-weight: 800; color: #064e3b; margin: 0 0 6px;">FLAC</h3>
-          <p style="font-size: 13px; color: #047857; font-weight: 600; margin-bottom: 10px;">Lossless • ~700-900 kbps</p>
-          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Audiophile music lovers and archiving. Delivers bit-perfect studio quality identical to WAV at half the file size.</p>
+          <p style="font-size: 13px; color: #047857; font-weight: 600; margin-bottom: 10px;">Lossless • ~700-900 kbps
+          </p>
+          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Audiophile
+            music lovers and archiving. Delivers bit-perfect studio quality identical to WAV at half the file size.</p>
         </div>
 
         <!-- MP3 320k -->
         <div style="border: 1px solid #bbf7d0; border-radius: 12px; padding: 18px; background: #f0fdf4;">
-          <div style="font-size: 13px; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Universal Playback</div>
+          <div
+            style="font-size: 13px; font-weight: 800; color: #16a34a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+            Universal Playback</div>
           <h3 style="font-size: 18px; font-weight: 800; color: #14532d; margin: 0 0 6px;">320k MP3</h3>
-          <p style="font-size: 13px; color: #15803d; font-weight: 600; margin-bottom: 10px;">320 kbps Constant Bitrate</p>
-          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Everyday listening on smartphones, car stereos, DJ software, and ringtones. Maximum audio quality allowed by the MP3 standard.</p>
+          <p style="font-size: 13px; color: #15803d; font-weight: 600; margin-bottom: 10px;">320 kbps Constant Bitrate
+          </p>
+          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Everyday
+            listening on smartphones, car stereos, DJ software, and ringtones. Maximum audio quality allowed by the MP3
+            standard.</p>
         </div>
 
         <!-- M4A AAC -->
         <div style="border: 1px solid #fed7aa; border-radius: 12px; padding: 18px; background: #fff7ed;">
-          <div style="font-size: 13px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Native YouTube Stream</div>
+          <div
+            style="font-size: 13px; font-weight: 800; color: #d97706; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+            Native YouTube Stream</div>
           <h3 style="font-size: 18px; font-weight: 800; color: #7c2d12; margin: 0 0 6px;">Native M4A</h3>
-          <p style="font-size: 13px; color: #b45309; font-weight: 600; margin-bottom: 10px;">~128-160 kbps Original AAC</p>
-          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Ultra-fast 1-second cloud downloads. YouTube stores audio natively in AAC/M4A, so this stream is saved directly without transcoding.</p>
+          <p style="font-size: 13px; color: #b45309; font-weight: 600; margin-bottom: 10px;">~128-160 kbps Original AAC
+          </p>
+          <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;"><strong>Best for:</strong> Ultra-fast
+            1-second cloud downloads. YouTube stores audio natively in AAC/M4A, so this stream is saved directly without
+            transcoding.</p>
         </div>
       </div>
 
       <!-- Producer Sampling & Anti-Desync Banner -->
-      <div style="border-top: 1px solid var(--border, #e2e8f0); padding-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+      <div
+        style="border-top: 1px solid var(--border, #e2e8f0); padding-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
         <div>
-          <h4 style="font-size: 15.5px; font-weight: 700; color: var(--text, #0f172a); margin-bottom: 6px;">🎛️ The Ultimate YouTube Sample Cutter for Music Producers</h4>
+          <h4 style="font-size: 15.5px; font-weight: 700; color: var(--text, #0f172a); margin-bottom: 6px;">🎛️ The
+            Ultimate YouTube Sample Cutter for Music Producers</h4>
           <p style="font-size: 13.5px; color: var(--muted, #64748b); line-height: 1.55; margin: 0;">
-            Digging for rare vintage vinyl samples, vocal chops, drum breaks, or synth loops? YTCuttr exports broadcast-grade 16-bit 44.1kHz WAV and FLAC files. Simply drag the downloaded sample straight into your timeline in FL Studio, Ableton Live, Logic Pro, MPC, or Cubase with zero format conversion glitches.
+            Digging for rare vintage vinyl samples, vocal chops, drum breaks, or synth loops? YTCuttr exports
+            broadcast-grade 16-bit 44.1kHz WAV and FLAC files. Simply drag the downloaded sample straight into your
+            timeline in FL Studio, Ableton Live, Logic Pro, MPC, or Cubase with zero format conversion glitches.
           </p>
         </div>
         <div>
-          <h4 style="font-size: 15.5px; font-weight: 700; color: var(--text, #0f172a); margin-bottom: 6px;">🛡️ Precision Timestamping &amp; 0.1s Padding Rule</h4>
+          <h4 style="font-size: 15.5px; font-weight: 700; color: var(--text, #0f172a); margin-bottom: 6px;">🛡️
+            Precision Timestamping &amp; 0.1s Padding Rule</h4>
           <p style="font-size: 13.5px; color: var(--muted, #64748b); line-height: 1.55; margin: 0;">
-            Competitor cutters frequently cause audio desync or cut off the first syllable of speech. YTCuttr uses cloud keyframe alignment for zero audio drift. <strong>Pro Tip:</strong> Set your Start point ~0.1s before the first vocal transient and your End point ~0.2s after the sound ends to ensure natural, seamless audio loops.
+            Competitor cutters frequently cause audio desync or cut off the first syllable of speech. YTCuttr uses cloud
+            keyframe alignment for zero audio drift. <strong>Pro Tip:</strong> Set your Start point ~0.1s before the
+            first vocal transient and your End point ~0.2s after the sound ends to ensure natural, seamless audio loops.
           </p>
         </div>
       </div>
@@ -2402,32 +2617,38 @@
       <div class="feat-card">
         <span class="feat-icon">🔊</span>
         <h4>Lossless Studio Fidelity</h4>
-        <p>We preserve YouTube&rsquo;s native AAC/M4A sound stream with zero audio degradation or noisy re-compression artifacts.</p>
+        <p>We preserve YouTube&rsquo;s native AAC/M4A sound stream with zero audio degradation or noisy re-compression
+          artifacts.</p>
       </div>
       <div class="feat-card">
         <span class="feat-icon">✂️</span>
         <h4>Precise Second Trimming</h4>
-        <p>Set start and stop points down to the exact second. Perfect for creating custom ringtones, samples, and podcast soundbites.</p>
+        <p>Set start and stop points down to the exact second. Perfect for creating custom ringtones, samples, and
+          podcast soundbites.</p>
       </div>
       <div class="feat-card">
         <span class="feat-icon">📱</span>
         <h4>100% Mobile Optimized</h4>
-        <p>Built specifically for seamless one-handed use on iPhone, Android, iPads, tablets, and desktop browsers without installing apps.</p>
+        <p>Built specifically for seamless one-handed use on iPhone, Android, iPads, tablets, and desktop browsers
+          without installing apps.</p>
       </div>
       <div class="feat-card">
         <span class="feat-icon">🚫</span>
         <h4>Zero Watermarks &amp; Ads</h4>
-        <p>Your downloaded audio clips are 100% clean, original, and unbranded. No voiceovers, beeps, or injected watermarks.</p>
+        <p>Your downloaded audio clips are 100% clean, original, and unbranded. No voiceovers, beeps, or injected
+          watermarks.</p>
       </div>
       <div class="feat-card">
         <span class="feat-icon">⚡</span>
         <h4>Ultra-Fast Cloud Processing</h4>
-        <p>Cloud-native stream extraction processes long videos and audio cuts in seconds, using minimal device battery and data.</p>
+        <p>Cloud-native stream extraction processes long videos and audio cuts in seconds, using minimal device battery
+          and data.</p>
       </div>
       <div class="feat-card">
         <span class="feat-icon">🔒</span>
         <h4>Private &amp; Completely Free</h4>
-        <p>No registration, no credit card, and no personal logs. Enjoy unlimited free YouTube audio cutting whenever you need it.</p>
+        <p>No registration, no credit card, and no personal logs. Enjoy unlimited free YouTube audio cutting whenever
+          you need it.</p>
       </div>
     </div>
   </section>
@@ -2437,7 +2658,8 @@
     <div class="banner-inner">
       <div class="banner-content">
         <h3>Need to Download Full Videos or Vertical Shorts?</h3>
-        <p>Explore YTCuttr&rsquo;s specialized tools for timestamp video clipping and 1080p YouTube Shorts downloads.</p>
+        <p>Explore YTCuttr&rsquo;s specialized tools for timestamp video clipping and 1080p YouTube Shorts downloads.
+        </p>
       </div>
       <div class="banner-btn-group">
         <a href="/" class="banner-btn secondary">
@@ -2450,49 +2672,81 @@
     </div>
   </section>
 
-    <!-- FAQ SECTION -->
+  <!-- FAQ SECTION -->
   <section class="faq-section">
     <h2 class="section-title">Frequently Asked Questions</h2>
     <p class="section-sub">Helpful answers about cutting and converting YouTube audio to MP3, WAV, FLAC &amp; M4A</p>
 
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">How do I cut audio from a YouTube video?</div>
-      <div class="faq-a">Paste your YouTube video link into YTCuttr's YouTube Audio Cutter. In Option 1 (Cut Audio), set your desired Start Time and End Time using the interactive timeline slider or timestamp inputs, select your audio format (WAV, FLAC, MP3 320k, or M4A), and click Download. Your trimmed audio clip will be processed instantly in the cloud.</div>
+      <div class="faq-a">Paste your YouTube video link into YTCuttr's YouTube Audio Cutter. In Option 1 (Cut Audio), set
+        your desired Start Time and End Time using the interactive timeline slider or timestamp inputs, select your
+        audio format (WAV, FLAC, MP3 320k, or M4A), and click Download. Your trimmed audio clip will be processed
+        instantly in the cloud.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Can I download YouTube audio as uncompressed Studio WAV or FLAC?</div>
-      <div class="faq-a">Yes! YTCuttr exports broadcast-standard 16-bit 44.1kHz Linear PCM WAV files and bit-perfect Lossless FLAC files. They drag and drop seamlessly into FL Studio, Ableton Live, Logic Pro, Pro Tools, Premiere Pro, and DaVinci Resolve with zero format conflicts.</div>
+      <div class="faq-q" onclick="toggleFaq(this)">Can I download YouTube audio as uncompressed Studio WAV or FLAC?
+      </div>
+      <div class="faq-a">Yes! YTCuttr exports broadcast-standard 16-bit 44.1kHz Linear PCM WAV files and bit-perfect
+        Lossless FLAC files. They drag and drop seamlessly into FL Studio, Ableton Live, Logic Pro, Pro Tools, Premiere
+        Pro, and DaVinci Resolve with zero format conflicts.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Can I download the full audio track without cutting?</div>
-      <div class="faq-a">Yes! Switch to Option 2: &ldquo;Full Audio Track&rdquo; and select your preferred format. YTCuttr extracts and saves the entire original sound track in high-fidelity WAV, FLAC, 320kbps MP3, or native M4A.</div>
+      <div class="faq-a">Yes! Switch to Option 2: &ldquo;Full Audio Track&rdquo; and select your preferred format.
+        YTCuttr extracts and saves the entire original sound track in high-fidelity WAV, FLAC, 320kbps MP3, or native
+        M4A.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">How do I avoid cutting off vocals or words when trimming audio?</div>
-      <div class="faq-a">Follow our 0.1-second padding rule: set your Start timestamp approximately 0.1 to 0.2 seconds before the first spoken syllable or drum transient, and set the End timestamp 0.2 seconds after the sentence or sound ends. Use the Preview button to verify before downloading.</div>
+      <div class="faq-a">Follow our 0.1-second padding rule: set your Start timestamp approximately 0.1 to 0.2 seconds
+        before the first spoken syllable or drum transient, and set the End timestamp 0.2 seconds after the sentence or
+        sound ends. Use the Preview button to verify before downloading.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">What is the difference between WAV, FLAC, MP3, and M4A?</div>
-      <div class="faq-a">WAV is uncompressed studio master audio ideal for music production in DAWs. FLAC delivers identical lossless audio quality at 50% smaller file size. MP3 (320kbps) provides universal playback on cars and phones. M4A is YouTube's untouched native AAC stream, offering the fastest 1-second cloud extraction.</div>
+      <div class="faq-a">WAV is uncompressed studio master audio ideal for music production in DAWs. FLAC delivers
+        identical lossless audio quality at 50% smaller file size. MP3 (320kbps) provides universal playback on cars and
+        phones. M4A is YouTube's untouched native AAC stream, offering the fastest 1-second cloud extraction.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Does cutting audio on YTCuttr cause audio-video desync?</div>
-      <div class="faq-a">No. Unlike older web trimmers that suffer from timestamp drift and desync, YTCuttr performs server-side FFmpeg keyframe-accurate alignment, ensuring your trimmed audio slice begins and ends at the exact millisecond.</div>
+      <div class="faq-a">No. Unlike older web trimmers that suffer from timestamp drift and desync, YTCuttr performs
+        server-side FFmpeg keyframe-accurate alignment, ensuring your trimmed audio slice begins and ends at the exact
+        millisecond.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Can I import downloaded WAV files directly into FL Studio, Ableton, or Premiere Pro?</div>
-      <div class="faq-a">Yes, 100%. YTCuttr exports industry-standard Linear PCM WAV files that work natively across all Digital Audio Workstations (DAWs) and Non-Linear Editors (NLEs) without needing third-party converters.</div>
+      <div class="faq-q" onclick="toggleFaq(this)">Can I import downloaded WAV files directly into FL Studio, Ableton,
+        or Premiere Pro?</div>
+      <div class="faq-a">Yes, 100%. YTCuttr exports industry-standard Linear PCM WAV files that work natively across all
+        Digital Audio Workstations (DAWs) and Non-Linear Editors (NLEs) without needing third-party converters.</div>
     </div>
 
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">Is YTCuttr completely free with no file size limitations?</div>
-      <div class="faq-a">Yes! YTCuttr is 100% free with unlimited usage. You can cut as many clips as you like without account registration, software downloads, or subscription paywalls.</div>
+      <div class="faq-a">Yes! YTCuttr is 100% free with unlimited usage. You can cut as many clips as you like without
+        account registration, software downloads, or subscription paywalls.</div>
+    </div>
+  </section>
+
+  <!-- RELATED GUIDES -->
+  <section aria-label="Audio Cutting Guides" style="max-width:860px; margin:24px auto 0; padding:0 16px;">
+    <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius, 12px); padding:20px 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <h3 style="font-size:16px; font-weight:800; color:var(--text); margin:0;">Related Audio &amp; Clipping Guides</h3>
+        <a href="/blog/" style="font-size:13.5px; font-weight:700; color:var(--red); text-decoration:none;">View All Guides &rarr;</a>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; font-size:13.5px;">
+        <a href="/blog/extract-audio-sample-youtube-wav-mp3/" style="color:var(--text-soft, #334155); text-decoration:none; padding:10px 12px; background:var(--bg, #f8fafc); border:1px solid var(--border); border-radius:8px; font-weight:600;">YouTube Audio Sampling: WAV vs FLAC vs 320kbps MP3</a>
+        <a href="/blog/how-to-cut-youtube-video-by-timestamp/" style="color:var(--text-soft, #334155); text-decoration:none; padding:10px 12px; background:var(--bg, #f8fafc); border:1px solid var(--border); border-radius:8px; font-weight:600;">How to Cut YouTube Clips by Timestamp</a>
+        <a href="/blog/download-youtube-video-section-without-yt-dlp-ffmpeg/" style="color:var(--text-soft, #334155); text-decoration:none; padding:10px 12px; background:var(--bg, #f8fafc); border:1px solid var(--border); border-radius:8px; font-weight:600;">Browser Tool vs yt-dlp &amp; FFmpeg Guide</a>
+      </div>
     </div>
   </section>
 
@@ -2503,11 +2757,11 @@
       <div class="ad-frame-728-inner">
         <script>
           atOptions = {
-            'key' : 'b62a06f523dae80ff5f9af3320b0e090',
-            'format' : 'iframe',
-            'height' : 90,
-            'width' : 728,
-            'params' : {}
+            'key': 'b62a06f523dae80ff5f9af3320b0e090',
+            'format': 'iframe',
+            'height': 90,
+            'width': 728,
+            'params': {}
           };
         </script>
         <script src="https://bauval.org/22/b62a06f523dae80ff5f9af3320b0e090"></script>
@@ -2521,18 +2775,26 @@
       <a href="/">Clip Cutter</a>
       <a href="/youtube-shorts-downloader">Shorts Downloader</a>
       <a href="/youtube-audio-cutter">Audio Cutter</a>
+      <a href="/4k-youtube-video-cutter">4K Cutter</a>
+      <a href="/youtube-timestamp-link-generator">Timestamp Link Generator</a>
+      <a href="/ytcutter-alternative">YTCutter Alternative</a>
+      <a href="/blog/">Guides &amp; Blog</a>
       <a href="/about">About</a>
       <a href="/privacy">Privacy Policy</a>
       <a href="/terms">Terms of Service</a>
       <a href="/contact">Contact</a>
     </div>
-    <div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; font-size:12.5px; color:var(--muted, #64748b);">
+    <div
+      style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; font-size:12.5px; color:var(--muted, #64748b);">
       <span>Other Tools:</span>
-      <a href="https://streamslicer.pages.dev/" target="_blank" rel="noopener" style="color:var(--text, #1e293b); font-weight:500;">StreamSlicer (Twitch &amp; Kick Cutter)</a>
+      <a href="https://streamslicer.pages.dev/" target="_blank" rel="noopener"
+        style="color:var(--text, #1e293b); font-weight:500;">StreamSlicer (Twitch &amp; Kick Cutter)</a>
       <span>•</span>
-      <a href="https://tubemetrix.net/" target="_blank" rel="noopener" style="color:var(--text, #1e293b); font-weight:500;">TubeMetrix (YouTube Live Analytics)</a>
+      <a href="https://tubemetrix.net/" target="_blank" rel="noopener"
+        style="color:var(--text, #1e293b); font-weight:500;">TubeMetrix (YouTube Live Analytics)</a>
     </div>
-    <p class="footer-copy">&copy; 2026 YTCuttr. All rights reserved. Free online YouTube audio trimmer and clip downloader.</p>
+    <p class="footer-copy">&copy; 2026 YTCuttr. All rights reserved. Free online YouTube audio trimmer and clip
+      downloader.</p>
   </footer>
 
   <!-- JAVASCRIPT APPLICATION CODE -->
@@ -2697,7 +2959,7 @@
         e.stopPropagation();
         const resolved = resolveTargetHandle(e.clientX, e.target);
         startDragHandle(resolved, e.clientX);
-        try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
+        try { e.target.setPointerCapture(e.pointerId); } catch (err) { }
       });
 
       handleEnd.addEventListener('pointerdown', (e) => {
@@ -2706,7 +2968,7 @@
         e.stopPropagation();
         const resolved = resolveTargetHandle(e.clientX, e.target);
         startDragHandle(resolved, e.clientX);
-        try { e.target.setPointerCapture(e.pointerId); } catch(err) {}
+        try { e.target.setPointerCapture(e.pointerId); } catch (err) { }
       });
 
       rail.addEventListener('pointerdown', (e) => {
@@ -2886,12 +3148,12 @@
     function syncNavLinksWithUrl() {
       const currentUrl = getActiveVideoUrl();
       const encoded = currentUrl ? encodeURIComponent(currentUrl) : '';
-      
+
       const clipBtn = document.getElementById('nav-btn-clip');
       if (clipBtn) {
         clipBtn.href = encoded ? `/?url=${encoded}` : '/';
       }
-      
+
       const fullBtn = document.getElementById('nav-btn-full');
       if (fullBtn) {
         fullBtn.href = encoded ? `/youtube-shorts-downloader?url=${encoded}` : '/youtube-shorts-downloader';
@@ -2900,8 +3162,8 @@
 
     function handleNavClick(event, targetPath) {
       if (event) {
-        try { event.preventDefault(); } catch(e) {}
-        try { event.stopPropagation(); } catch(e) {}
+        try { event.preventDefault(); } catch (e) { }
+        try { event.stopPropagation(); } catch (e) { }
       }
       const currentUrl = getActiveVideoUrl();
 
@@ -3052,7 +3314,7 @@
         let apiData = null;
         const cType = resp.headers.get("content-type") || "";
         if (cType.includes("application/json")) {
-          try { apiData = await resp.json(); } catch(e) {}
+          try { apiData = await resp.json(); } catch (e) { }
         }
 
         if (resp.ok && apiData) {
@@ -3092,7 +3354,7 @@
       }
     }
 
-        // ── YOUTUBE IFRAME PLAYER API INTEGRATION (Exact Duration & Millisecond Preview) ──
+    // ── YOUTUBE IFRAME PLAYER API INTEGRATION (Exact Duration & Millisecond Preview) ──
     let ytPlayer = null;
     let durationPollTimer = null;
     let isPlayerReady = false;
@@ -3107,7 +3369,7 @@
           const firstScriptTag = document.getElementsByTagName('script')[0];
           firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
         }
-        window.onYouTubeIframeAPIReady = function() {
+        window.onYouTubeIframeAPIReady = function () {
           createAudioPlayer(videoId);
         };
       } else {
@@ -3135,12 +3397,12 @@
             start: currentStartSec || 0
           },
           events: {
-            onReady: function(event) {
+            onReady: function (event) {
               isPlayerReady = true;
               syncDurationFromPlayer();
               startAudioDurationPolling();
             },
-            onStateChange: function(event) {
+            onStateChange: function (event) {
               syncDurationFromPlayer();
               if (event.data === (window.YT ? YT.PlayerState.PLAYING : 1)) {
                 startClipBoundaryMonitoring();
@@ -3167,7 +3429,7 @@
           ytPlayer.seekTo(currentStartSec, true);
           ytPlayer.playVideo();
           startClipBoundaryMonitoring();
-        } catch(e) {}
+        } catch (e) { }
       }, 120);
     }
 
@@ -3183,7 +3445,7 @@
               ytPlayer.seekTo(currentStartSec, true);
             }
           }
-        } catch(e) {}
+        } catch (e) { }
       }, 250);
     }
 
@@ -3198,7 +3460,7 @@
             const durBadge = document.getElementById('video-duration-tag');
             if (durBadge) durBadge.textContent = formatSecondsToHms(dur);
             updateTimelineTicks(dur);
-            
+
             if (userAdjustedAudio) {
               currentStartSec = Math.max(0, Math.min(currentStartSec, dur - 1));
               currentEndSec = Math.max(currentStartSec + 1, Math.min(currentEndSec, dur));
@@ -3212,7 +3474,7 @@
           }
           return true;
         }
-      } catch (e) {}
+      } catch (e) { }
       return false;
     }
 
@@ -3322,7 +3584,7 @@
       }
     });
 
-        function previewSelectedAudio() {
+    function previewSelectedAudio() {
       autoPlayFromStart();
     }
 
@@ -3332,7 +3594,7 @@
         clipBoundaryTimer = null;
       }
       if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-        try { ytPlayer.pauseVideo(); } catch(e) {}
+        try { ytPlayer.pauseVideo(); } catch (e) { }
       }
     }
 
@@ -3501,7 +3763,7 @@
         if (cType.includes("application/json")) {
           try {
             data = await resp.json();
-          } catch(e) {
+          } catch (e) {
             data = null;
           }
         }
@@ -3554,7 +3816,7 @@
             else if (qualityKey === 'flac') ext = 'flac';
             else if (qualityKey === 'm4a') ext = 'm4a';
             else ext = 'mp3';
-            const fileName = job.filename || (isClip 
+            const fileName = job.filename || (isClip
               ? `ytcuttr_clip_${startHms.replace(/:/g, '-')}_${endHms.replace(/:/g, '-')}.${ext}`
               : `ytcuttr_audio_${qualityKey}.${ext}`);
 
@@ -3616,7 +3878,7 @@
         setTimeout(() => {
           if (a.parentNode) a.parentNode.removeChild(a);
         }, 1500);
-      } catch(e) {
+      } catch (e) {
         window.location.assign(fileUrl);
       }
     }
@@ -3653,14 +3915,14 @@
             el.style.setProperty('z-index', '9999', 'important');
           }
         });
-      } catch(e) {}
+      } catch (e) { }
     }
     try {
       new MutationObserver(relocateSocialBar).observe(document.documentElement, { childList: true, subtree: true });
       window.addEventListener('load', relocateSocialBar);
       setInterval(relocateSocialBar, 500);
-    } catch(e) {}
+    } catch (e) { }
   </script>
 </body>
-</html>
 
+</html>
