@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>YouTube Full Video &amp; Shorts Downloader - Free 1080p HD MP4 &amp; MP3 | YTCuttr</title>
-  <meta name="description" content="Download full YouTube videos, Shorts, and audio tracks in high-quality 1080p, 4K, 720p MP4 or MP3, WAV, FLAC with sound. Free online downloader, no watermark, no popups. Fast, clean and safe YT1s alternative for YouTube videos and Shorts.">
-  <meta name="keywords" content="youtube shorts downloader, download youtube shorts 1080p, youtube video downloader, youtube to mp4, yt1s alternative">
+  <title>YouTube Shorts &amp; Video Clipper: 1080p MP4 Free | YTCuttr</title>
+  <meta name="description" content="Save YouTube Shorts and public videos in 1080p MP4 or M4A audio in seconds. Clean browser tool with zero watermark, no popups, and no registration required.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#e63030">
   <link rel="canonical" href="https://ytcuttr.com/youtube-shorts-downloader/">
@@ -19,7 +18,7 @@
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://ytcuttr.com/youtube-shorts-downloader">
+  <meta property="twitter:url" content="https://ytcuttr.com/youtube-shorts-downloader/">
   <meta property="twitter:title" content="YouTube Full Video &amp; Shorts Downloader — Free 1080p HD MP4 &amp; MP3 | YTCuttr">
   <meta property="twitter:description" content="Download full YouTube videos, Shorts, and audio tracks in high-quality 1080p, 4K, 720p MP4 or MP3, WAV, FLAC free with sound. No watermark.">
   <meta property="twitter:image" content="https://ytcuttr.com/img/feat_shorts.png">
@@ -39,7 +38,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "YTCuttr YouTube Shorts Downloader",
-    "url": "https://ytcuttr.com/youtube-shorts-downloader",
+    "url": "https://ytcuttr.com/youtube-shorts-downloader/",
     "description": "Free online YouTube Shorts downloader. Download YouTube Shorts videos in 1080p Full HD, 720p HD, and MP3 audio with no watermark.",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "All",
@@ -68,7 +67,7 @@
         "@type": "ListItem",
         "position": 2,
         "name": "YouTube Shorts Downloader",
-        "item": "https://ytcuttr.com/youtube-shorts-downloader"
+        "item": "https://ytcuttr.com/youtube-shorts-downloader/"
       }
     ]
   }
@@ -138,14 +137,6 @@
       },
       {
         "@type": "Question",
-        "name": "Why is YTCuttr a safe alternative to YT1s for downloading YouTube videos and Shorts?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "YT1s often redirects users to shady pop-ups, push notification spam, and adware. YTCuttr offers a safe, clean, and direct interface that preserves maximum video quality without malicious redirects."
-        }
-      },
-      {
-        "@type": "Question",
         "name": "How can I download a YouTube Short directly to my phone gallery with audio?",
         "acceptedAnswer": {
           "@type": "Answer",
@@ -170,21 +161,21 @@
         "position": 1,
         "name": "Copy Shorts Link",
         "text": "Tap Share on any YouTube Short and select Copy Link.",
-        "url": "https://ytcuttr.com/youtube-shorts-downloader"
+        "url": "https://ytcuttr.com/youtube-shorts-downloader/"
       },
       {
         "@type": "HowToStep",
         "position": 2,
         "name": "Paste in YTCuttr",
         "text": "Paste the link into YTCuttr and click Get Video.",
-        "url": "https://ytcuttr.com/youtube-shorts-downloader"
+        "url": "https://ytcuttr.com/youtube-shorts-downloader/"
       },
       {
         "@type": "HowToStep",
         "position": 3,
         "name": "Download MP4",
         "text": "Select 1080p Full HD or preferred format and click Download to save the video to your gallery or storage.",
-        "url": "https://ytcuttr.com/youtube-shorts-downloader"
+        "url": "https://ytcuttr.com/youtube-shorts-downloader/"
       }
     ]
   }
@@ -1489,7 +1480,7 @@
       flex-shrink: 0;
     }
 
-    /* ── CLOUD EMBED CONTAINER (YT1s STYLE - 0% VPS LOAD) ── */
+    /* ── CLOUD EMBED CONTAINER (CLOUD STYLE - 0% VPS LOAD) ── */
     .cloud-frame-wrap {
       width: 100%;
       background: var(--white);
@@ -1525,11 +1516,11 @@
           <span>✂️</span>
           <span>Clip Cutter</span>
         </a>
-        <a href="/youtube-shorts-downloader" class="nav-btn active" id="nav-btn-full" aria-label="Full Video &amp; Shorts Downloader (Active)" onclick="handleNavClick(event, '/youtube-shorts-downloader')">
+        <a href="/youtube-shorts-downloader/" class="nav-btn active" id="nav-btn-full" aria-label="Full Video &amp; Shorts Downloader (Active)" onclick="handleNavClick(event, '/youtube-shorts-downloader')">
           <span>⚡</span>
           <span>Full Video &amp; Shorts</span>
         </a>
-        <a href="/youtube-audio-cutter" class="nav-btn" id="nav-btn-audio" aria-label="Switch to Audio Cutter" onclick="handleNavClick(event, '/youtube-audio-cutter')">
+        <a href="/youtube-audio-cutter/" class="nav-btn" id="nav-btn-audio" aria-label="Switch to Audio Cutter" onclick="handleNavClick(event, '/youtube-audio-cutter')">
           <span>🎵</span>
           <span>Audio Cutter</span>
         </a>
@@ -1619,7 +1610,7 @@
       <!-- EMPTY STATE (Zero Bloat Placeholder) -->
       <div class="empty-state hidden" id="empty-state" style="display:none;"></div>
 
-      <!-- LOADED WORKSPACE (YT1S-STYLE CLOUD ENGINE + CLIP TRIMMER BANNER) -->
+      <!-- LOADED WORKSPACE (CLOUD ENGINE + CLIP TRIMMER BANNER) -->
       <div class="shorts-workspace" id="shorts-workspace" style="display: none; padding: 20px;">
         
         <!-- YTCUTTR CLIP CUTTER ACTION BANNER -->
@@ -1628,7 +1619,7 @@
             <span class="switch-icon">✂️</span>
             <div class="switch-text">
               <strong>Need only a specific part of this video?</strong>
-              <span>Trim exact start &amp; end timestamps with millisecond precision without downloading the whole file.</span>
+              <span>Trim exact start &amp; end timestamps with second-accurate precision without downloading the whole file.</span>
             </div>
           </div>
           <div class="switch-bar-actions">
@@ -1638,7 +1629,7 @@
           </div>
         </div>
 
-        <!-- CLOUD DOWNLOAD ENGINE (ALL FORMATS - 0% VPS LOAD - YT1S ENGINE) -->
+        <!-- CLOUD DOWNLOAD ENGINE (ALL FORMATS - 0% VPS LOAD - CLOUD ENGINE) -->
         <div class="cloud-frame-wrap" id="cloud-frame-wrap">
           <div class="iframe-loading-placeholder" id="iframe-loader">
             <div class="status-spinner" style="margin: 0 auto 12px; border-width: 3px; width: 32px; height: 32px;"></div>
@@ -1836,11 +1827,11 @@
   <footer>
     <div class="footer-links">
       <a href="/">Clip Cutter</a>
-      <a href="/youtube-shorts-downloader">Shorts Downloader</a>
-      <a href="/youtube-audio-cutter">Audio Cutter</a>
-      <a href="/4k-youtube-video-cutter">4K Cutter</a>
-      <a href="/youtube-timestamp-link-generator">Timestamp Link Generator</a>
-      <a href="/ytcutter-alternative">YTCutter Alternative</a>
+      <a href="/youtube-shorts-downloader/">Shorts Downloader</a>
+      <a href="/youtube-audio-cutter/">Audio Cutter</a>
+      <a href="/4k-youtube-video-cutter/">4K Cutter</a>
+      <a href="/youtube-timestamp-link-generator/">Timestamp Link Generator</a>
+      <a href="/ytcutter-alternative/">YTCutter Alternative</a>
       <a href="/blog/">Guides &amp; Blog</a>
       <a href="/about">About</a>
       <a href="/privacy">Privacy Policy</a>
@@ -2010,7 +2001,7 @@
       if (frame) frame.style.display = 'block';
     }
 
-    // Main Fetch Handler (100% Cloud Server - YT1s Style - 0% VPS Load)
+    // Main Fetch Handler (100% Cloud Server - 0% VPS Load)
     function handleFetch() {
       const input = document.getElementById('shorts-url-input');
       const rawUrl = (input ? input.value : '').trim();

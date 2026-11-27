@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>4K YouTube Video Cutter - Cut YouTube in 1080p &amp; 4K HD Free | YTCuttr</title>
-  <meta name="description" content="Cut and download YouTube videos in true 4K (2160p) and 1080p Full HD with original sound. No 360p paywall, no re-encoding quality loss, 100% free with no watermark.">
-  <meta name="keywords" content="4k youtube video cutter, 1080p youtube cutter, cut 4k youtube video, hd youtube trimmer, 2160p youtube cutter">
+  <title>4K YouTube Video Cutter: Cut 1080p &amp; 4K Clips Free | YTCuttr</title>
+  <meta name="description" content="Cut YouTube video clips in up to 4K (2160p) and 1080p Full HD when offered by the source video. Free timestamp trimmer with no 360p paywall or watermark.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#e63030">
   <link rel="canonical" href="https://ytcuttr.com/4k-youtube-video-cutter/">
@@ -79,7 +78,7 @@
         "name": "Does cutting 4K video cause audio desynchronization?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "No. YTCuttr merges the original high-bitrate video stream with high-fidelity AAC audio with exact millisecond timestamp precision to ensure perfect audio-video sync."
+          "text": "No. YTCuttr merges the original high-bitrate video stream with high-fidelity AAC audio with keyframe-aligned timestamp precision to ensure perfect audio-video sync."
         }
       },
       {
@@ -1812,11 +1811,11 @@ footer a { color: var(--red); text-decoration: none; }
           <span>✂️</span>
           <span>Clip Cutter</span>
         </a>
-        <a href="/youtube-shorts-downloader" class="nav-btn" aria-label="Switch to Full Video & Shorts Downloader">
+        <a href="/youtube-shorts-downloader/" class="nav-btn" aria-label="Switch to Full Video & Shorts Downloader">
           <span>⚡</span>
           <span>Full Video &amp; Shorts</span>
         </a>
-        <a href="/youtube-audio-cutter" class="nav-btn" aria-label="Switch to Audio Cutter">
+        <a href="/youtube-audio-cutter/" class="nav-btn" aria-label="Switch to Audio Cutter">
           <span>🎵</span>
           <span>Audio Cutter</span>
         </a>
@@ -2503,11 +2502,11 @@ footer a { color: var(--red); text-decoration: none; }
   <footer>
     <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:12px; font-size:13.5px; font-weight:600;">
       <a href="/" style="color:var(--text);">Clip Cutter</a>
-      <a href="/youtube-shorts-downloader" style="color:var(--text);">Shorts Downloader</a>
-      <a href="/youtube-audio-cutter" style="color:var(--text);">Audio Cutter</a>
-      <a href="/4k-youtube-video-cutter" style="color:var(--text);">4K Cutter</a>
-      <a href="/youtube-timestamp-link-generator" style="color:var(--text);">Timestamp Link Generator</a>
-      <a href="/ytcutter-alternative" style="color:var(--text);">YTCutter Alternative</a>
+      <a href="/youtube-shorts-downloader/" style="color:var(--text);">Shorts Downloader</a>
+      <a href="/youtube-audio-cutter/" style="color:var(--text);">Audio Cutter</a>
+      <a href="/4k-youtube-video-cutter/" style="color:var(--text);">4K Cutter</a>
+      <a href="/youtube-timestamp-link-generator/" style="color:var(--text);">Timestamp Link Generator</a>
+      <a href="/ytcutter-alternative/" style="color:var(--text);">YTCutter Alternative</a>
       <a href="/blog/" style="color:var(--text);">Guides &amp; Blog</a>
       <a href="/about" style="color:var(--muted);">About</a>
       <a href="/privacy" style="color:var(--muted);">Privacy Policy</a>
@@ -3689,7 +3688,7 @@ footer a { color: var(--red); text-decoration: none; }
             );
           } else if (job.status === "processing") {
             targetProgress = 88;
-            setProcProgress(currentProgressPercent, "Cutting & Lossless Muxing...", "Encoding lossless segment with FFmpeg...");
+            setProcProgress(currentProgressPercent, "Cutting & Aligning Streams...", "Aligning trimmed segment with FFmpeg...");
           } else if (job.status === "done") {
             if (isCompleted) return;
             isCompleted = true;
